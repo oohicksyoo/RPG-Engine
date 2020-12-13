@@ -6,7 +6,7 @@
 
 #include <string>
 #include <iostream>
-#include <windows.h>
+#include <Windows.h>
 
 namespace RPG {
 	void Log(const std::string& tag, const std::string& message);
