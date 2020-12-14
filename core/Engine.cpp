@@ -4,6 +4,9 @@
 
 #include "Engine.hpp"
 #include "Log.hpp"
+#include "../application/Application.hpp"
+#include "../application/opengl/OpenGLApplication.hpp"
+#include <stdexcept>
 #include <SDL_image.h>
 
 using RPG::Engine;
@@ -23,7 +26,25 @@ struct Engine::Internal {
 		}
 		RPG::Log(logTag, "SDL2_image initialized successfully with PNG support");
 
+		ResolveApplication()->StartApplication();
+	}
 
+	//Determine if the application can run Vulkan and if not fall back to a version of OpenGL
+	std::unique_ptr<RPG::Application> ResolveApplication() {
+		#ifdef FORCE_OPENGL
+			RPG::Log(logTag, "Forcing OpenGL");
+		#endif
+
+		//TODO: Finish this out with Vulkan implementation
+
+		try {
+			RPG::Log(logTag, "Creating OpenGL application ...");
+			return std::make_unique<RPG::OpenGLApplication>();
+		} catch (const std::exception& error) {
+			RPG::Log(logTag, "OpenGL application failed to initialize", error);
+		}
+
+		throw std::runtime_error("[" + logTag + "] No applications can run in the current environment");
 	}
 
 	~Internal() {
