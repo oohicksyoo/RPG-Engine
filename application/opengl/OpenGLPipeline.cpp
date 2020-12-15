@@ -36,7 +36,7 @@ namespace {
 	}
 
 	GLuint CreateShaderProgram(const std::string& shaderName) {
-		const std::string logTag{"rpg::OpenGLPipeline::createShaderProgram"};
+		const std::string logTag{"RPG::OpenGLPipeline::CreateShaderProgram"};
 
 		RPG::Log(logTag, "Creating pipeline for '" + shaderName + "'");
 
