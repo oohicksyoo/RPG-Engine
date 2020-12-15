@@ -6,6 +6,10 @@
 #include "Log.hpp"
 #include "../application/Application.hpp"
 #include "../application/opengl/OpenGLApplication.hpp"
+#ifndef __EMSCRIPTEN__
+	#include "../application/vulkan/VulkanApplication.hpp"
+	#include "../application/vulkan/VulkanCommon.hpp"
+#endif
 #include <stdexcept>
 #include <SDL_image.h>
 
@@ -35,7 +39,16 @@ struct Engine::Internal {
 			RPG::Log(logTag, "Forcing OpenGL");
 		#endif
 
-		//TODO: Finish this out with Vulkan implementation
+		#if !defined(__EMSCRIPTEN__) && !defined(FORCE_OPENGL)
+			if (RPG::Vulkan::IsVulkanAvailable()) {
+				try {
+					RPG::Log(logTag, "Creating Vulkan application ...");
+					return std::make_unique<RPG::VulkanApplication>();
+				} catch (const std::exception& error) {
+					RPG::Log(logTag, "Vulkan application failed to initialize", error);
+				}
+			}
+		#endif
 
 		try {
 			RPG::Log(logTag, "Creating OpenGL application ...");
