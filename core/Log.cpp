@@ -7,7 +7,8 @@
 
 void RPG::Log(const std::string &tag, const std::string &message) {
 	#ifndef NDEBUG
-		std::cout << Blue << "[" << tag << "] " << White << message << std::endl;
+		//std::cout << Blue << "[" << tag << "] " << White << message << std::endl;
+		std::cout << "[" << tag << "] " << message << std::endl;
 	#endif
 }
 

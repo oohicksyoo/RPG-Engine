@@ -6,14 +6,14 @@
 
 #include <string>
 #include <iostream>
-#include <Windows.h>
+//#include <windows.h>
 
 namespace RPG {
 	void Log(const std::string& tag, const std::string& message);
 	void Log(const std::string& tag, const std::string& message, const std::exception& error);
 
 	//Logging Colours
-	inline std::ostream& Blue(std::ostream& s) {
+	/*inline std::ostream& Blue(std::ostream& s) {
 		HANDLE hStdout = GetStdHandle(STD_OUTPUT_HANDLE);
 		SetConsoleTextAttribute(hStdout, FOREGROUND_BLUE
 										 | FOREGROUND_GREEN | FOREGROUND_INTENSITY);
@@ -25,7 +25,7 @@ namespace RPG {
 		SetConsoleTextAttribute(hStdout,
 								FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE);
 		return s;
-	}
+	}*/
 }
 
 
