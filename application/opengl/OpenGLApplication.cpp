@@ -52,8 +52,8 @@ namespace {
 		return RPG::OpenGLRenderer(assetManager);
 	}
 
-	std::unique_ptr<RPG::Scene> CreateMainScene(const RPG::SDLWindow& window, RPG::OpenGLAssetManager& assetManager) {
-		std::unique_ptr<RPG::Scene> scene{std::make_unique<RPG::SceneMain>(RPG::SDL::GetWindowSize(window.GetWindow()))};
+	std::unique_ptr<RPG::IScene> CreateMainScene(const RPG::SDLWindow& window, RPG::OpenGLAssetManager& assetManager) {
+		std::unique_ptr<RPG::IScene> scene{std::make_unique<RPG::SceneMain>(RPG::SDL::GetWindowSize(window.GetWindow()))};
 		assetManager.LoadAssetManifest(scene->GetAssetManifest());
 		scene->Prepare();
 
@@ -66,7 +66,7 @@ struct OpenGLApplication::Internal {
 	SDL_GLContext context;
 	const std::shared_ptr<RPG::OpenGLAssetManager> assetManager;
 	RPG::OpenGLRenderer renderer;
-	std::unique_ptr<RPG::Scene> scene;
+	std::unique_ptr<RPG::IScene> scene;
 
 	Internal() : window(RPG::SDLWindow(SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI)),
 				 context(::CreateContext(window.GetWindow())),
@@ -93,7 +93,7 @@ struct OpenGLApplication::Internal {
 		::UpdateViewport(window.GetWindow());
 	}
 
-	RPG::Scene& GetScene() {
+	RPG::IScene& GetScene() {
 		if (!scene) {
 			scene = ::CreateMainScene(window, *assetManager);
 		}
