@@ -5,11 +5,12 @@
 #pragma once
 
 #include "InternalPointer.hpp"
+#include "Loadable.hpp"
 #include "Vertex.hpp"
 #include <vector>
 
 namespace RPG {
-	struct Mesh {
+	struct Mesh : public Loadable {
 		public:
 			Mesh(const std::vector<RPG::Vertex>& vertices, const std::vector<uint32_t>& indices);
 			const std::vector<RPG::Vertex>& GetVertices() const;
