@@ -16,8 +16,6 @@ std::string RPG::Assets::ResolveStaticMeshPath(const RPG::Assets::StaticMesh &st
 	switch (staticMesh) {
 		case RPG::Assets::StaticMesh::Crate:
 			return "assets/models/crate.obj";
-		case RPG::Assets::StaticMesh::Torus:
-			return "assets/models/torus.obj";
 		default:
 			return "";
 	}
@@ -27,8 +25,6 @@ std::string RPG::Assets::ResolveTexturePath(const RPG::Assets::Texture &texture)
 	switch (texture) {
 		case RPG::Assets::Texture::Crate:
 			return "assets/textures/crate.png";
-		case RPG::Assets::Texture::RedCrossHatch:
-			return "assets/textures/red_cross_hatch.png";
 		default:
 			return "";
 	}
