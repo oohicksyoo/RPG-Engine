@@ -69,13 +69,22 @@ struct OpenGLApplication::Internal {
 	const std::shared_ptr<RPG::OpenGLAssetManager> assetManager;
 	RPG::OpenGLRenderer renderer;
 	std::unique_ptr<RPG::IScene> scene;
-	EditorManager editorManager;
+	#ifdef RPG_DEBUG
+		EditorManager editorManager;
+	#endif
 
-	Internal() : window(RPG::SDLWindow(SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI)),
-				 context(::CreateContext(window.GetWindow())),
-				 assetManager(::CreateAssetManager()),
-				 renderer(::CreateRenderer(assetManager)),
-				 editorManager(window, context) {}
+	#ifdef RPG_DEBUG
+		Internal() : window(RPG::SDLWindow(SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI)),
+					 context(::CreateContext(window.GetWindow())),
+					 assetManager(::CreateAssetManager()),
+					 renderer(::CreateRenderer(assetManager)),
+					 editorManager(window, context) {}
+	#else
+		Internal() : window(RPG::SDLWindow(SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI)),
+					 context(::CreateContext(window.GetWindow())),
+					 assetManager(::CreateAssetManager()),
+					 renderer(::CreateRenderer(assetManager)){}
+	#endif
 
 	void Render() {
 		SDL_GL_MakeCurrent(window.GetWindow(), context);
@@ -83,14 +92,16 @@ struct OpenGLApplication::Internal {
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		//TODO: Move to Debug only
-		editorManager.NewFrame(window);
+		#ifdef RPG_DEBUG
+			editorManager.NewFrame(window);
+		#endif
 
 		GetScene().Render(renderer);
 
-		//TODO: Move to debug only
-		editorManager.BuildGUI();
-		editorManager.Render();
+		#ifdef RPG_DEBUG
+			editorManager.BuildGUI();
+			editorManager.Render();
+		#endif
 
 		SDL_GL_SwapWindow(window.GetWindow());
 	}
