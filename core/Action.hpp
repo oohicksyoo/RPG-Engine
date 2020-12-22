@@ -17,6 +17,9 @@ namespace RPG {
 			//Helpers
 			using Callback = std::function<void(Args...)>;
 
+			template<class T>
+			using Func = std::function<T(Args...)>;
+
 			//Functions
 			ListenerID AddListener(Callback callback);
 			bool RemoveListener(ListenerID listenerID);
