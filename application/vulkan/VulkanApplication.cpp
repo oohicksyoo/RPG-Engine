@@ -11,8 +11,8 @@
 using RPG::VulkanApplication;
 
 namespace {
-	std::unique_ptr<RPG::Scene> CreateMainScene(RPG::VulkanContext& context) {
-		std::unique_ptr<RPG::Scene> scene{std::make_unique<RPG::SceneMain>(context.GetCurrentWindowSize())};
+	std::unique_ptr<RPG::IScene> CreateMainScene(RPG::VulkanContext& context) {
+		std::unique_ptr<RPG::IScene> scene{std::make_unique<RPG::SceneMain>(context.GetCurrentWindowSize())};
 		context.LoadAssetManifest(scene->GetAssetManifest());
 		scene->Prepare();
 
@@ -22,11 +22,11 @@ namespace {
 
 struct VulkanApplication::Internal {
 	RPG::VulkanContext context;
-	std::unique_ptr<RPG::Scene> scene;
+	std::unique_ptr<RPG::IScene> scene;
 
 	Internal() : context(RPG::VulkanContext()) {}
 
-	RPG::Scene& GetScene() {
+	RPG::IScene& GetScene() {
 		if (!scene) {
 			scene = ::CreateMainScene(context);
 		}

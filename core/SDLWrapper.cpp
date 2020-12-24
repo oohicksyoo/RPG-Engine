@@ -65,7 +65,7 @@ RPG::WindowSize RPG::SDL::GetInitialWindowSize() {
 		}
 
 		// For other platforms we'll just show a fixed size window.
-		return RPG::WindowSize{640, 480};
+		return RPG::WindowSize{1280, 720};
 	#endif
 }
 

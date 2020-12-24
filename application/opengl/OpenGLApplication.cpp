@@ -11,6 +11,8 @@
 #include "OpenGLRenderer.hpp"
 #include <string>
 
+#include "../../../editor/EditorManager.hpp"
+
 using RPG::OpenGLApplication;
 
 namespace {
@@ -52,8 +54,8 @@ namespace {
 		return RPG::OpenGLRenderer(assetManager);
 	}
 
-	std::unique_ptr<RPG::Scene> CreateMainScene(const RPG::SDLWindow& window, RPG::OpenGLAssetManager& assetManager) {
-		std::unique_ptr<RPG::Scene> scene{std::make_unique<RPG::SceneMain>(RPG::SDL::GetWindowSize(window.GetWindow()))};
+	std::unique_ptr<RPG::IScene> CreateMainScene(const RPG::SDLWindow& window, RPG::OpenGLAssetManager& assetManager) {
+		std::unique_ptr<RPG::IScene> scene{std::make_unique<RPG::SceneMain>(RPG::SDL::GetWindowSize(window.GetWindow()))};
 		assetManager.LoadAssetManifest(scene->GetAssetManifest());
 		scene->Prepare();
 
@@ -66,12 +68,23 @@ struct OpenGLApplication::Internal {
 	SDL_GLContext context;
 	const std::shared_ptr<RPG::OpenGLAssetManager> assetManager;
 	RPG::OpenGLRenderer renderer;
-	std::unique_ptr<RPG::Scene> scene;
+	std::unique_ptr<RPG::IScene> scene;
+	#ifdef RPG_DEBUG
+		EditorManager editorManager;
+	#endif
 
-	Internal() : window(RPG::SDLWindow(SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI)),
-				 context(::CreateContext(window.GetWindow())),
-				 assetManager(::CreateAssetManager()),
-				 renderer(::CreateRenderer(assetManager)) {}
+	#ifdef RPG_DEBUG
+		Internal() : window(RPG::SDLWindow(SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI)),
+					 context(::CreateContext(window.GetWindow())),
+					 assetManager(::CreateAssetManager()),
+					 renderer(::CreateRenderer(assetManager)),
+					 editorManager(window, context) {}
+	#else
+		Internal() : window(RPG::SDLWindow(SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI)),
+					 context(::CreateContext(window.GetWindow())),
+					 assetManager(::CreateAssetManager()),
+					 renderer(::CreateRenderer(assetManager)){}
+	#endif
 
 	void Render() {
 		SDL_GL_MakeCurrent(window.GetWindow(), context);
@@ -79,7 +92,16 @@ struct OpenGLApplication::Internal {
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+		#ifdef RPG_DEBUG
+			editorManager.NewFrame(window);
+		#endif
+
 		GetScene().Render(renderer);
+
+		#ifdef RPG_DEBUG
+			editorManager.BuildGUI();
+			editorManager.Render();
+		#endif
 
 		SDL_GL_SwapWindow(window.GetWindow());
 	}
@@ -93,7 +115,7 @@ struct OpenGLApplication::Internal {
 		::UpdateViewport(window.GetWindow());
 	}
 
-	RPG::Scene& GetScene() {
+	RPG::IScene& GetScene() {
 		if (!scene) {
 			scene = ::CreateMainScene(window, *assetManager);
 		}

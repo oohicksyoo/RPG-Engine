@@ -9,7 +9,7 @@
 #include <vector>
 
 namespace RPG {
-	struct Renderer {
+	struct IRenderer {
 		virtual void Render(const RPG::Assets::Pipeline& pipeline, const std::vector<RPG::StaticMeshInstance>& staticMeshInstances) = 0;
 	};
 }
