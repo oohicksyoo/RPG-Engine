@@ -6,11 +6,11 @@
 
 #include "../../core/AssetManifest.hpp"
 #include "../../core/InternalPointer.hpp"
-#include "../../core/Renderer.hpp"
+#include "../../core/IRenderer.hpp"
 #include "../../core/WindowSize.hpp"
 
 namespace RPG {
-	struct VulkanContext : public RPG::Renderer {
+	struct VulkanContext : public RPG::IRenderer {
 		public:
 			VulkanContext();
 			void LoadAssetManifest(const RPG::AssetManifest& assetManifest);

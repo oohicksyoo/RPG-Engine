@@ -5,12 +5,12 @@
 #pragma once
 
 #include "../../core/InternalPointer.hpp"
-#include "../../core/Renderer.hpp"
+#include "../../core/IRenderer.hpp"
 #include "OpenGLAssetManager.hpp"
 #include <memory>
 
 namespace RPG {
-	struct OpenGLRenderer : public RPG::Renderer {
+	struct OpenGLRenderer : public RPG::IRenderer {
 		public:
 			OpenGLRenderer(std::shared_ptr<RPG::OpenGLAssetManager> AssetManager);
 			void Render(const RPG::Assets::Pipeline& pipeline, const std::vector<RPG::StaticMeshInstance>& staticMeshInstances) override;
