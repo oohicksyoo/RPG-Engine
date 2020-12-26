@@ -12,6 +12,7 @@
 #include <string>
 
 #include "../../../editor/EditorManager.hpp"
+#include "../../core/FrameBuffer.hpp"
 
 using RPG::OpenGLApplication;
 
@@ -61,6 +62,51 @@ namespace {
 
 		return scene;
 	}
+
+	RPG::FrameBuffer CreateFrameBuffer(glm::vec2 size) {
+		uint32_t bufferID;
+		uint32_t renderTextureID;
+		uint32_t depthStencilBufferID;
+
+		//Generate OpenGL Objects
+		glGenFramebuffers(1, &bufferID);
+		glGenTextures(1, &renderTextureID);
+		glGenRenderbuffers(1, &depthStencilBufferID);
+
+		//Setup Textures
+		glBindTexture(GL_TEXTURE_2D, renderTextureID);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glBindTexture(GL_TEXTURE_2D, 0);
+
+		//Setup Framebuffer
+		glBindFramebuffer(GL_FRAMEBUFFER, bufferID);
+		glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, renderTextureID, 0);
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+		//Resize
+		//Resize Texture
+		glBindTexture(GL_TEXTURE_2D, renderTextureID);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, size.x, size.y, 0, GL_RGB, GL_UNSIGNED_BYTE, 0);
+		glBindTexture(GL_TEXTURE_2D, 0);
+
+		//Setup depth-stencil buffer
+		glBindRenderbuffer(GL_RENDERBUFFER, depthStencilBufferID);
+		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_STENCIL, size.x, size.y);
+		glBindRenderbuffer(GL_RENDERBUFFER, 0);
+
+		//Attach depth and stencil buffer to the framebuffer
+		glBindFramebuffer(GL_FRAMEBUFFER, bufferID);
+		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthStencilBufferID);
+		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_RENDERBUFFER, depthStencilBufferID);
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+		if(glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE) {
+			RPG::Log("Framebuffer", "Framebuffer was created and completed");
+		}
+
+		return RPG::FrameBuffer{bufferID, renderTextureID, depthStencilBufferID};
+	}
 }
 
 struct OpenGLApplication::Internal {
@@ -70,7 +116,8 @@ struct OpenGLApplication::Internal {
 	RPG::OpenGLRenderer renderer;
 	std::unique_ptr<RPG::IScene> scene;
 	#ifdef RPG_DEBUG
-		EditorManager editorManager;
+		RPG::EditorManager editorManager;
+		RPG::FrameBuffer framebuffer;
 	#endif
 
 	#ifdef RPG_DEBUG
@@ -78,7 +125,8 @@ struct OpenGLApplication::Internal {
 					 context(::CreateContext(window.GetWindow())),
 					 assetManager(::CreateAssetManager()),
 					 renderer(::CreateRenderer(assetManager)),
-					 editorManager(window, context) {}
+					 editorManager(window, context),
+					 framebuffer(::CreateFrameBuffer(glm::vec2{1280, 720})){}
 	#else
 		Internal() : window(RPG::SDLWindow(SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI)),
 					 context(::CreateContext(window.GetWindow())),
@@ -88,6 +136,10 @@ struct OpenGLApplication::Internal {
 
 	void Render() {
 		SDL_GL_MakeCurrent(window.GetWindow(), context);
+
+		#ifdef RPG_DEBUG
+			GetScene().RenderToFrameBuffer(renderer, framebuffer);
+		#endif
 
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -99,6 +151,7 @@ struct OpenGLApplication::Internal {
 		GetScene().Render(renderer);
 
 		#ifdef RPG_DEBUG
+			//RPG::Log("FrameBuffer", "Framebuffer ID: " + std::to_string(framebuffer.GetRenderTextureID()));
 			editorManager.BuildGUI();
 			editorManager.Render();
 		#endif
@@ -124,6 +177,10 @@ struct OpenGLApplication::Internal {
 
 	~Internal() {
 		SDL_GL_DeleteContext(context);
+
+		#ifdef RPG_DEBUG
+			renderer.DeleteFrameBuffer(RPG::Assets::Pipeline::Default, framebuffer);
+		#endif
 	}
 };
 

@@ -156,6 +156,16 @@ void VulkanContext::Render(const RPG::Assets::Pipeline& pipeline, const std::vec
 	internal->Render(pipeline, staticMeshInstances);
 }
 
+void VulkanContext::RenderToFrameBuffer(const RPG::Assets::Pipeline &pipeline,
+										const std::vector<RPG::StaticMeshInstance> &staticMeshInstances,
+										const RPG::FrameBuffer &framebuffer) {
+	//TODO: Vulkan Framebuffer setup
+}
+
+void VulkanContext::DeleteFrameBuffer(const RPG::Assets::Pipeline &pipeline, const RPG::FrameBuffer& framebuffer) {
+	//TODO: Clean up framebuffer
+}
+
 void VulkanContext::RenderEnd() {
 	internal->RenderEnd();
 }

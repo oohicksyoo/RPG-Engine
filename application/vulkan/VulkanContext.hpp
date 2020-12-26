@@ -7,6 +7,7 @@
 #include "../../core/AssetManifest.hpp"
 #include "../../core/InternalPointer.hpp"
 #include "../../core/IRenderer.hpp"
+#include "../../core/FrameBuffer.hpp"
 #include "../../core/WindowSize.hpp"
 
 namespace RPG {
@@ -16,6 +17,8 @@ namespace RPG {
 			void LoadAssetManifest(const RPG::AssetManifest& assetManifest);
 			bool RenderBegin();
 			void Render(const RPG::Assets::Pipeline& pipeline, const std::vector<RPG::StaticMeshInstance>& staticMeshInstances) override;
+			void RenderToFrameBuffer(const RPG::Assets::Pipeline& pipeline, const std::vector<RPG::StaticMeshInstance>& staticMeshInstances, const RPG::FrameBuffer& framebuffer) override;
+			void DeleteFrameBuffer(const RPG::Assets::Pipeline &pipeline, const RPG::FrameBuffer& framebuffer) override;
 			void RenderEnd();
 			RPG::WindowSize GetCurrentWindowSize() const;
 
