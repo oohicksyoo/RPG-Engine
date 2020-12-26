@@ -110,6 +110,9 @@ namespace {
 }
 
 struct OpenGLApplication::Internal {
+	bool isRunning;
+	bool hasRanFirstFrame = false;
+
 	const RPG::SDLWindow window;
 	SDL_GLContext context;
 	const std::shared_ptr<RPG::OpenGLAssetManager> assetManager;
@@ -126,12 +129,14 @@ struct OpenGLApplication::Internal {
 					 assetManager(::CreateAssetManager()),
 					 renderer(::CreateRenderer(assetManager)),
 					 editorManager(window, context),
-					 framebuffer(::CreateFrameBuffer(glm::vec2{1280, 720})){}
+					 framebuffer(::CreateFrameBuffer(glm::vec2{1280, 720})),
+					 isRunning(false){}
 	#else
 		Internal() : window(RPG::SDLWindow(SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI)),
 					 context(::CreateContext(window.GetWindow())),
 					 assetManager(::CreateAssetManager()),
-					 renderer(::CreateRenderer(assetManager)){}
+					 renderer(::CreateRenderer(assetManager)),
+					 isRunning(true) {}
 	#endif
 
 	void Render() {
@@ -141,14 +146,18 @@ struct OpenGLApplication::Internal {
 			GetScene().RenderToFrameBuffer(renderer, framebuffer);
 		#endif
 
-		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		#ifndef RPG_DEBUG
+			glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		#endif
 
 		#ifdef RPG_DEBUG
 			editorManager.NewFrame(window);
 		#endif
 
-		GetScene().Render(renderer);
+		#ifndef RPG_DEBUG
+			GetScene().Render(renderer);
+		#endif
 
 		#ifdef RPG_DEBUG
 			//RPG::Log("FrameBuffer", "Framebuffer ID: " + std::to_string(framebuffer.GetRenderTextureID()));
@@ -160,7 +169,10 @@ struct OpenGLApplication::Internal {
 	}
 
 	void Update(const float& delta) {
-		GetScene().Update(delta);
+		if (isRunning || !hasRanFirstFrame) {
+			hasRanFirstFrame = true;
+			GetScene().Update(delta);
+		}
 	}
 
 	void OnWindowResized() {
