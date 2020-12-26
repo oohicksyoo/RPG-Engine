@@ -173,7 +173,7 @@ struct OpenGLPipeline::Internal {
 			const RPG::OpenGLMesh& mesh = assetManager.GetStaticMesh(staticMeshInstance.GetMesh());
 
 			// Populate the 'u_mvp' uniform in the shader program.
-			//glUniformMatrix4fv(uniformLocationMVP, 1, GL_FALSE, &staticMeshInstance.GetTransformMatrix()[0][0]);
+			glUniformMatrix4fv(uniformLocationMVP, 1, GL_FALSE, &staticMeshInstance.GetTransformMatrix()[0][0]);
 
 			// Apply the texture we want to paint the mesh with.
 			assetManager.GetTexture(staticMeshInstance.GetTexture()).Bind();
