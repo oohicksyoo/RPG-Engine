@@ -11,6 +11,7 @@
 #include "OpenGLRenderer.hpp"
 #include <string>
 
+#include "../ApplicationStats.hpp"
 #include "../../../editor/EditorManager.hpp"
 #include "../../core/FrameBuffer.hpp"
 
@@ -24,6 +25,7 @@ namespace {
 		int viewportHeight;
 		SDL_GL_GetDrawableSize(window, &viewportWidth, &viewportHeight);
 		RPG::Log(logTag, "Created OpenGL context with viewport size: " + std::to_string(viewportWidth) + " x " + std::to_string(viewportHeight));
+		RPG::ApplicationStats::GetInstance().SetWindowSize(glm::vec2{viewportWidth, viewportHeight});
 
 		glViewport(0, 0, viewportWidth, viewportHeight);
 	}
@@ -63,6 +65,25 @@ namespace {
 		return scene;
 	}
 
+	void ResizeFrameBuffer(RPG::FrameBuffer& frameBuffer, glm::vec2 size) {
+		//Resize
+		//Resize Texture
+		glBindTexture(GL_TEXTURE_2D, frameBuffer.GetRenderTextureID());
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, size.x, size.y, 0, GL_RGB, GL_UNSIGNED_BYTE, 0);
+		glBindTexture(GL_TEXTURE_2D, 0);
+
+		//Setup depth-stencil buffer
+		glBindRenderbuffer(GL_RENDERBUFFER, frameBuffer.GetDepthStencilBufferID());
+		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_STENCIL, size.x, size.y);
+		glBindRenderbuffer(GL_RENDERBUFFER, 0);
+
+		//Attach depth and stencil buffer to the framebuffer
+		glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer.GetBufferID());
+		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, frameBuffer.GetDepthStencilBufferID());
+		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_RENDERBUFFER, frameBuffer.GetDepthStencilBufferID());
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	}
+
 	RPG::FrameBuffer CreateFrameBuffer(glm::vec2 size) {
 		uint32_t bufferID;
 		uint32_t renderTextureID;
@@ -84,28 +105,14 @@ namespace {
 		glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, renderTextureID, 0);
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-		//Resize
-		//Resize Texture
-		glBindTexture(GL_TEXTURE_2D, renderTextureID);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, size.x, size.y, 0, GL_RGB, GL_UNSIGNED_BYTE, 0);
-		glBindTexture(GL_TEXTURE_2D, 0);
-
-		//Setup depth-stencil buffer
-		glBindRenderbuffer(GL_RENDERBUFFER, depthStencilBufferID);
-		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_STENCIL, size.x, size.y);
-		glBindRenderbuffer(GL_RENDERBUFFER, 0);
-
-		//Attach depth and stencil buffer to the framebuffer
-		glBindFramebuffer(GL_FRAMEBUFFER, bufferID);
-		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthStencilBufferID);
-		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_RENDERBUFFER, depthStencilBufferID);
-		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		RPG::FrameBuffer framebuffer{bufferID, renderTextureID, depthStencilBufferID};
+		ResizeFrameBuffer(framebuffer, size);
 
 		if(glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE) {
 			RPG::Log("Framebuffer", "Framebuffer was created and completed");
 		}
 
-		return RPG::FrameBuffer{bufferID, renderTextureID, depthStencilBufferID};
+		return framebuffer;
 	}
 }
 
@@ -178,6 +185,10 @@ struct OpenGLApplication::Internal {
 	void OnWindowResized() {
 		GetScene().OnWindowResized(RPG::SDL::GetWindowSize(window.GetWindow()));
 		::UpdateViewport(window.GetWindow());
+
+		#ifdef RPG_DEBUG
+			::ResizeFrameBuffer(framebuffer, RPG::ApplicationStats::GetInstance().GetWindowSize());
+		#endif
 	}
 
 	RPG::IScene& GetScene() {

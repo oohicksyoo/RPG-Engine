@@ -5,6 +5,7 @@
 #pragma once
 
 #include "../core/InternalPointer.hpp"
+#include "../core/GLMWrapper.hpp"
 
 namespace RPG {
 	struct Application {
