@@ -15,11 +15,11 @@ struct OpenGLRenderer::Internal {
 		assetManager->GetPipeline(pipeline).Render(*assetManager, staticMeshInstances);
 	}
 
-	void RenderToFrameBuffer(const RPG::Assets::Pipeline& pipeline, const std::vector<RPG::StaticMeshInstance>& staticMeshInstances, const RPG::FrameBuffer& framebuffer) {
+	void RenderToFrameBuffer(const RPG::Assets::Pipeline& pipeline, const std::vector<RPG::StaticMeshInstance>& staticMeshInstances, const std::shared_ptr<RPG::FrameBuffer> framebuffer) {
 		assetManager->GetPipeline(pipeline).RenderToFrameBuffer(*assetManager, staticMeshInstances, framebuffer);
 	}
 
-	void DeleteFrameBuffer(const RPG::Assets::Pipeline& pipeline, const RPG::FrameBuffer& framebuffer) {
+	void DeleteFrameBuffer(const RPG::Assets::Pipeline& pipeline, const std::shared_ptr<RPG::FrameBuffer> framebuffer) {
 		assetManager->GetPipeline(pipeline).DeleteFrameBuffer(framebuffer);
 	}
 };
@@ -32,10 +32,10 @@ void OpenGLRenderer::Render(const RPG::Assets::Pipeline& pipeline, const std::ve
 
 void OpenGLRenderer::RenderToFrameBuffer(const RPG::Assets::Pipeline &pipeline,
 										 const std::vector<RPG::StaticMeshInstance> &staticMeshInstances,
-										 const RPG::FrameBuffer &framebuffer) {
+										 const std::shared_ptr<RPG::FrameBuffer> framebuffer) {
 	internal->RenderToFrameBuffer(pipeline, staticMeshInstances, framebuffer);
 }
 
-void OpenGLRenderer::DeleteFrameBuffer(const RPG::Assets::Pipeline &pipeline, const RPG::FrameBuffer& framebuffer) {
+void OpenGLRenderer::DeleteFrameBuffer(const RPG::Assets::Pipeline &pipeline, const std::shared_ptr<RPG::FrameBuffer> framebuffer) {
 	internal->DeleteFrameBuffer(pipeline, framebuffer);
 }

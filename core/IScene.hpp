@@ -9,6 +9,7 @@
 #include "FrameBuffer.hpp"
 #include "WindowSize.hpp"
 #include "StaticMeshInstance.hpp"
+#include "Hierarchy.hpp"
 #include <vector>
 
 namespace RPG {
@@ -19,7 +20,8 @@ namespace RPG {
 		virtual void Prepare() = 0;
 		virtual void Update(const float& delta) = 0;
 		virtual void Render(RPG::IRenderer& renderer) = 0;
-		virtual void RenderToFrameBuffer(RPG::IRenderer& renderer, RPG::FrameBuffer& frameBuffer) = 0;
+		virtual void RenderToFrameBuffer(RPG::IRenderer& renderer, std::shared_ptr<RPG::FrameBuffer> frameBuffer) = 0;
 		virtual void OnWindowResized(const RPG::WindowSize& size) = 0;
+		virtual std::shared_ptr<RPG::Hierarchy> GetHierarchy() = 0;
 	};
 }

@@ -12,7 +12,7 @@
 namespace RPG {
 	struct IRenderer {
 		virtual void Render(const RPG::Assets::Pipeline& pipeline, const std::vector<RPG::StaticMeshInstance>& staticMeshInstances) = 0;
-		virtual void RenderToFrameBuffer(const RPG::Assets::Pipeline& pipeline, const std::vector<RPG::StaticMeshInstance>& staticMeshInstances, const RPG::FrameBuffer& framebuffer) = 0;
-		virtual void DeleteFrameBuffer(const RPG::Assets::Pipeline &pipeline, const RPG::FrameBuffer& framebuffer) = 0;
+		virtual void RenderToFrameBuffer(const RPG::Assets::Pipeline& pipeline, const std::vector<RPG::StaticMeshInstance>& staticMeshInstances, const std::shared_ptr<RPG::FrameBuffer> framebuffer) = 0;
+		virtual void DeleteFrameBuffer(const RPG::Assets::Pipeline &pipeline, const std::shared_ptr<RPG::FrameBuffer> framebuffer) = 0;
 	};
 }

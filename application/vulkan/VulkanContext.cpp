@@ -158,11 +158,11 @@ void VulkanContext::Render(const RPG::Assets::Pipeline& pipeline, const std::vec
 
 void VulkanContext::RenderToFrameBuffer(const RPG::Assets::Pipeline &pipeline,
 										const std::vector<RPG::StaticMeshInstance> &staticMeshInstances,
-										const RPG::FrameBuffer &framebuffer) {
+										const std::shared_ptr<RPG::FrameBuffer> framebuffer) {
 	//TODO: Vulkan Framebuffer setup
 }
 
-void VulkanContext::DeleteFrameBuffer(const RPG::Assets::Pipeline &pipeline, const RPG::FrameBuffer& framebuffer) {
+void VulkanContext::DeleteFrameBuffer(const RPG::Assets::Pipeline &pipeline, const std::shared_ptr<RPG::FrameBuffer> framebuffer) {
 	//TODO: Clean up framebuffer
 }
 

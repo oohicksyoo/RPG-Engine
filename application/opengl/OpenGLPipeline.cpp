@@ -154,8 +154,8 @@ struct OpenGLPipeline::Internal {
 		glDisableVertexAttribArray(attributeLocationTexCoord);
 	}
 
-	void RenderToFrameBuffer(const RPG::OpenGLAssetManager& assetManager, const std::vector<RPG::StaticMeshInstance>& staticMeshInstances, const RPG::FrameBuffer& frameBuffer) const {
-		glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer.GetRenderTextureID());
+	void RenderToFrameBuffer(const RPG::OpenGLAssetManager& assetManager, const std::vector<RPG::StaticMeshInstance>& staticMeshInstances, const std::shared_ptr<RPG::FrameBuffer> frameBuffer) const {
+		glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer->GetRenderTextureID());
 		glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // we're not using the stencil buffer now
 		glEnable(GL_DEPTH_TEST);
@@ -216,10 +216,10 @@ struct OpenGLPipeline::Internal {
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	}
 
-	void DeleteFrameBuffer(const RPG::FrameBuffer& framebuffer) const {
-		glDeleteBuffers(1, &framebuffer.GetBufferID());
-		glDeleteTextures(1, &framebuffer.GetRenderTextureID());
-		glDeleteRenderbuffers(1, &framebuffer.GetDepthStencilBufferID());
+	void DeleteFrameBuffer(const std::shared_ptr<RPG::FrameBuffer> framebuffer) const {
+		glDeleteBuffers(1, &framebuffer->GetBufferID());
+		glDeleteTextures(1, &framebuffer->GetRenderTextureID());
+		glDeleteRenderbuffers(1, &framebuffer->GetDepthStencilBufferID());
 	}
 
 	~Internal() {
@@ -235,10 +235,10 @@ void OpenGLPipeline::Render(const RPG::OpenGLAssetManager& assetManager, const s
 
 void OpenGLPipeline::RenderToFrameBuffer(const RPG::OpenGLAssetManager &assetManager,
 										 const std::vector<RPG::StaticMeshInstance> &staticMeshInstances,
-										 const RPG::FrameBuffer& frameBuffer) const {
+										 const std::shared_ptr<RPG::FrameBuffer> frameBuffer) const {
 	internal->RenderToFrameBuffer(assetManager, staticMeshInstances, frameBuffer);
 }
 
-void OpenGLPipeline::DeleteFrameBuffer(const RPG::FrameBuffer& framebuffer) const {
+void OpenGLPipeline::DeleteFrameBuffer(const std::shared_ptr<RPG::FrameBuffer> framebuffer) const {
 	internal->DeleteFrameBuffer(framebuffer);
 }

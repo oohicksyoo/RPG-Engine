@@ -9,17 +9,25 @@
 using RPG::Hierarchy;
 
 struct Hierarchy::Internal {
-	std::vector<RPG::GameObject> hierarchy;
+	std::vector<std::shared_ptr<RPG::GameObject>> hierarchy;
 
 	Internal() {}
+
+	void Add(std::shared_ptr<RPG::GameObject> gameObject) {
+		hierarchy.push_back(gameObject);
+	}
 };
 
 Hierarchy::Hierarchy() : internal(RPG::MakeInternalPointer<Internal>()) {}
 
-void Hierarchy::Add(RPG::GameObject gameObject, RPG::TransformComponent parent) {
-
+void Hierarchy::Add(std::shared_ptr<RPG::GameObject> gameObject) {
+	internal->Add(gameObject);
 }
 
-RPG::GameObject Hierarchy::GetGameObjectByGuid(std::string guid) {
+std::shared_ptr<RPG::GameObject> Hierarchy::GetGameObjectByGuid(std::string guid) {
+	return internal->hierarchy[0];
+}
 
+std::vector<std::shared_ptr<RPG::GameObject>> Hierarchy::GetHierarchy() {
+	return internal->hierarchy;
 }

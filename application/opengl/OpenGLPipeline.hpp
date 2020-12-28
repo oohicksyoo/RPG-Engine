@@ -17,8 +17,8 @@ namespace RPG {
 		public:
 			OpenGLPipeline(const std::string& shaderName);
 			void Render(const RPG::OpenGLAssetManager& assetManager, const std::vector<RPG::StaticMeshInstance>& staticMeshInstances) const;
-			void RenderToFrameBuffer(const RPG::OpenGLAssetManager& assetManager, const std::vector<RPG::StaticMeshInstance>& staticMeshInstances, const RPG::FrameBuffer& frameBuffer) const;
-			void DeleteFrameBuffer(const RPG::FrameBuffer& framebuffer) const;
+			void RenderToFrameBuffer(const RPG::OpenGLAssetManager& assetManager, const std::vector<RPG::StaticMeshInstance>& staticMeshInstances, const std::shared_ptr<RPG::FrameBuffer> frameBuffer) const;
+			void DeleteFrameBuffer(const std::shared_ptr<RPG::FrameBuffer> framebuffer) const;
 
 		private:
 			struct Internal;

@@ -65,26 +65,26 @@ namespace {
 		return scene;
 	}
 
-	void ResizeFrameBuffer(RPG::FrameBuffer& frameBuffer, glm::vec2 size) {
+	void ResizeFrameBuffer(std::shared_ptr<RPG::FrameBuffer> frameBuffer, glm::vec2 size) {
 		//Resize
 		//Resize Texture
-		glBindTexture(GL_TEXTURE_2D, frameBuffer.GetRenderTextureID());
+		glBindTexture(GL_TEXTURE_2D, frameBuffer->GetRenderTextureID());
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, size.x, size.y, 0, GL_RGB, GL_UNSIGNED_BYTE, 0);
 		glBindTexture(GL_TEXTURE_2D, 0);
 
 		//Setup depth-stencil buffer
-		glBindRenderbuffer(GL_RENDERBUFFER, frameBuffer.GetDepthStencilBufferID());
+		glBindRenderbuffer(GL_RENDERBUFFER, frameBuffer->GetDepthStencilBufferID());
 		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_STENCIL, size.x, size.y);
 		glBindRenderbuffer(GL_RENDERBUFFER, 0);
 
 		//Attach depth and stencil buffer to the framebuffer
-		glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer.GetBufferID());
-		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, frameBuffer.GetDepthStencilBufferID());
-		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_RENDERBUFFER, frameBuffer.GetDepthStencilBufferID());
+		glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer->GetBufferID());
+		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, frameBuffer->GetDepthStencilBufferID());
+		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_RENDERBUFFER, frameBuffer->GetDepthStencilBufferID());
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	}
 
-	RPG::FrameBuffer CreateFrameBuffer(glm::vec2 size) {
+	std::shared_ptr<RPG::FrameBuffer> CreateFrameBuffer(glm::vec2 size) {
 		uint32_t bufferID;
 		uint32_t renderTextureID;
 		uint32_t depthStencilBufferID;
@@ -105,7 +105,7 @@ namespace {
 		glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, renderTextureID, 0);
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-		RPG::FrameBuffer framebuffer{bufferID, renderTextureID, depthStencilBufferID};
+		std::shared_ptr<RPG::FrameBuffer> framebuffer = std::make_unique<RPG::FrameBuffer>(RPG::FrameBuffer{bufferID, renderTextureID, depthStencilBufferID});
 		ResizeFrameBuffer(framebuffer, size);
 
 		if(glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE) {
@@ -127,7 +127,7 @@ struct OpenGLApplication::Internal {
 	std::unique_ptr<RPG::IScene> scene;
 	#ifdef RPG_DEBUG
 		RPG::EditorManager editorManager;
-		RPG::FrameBuffer framebuffer;
+		std::shared_ptr<RPG::FrameBuffer> framebuffer;
 	#endif
 
 	#ifdef RPG_DEBUG
@@ -168,7 +168,7 @@ struct OpenGLApplication::Internal {
 
 		#ifdef RPG_DEBUG
 			//RPG::Log("FrameBuffer", "Framebuffer ID: " + std::to_string(framebuffer.GetRenderTextureID()));
-			editorManager.BuildGUI();
+			editorManager.BuildGUI(framebuffer, scene->GetHierarchy());
 			editorManager.Render();
 		#endif
 
