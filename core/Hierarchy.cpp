@@ -28,6 +28,15 @@ void Hierarchy::Add(std::shared_ptr<RPG::GameObject> gameObject, std::shared_ptr
 	}
 }
 
+void Hierarchy::Remove(std::shared_ptr<RPG::GameObject> gameObject) {
+	for (int i = 0; i < internal->hierarchy.size(); ++i) {
+		if (internal->hierarchy[i]->GetGuid() == gameObject->GetGuid()) {
+			internal->hierarchy.erase(internal->hierarchy.begin() + i);
+			return;
+		}
+	}
+}
+
 std::shared_ptr<RPG::GameObject> Hierarchy::GetGameObjectByGuid(std::string guid) {
 	//TODO: Finish this functionality
 	return internal->hierarchy[0];

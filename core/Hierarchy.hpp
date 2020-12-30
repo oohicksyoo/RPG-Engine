@@ -15,6 +15,7 @@ namespace RPG {
 		public:
 			Hierarchy();
 			void Add(std::shared_ptr<RPG::GameObject> gameObject, std::shared_ptr<RPG::GameObject> parent = nullptr);
+			void Remove(std::shared_ptr<RPG::GameObject> gameObject);
 			std::shared_ptr<RPG::GameObject> GetGameObjectByGuid(std::string guid);
 			std::vector<std::shared_ptr<RPG::GameObject>> GetHierarchy();
 
