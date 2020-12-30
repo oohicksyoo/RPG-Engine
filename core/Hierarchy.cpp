@@ -20,11 +20,16 @@ struct Hierarchy::Internal {
 
 Hierarchy::Hierarchy() : internal(RPG::MakeInternalPointer<Internal>()) {}
 
-void Hierarchy::Add(std::shared_ptr<RPG::GameObject> gameObject) {
-	internal->Add(gameObject);
+void Hierarchy::Add(std::shared_ptr<RPG::GameObject> gameObject, std::shared_ptr<RPG::GameObject> parent) {
+	gameObject->SetParent(gameObject, parent);
+
+	if (parent == nullptr) {
+		internal->Add(gameObject);
+	}
 }
 
 std::shared_ptr<RPG::GameObject> Hierarchy::GetGameObjectByGuid(std::string guid) {
+	//TODO: Finish this functionality
 	return internal->hierarchy[0];
 }
 

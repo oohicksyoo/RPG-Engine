@@ -6,6 +6,7 @@
 
 #include "InternalPointer.hpp"
 #include "IComponent.hpp"
+#include "components/TransformComponent.hpp"
 #include <string>
 #include <memory>
 #include <vector>
@@ -19,6 +20,9 @@ namespace RPG {
 			std::string GetName();
 			std::vector<std::shared_ptr<RPG::GameObject>> GetChildren();
 			bool HasChildren();
+			bool AddChild(std::shared_ptr<RPG::GameObject> gameObject);
+			bool RemoveChild(std::shared_ptr<RPG::GameObject> gameObject);
+			void SetParent(std::shared_ptr<RPG::GameObject> gameObject, std::shared_ptr<RPG::GameObject> parent);
 
 		private:
 			struct Internal;

@@ -6,7 +6,10 @@
 
 #include "../IComponent.hpp"
 #include "../InternalPointer.hpp"
+#include "../GameObject.hpp"
 #include <string>
+#include <vector>
+#include <memory>
 
 namespace RPG {
 	struct TransformComponent : public IComponent {
