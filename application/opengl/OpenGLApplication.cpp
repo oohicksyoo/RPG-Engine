@@ -117,7 +117,6 @@ namespace {
 }
 
 struct OpenGLApplication::Internal {
-	bool isRunning;
 	bool hasRanFirstFrame = false;
 
 	const RPG::SDLWindow window;
@@ -136,14 +135,12 @@ struct OpenGLApplication::Internal {
 					 assetManager(::CreateAssetManager()),
 					 renderer(::CreateRenderer(assetManager)),
 					 editorManager(window, context),
-					 framebuffer(::CreateFrameBuffer(glm::vec2{1280, 720})),
-					 isRunning(false){}
+					 framebuffer(::CreateFrameBuffer(glm::vec2{1280, 720})) {}
 	#else
 		Internal() : window(RPG::SDLWindow(SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI)),
 					 context(::CreateContext(window.GetWindow())),
 					 assetManager(::CreateAssetManager()),
-					 renderer(::CreateRenderer(assetManager)),
-					 isRunning(true) {}
+					 renderer(::CreateRenderer(assetManager)) {}
 	#endif
 
 	void Render() {
@@ -176,10 +173,15 @@ struct OpenGLApplication::Internal {
 	}
 
 	void Update(const float& delta) {
-		if (isRunning || !hasRanFirstFrame) {
-			hasRanFirstFrame = true;
+		#ifdef RPG_DEBUG
+			if (editorManager.IsGameRunning() || !hasRanFirstFrame) {
+				hasRanFirstFrame = true;
+				GetScene().Update(delta);
+			}
+		#else
 			GetScene().Update(delta);
-		}
+		#endif
+
 	}
 
 	void OnWindowResized() {
