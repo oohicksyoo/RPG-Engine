@@ -103,3 +103,7 @@ void GameObject::SetParent(std::shared_ptr<RPG::GameObject> gameObject, std::sha
 		}
 	}
 }
+
+bool GameObject::HasParent() {
+	return internal->parent != nullptr;
+}

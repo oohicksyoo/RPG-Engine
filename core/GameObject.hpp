@@ -23,6 +23,7 @@ namespace RPG {
 			bool AddChild(std::shared_ptr<RPG::GameObject> gameObject);
 			bool RemoveChild(std::shared_ptr<RPG::GameObject> gameObject);
 			void SetParent(std::shared_ptr<RPG::GameObject> gameObject, std::shared_ptr<RPG::GameObject> parent);
+			bool HasParent();
 
 		private:
 			struct Internal;
