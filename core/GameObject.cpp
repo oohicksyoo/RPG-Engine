@@ -25,6 +25,10 @@ struct GameObject::Internal {
 		AddComponent(transform);
 	}
 
+	~Internal() {
+		RPG::Log("GameObject", "Cleanup - (" + name + "|" + guid + ") is being removed from memory");
+	}
+
 	bool AddComponent(std::shared_ptr<RPG::IComponent> component) {
 		std::string name = component->Name();
 		RPG::Log("GameObject", "Component: " + name);
@@ -46,8 +50,16 @@ std::shared_ptr<RPG::IComponent> GameObject::AddComponent(std::shared_ptr<RPG::I
 	return internal->AddComponent(component) ? component : nullptr;
 }
 
+std::vector<std::shared_ptr<RPG::IComponent>> GameObject::GetComponents() {
+	return internal->components;
+}
+
 std::string GameObject::GetName() {
 	return internal->name;
+}
+
+void GameObject::SetName(std::string name) {
+	internal->name = name;
 }
 
 std::string GameObject::GetGuid() {

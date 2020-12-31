@@ -16,8 +16,10 @@ namespace RPG {
 		public:
 			GameObject(std::string name = "GameObject");
 			std::shared_ptr<RPG::IComponent> AddComponent(std::shared_ptr<RPG::IComponent> component);
+			std::vector<std::shared_ptr<RPG::IComponent>> GetComponents();
 			std::string GetGuid();
 			std::string GetName();
+			void SetName(std::string name);
 			std::vector<std::shared_ptr<RPG::GameObject>> GetChildren();
 			bool HasChildren();
 			bool AddChild(std::shared_ptr<RPG::GameObject> gameObject);
