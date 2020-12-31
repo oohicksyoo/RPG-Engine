@@ -7,7 +7,6 @@
 #endif
 
 #include "Application.hpp"
-#include "../core/SDLWrapper.hpp"
 
 using RPG::Application;
 
@@ -51,6 +50,7 @@ bool Application::RunMainLoop() {
 	SDL_Event event;
 
 	while (SDL_PollEvent(&event)) {
+		OnGeneralEventData(event);
 		switch(event.type) {
 			case SDL_WINDOWEVENT:
 				if (event.window.event == SDL_WINDOWEVENT_RESIZED) {

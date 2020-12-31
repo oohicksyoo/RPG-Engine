@@ -63,3 +63,7 @@ void VulkanApplication::Render() {
 void VulkanApplication::OnWindowResized() {
 	internal->OnWindowResized();
 }
+
+void VulkanApplication::OnGeneralEventData(SDL_Event event) {
+	//TODO: Set this up for systems like ImGUI that may need events
+}

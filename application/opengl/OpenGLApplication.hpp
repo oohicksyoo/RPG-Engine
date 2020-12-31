@@ -14,6 +14,7 @@ namespace RPG {
 			void Render() override;
 			void Update(const float& delta) override;
 			void OnWindowResized() override;
+			void OnGeneralEventData(SDL_Event event) override;
 
 		private:
 			struct Internal;

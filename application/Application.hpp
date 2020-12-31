@@ -6,6 +6,7 @@
 
 #include "../core/InternalPointer.hpp"
 #include "../core/GLMWrapper.hpp"
+#include "../core/SDLWrapper.hpp"
 
 namespace RPG {
 	struct Application {
@@ -17,6 +18,7 @@ namespace RPG {
 			virtual void Render() = 0;
 			virtual void Update(const float& delta) = 0;
 			virtual void OnWindowResized() = 0;
+			virtual void OnGeneralEventData(SDL_Event event) = 0;
 
 		private:
 			struct Internal;

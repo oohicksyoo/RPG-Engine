@@ -193,6 +193,12 @@ struct OpenGLApplication::Internal {
 		#endif
 	}
 
+	void OnGeneralEventData(SDL_Event event) {
+		#ifdef RPG_DEBUG
+			editorManager.OnGeneralEventData(event);
+		#endif
+	}
+
 	RPG::IScene& GetScene() {
 		if (!scene) {
 			scene = ::CreateMainScene(window, *assetManager);
@@ -221,4 +227,8 @@ void OpenGLApplication::Update(const float& delta) {
 
 void OpenGLApplication::OnWindowResized() {
 	internal->OnWindowResized();
+}
+
+void OpenGLApplication::OnGeneralEventData(SDL_Event event) {
+	internal->OnGeneralEventData(event);
 }
