@@ -6,6 +6,8 @@
 #include "../../core/AssetInventory.hpp"
 #include "../../core/Assets.hpp"
 #include "../../core/Vertex.hpp"
+#include "../../core/components/MeshComponent.hpp"
+#include "../../core/Log.hpp"
 #include "VulkanMesh.hpp"
 #include "VulkanTexture.hpp"
 #include "VulkanAssetManager.hpp"
@@ -318,8 +320,15 @@ struct VulkanPipeline::Internal {
 	void Render(const RPG::VulkanDevice& device,
 				const vk::CommandBuffer& commandBuffer,
 				const RPG::VulkanAssetManager& assetManager,
-				const std::vector<RPG::StaticMeshInstance>& staticMeshInstances) {
-		for (const RPG::StaticMeshInstance& meshInstance : staticMeshInstances) {
+				const std::shared_ptr<RPG::Hierarchy> hierarchy,
+				const glm::mat4 cameraMatrix) {
+
+		//TODO: Similar rendering to Opengl but Vulkan
+		for (auto gameObject : hierarchy->GetHierarchy()) {
+			RenderGameObject(device, commandBuffer, assetManager, gameObject, cameraMatrix);
+		}
+
+		/*for (const RPG::StaticMeshInstance& meshInstance : staticMeshInstances) {
 			const RPG::VulkanMesh& mesh{ assetManager.GetStaticMesh(meshInstance.GetMesh()) };
 			const glm::mat4& transform{ meshInstance.GetTransformMatrix() };
 
@@ -348,7 +357,54 @@ struct VulkanPipeline::Internal {
 											 0, nullptr);
 
 			commandBuffer.drawIndexed(mesh.GetNumIndices(), 1, 0, 0, 0);
+		}*/
+	}
+
+	void RenderGameObject(const RPG::VulkanDevice& device,
+						  const vk::CommandBuffer& commandBuffer,
+						  const RPG::VulkanAssetManager& assetManager,
+						  std::shared_ptr<RPG::GameObject> gameObject,
+						  const glm::mat4 cameraMatrix) {
+		//Render Children First
+		for (auto childGameObject : gameObject->GetChildren()) {
+			RenderGameObject(device, commandBuffer, assetManager, childGameObject, cameraMatrix);
 		}
+
+		auto t = gameObject->GetTransform();
+		auto meshComponent = gameObject->GetComponent<std::shared_ptr<RPG::MeshComponent>, RPG::MeshComponent>(std::make_unique<RPG::MeshComponent>(RPG::Assets::StaticMesh::Crate, RPG::Assets::Texture::Crate));
+		if (meshComponent == nullptr) {
+			return;
+		}
+
+		//Vulkan Rendering
+		const RPG::VulkanMesh& mesh{ assetManager.GetStaticMesh(meshComponent->GetMesh()) };
+		const glm::mat4& transform{cameraMatrix *  t->GetTransformMatrix()};
+
+		commandBuffer.pushConstants(pipelineLayout.get(),
+									vk::ShaderStageFlagBits::eAllGraphics,
+									0,
+									sizeof(glm::mat4),
+									&transform);
+
+		commandBuffer.bindPipeline(vk::PipelineBindPoint::eGraphics, pipeline.get());
+
+		vk::DeviceSize offsets[]{ 0 };
+		commandBuffer.bindVertexBuffers(0, 1, &mesh.GetVertexBuffer(), offsets);
+
+		commandBuffer.bindIndexBuffer(mesh.GetIndexBuffer(), 0, vk::IndexType::eUint32);
+
+		const RPG::VulkanTexture& texture{ assetManager.GetTexture(meshComponent->GetTexture()) };
+
+		const vk::DescriptorSet& textureSamplerDescriptorSet{
+				GetTextureSamplerDescriptorSet(device, texture) };
+
+		commandBuffer.bindDescriptorSets(vk::PipelineBindPoint::eGraphics,
+										 pipelineLayout.get(),
+										 0,
+										 1, &textureSamplerDescriptorSet,
+										 0, nullptr);
+
+		commandBuffer.drawIndexed(mesh.GetNumIndices(), 1, 0, 0, 0);
 	}
 
 	const vk::DescriptorSet& GetTextureSamplerDescriptorSet(const RPG::VulkanDevice& device,
@@ -378,6 +434,7 @@ VulkanPipeline::VulkanPipeline(const RPG::VulkanPhysicalDevice& physicalDevice,
 void VulkanPipeline::Render(const RPG::VulkanDevice& device,
 							const vk::CommandBuffer& commandBuffer,
 							const RPG::VulkanAssetManager& assetManager,
-							const std::vector<RPG::StaticMeshInstance>& staticMeshInstances) const {
-	internal->Render(device, commandBuffer, assetManager, staticMeshInstances);
+							const std::shared_ptr<RPG::Hierarchy> hierarchy,
+							const glm::mat4 cameraMatrix) const {
+	internal->Render(device, commandBuffer, assetManager, hierarchy, cameraMatrix);
 }

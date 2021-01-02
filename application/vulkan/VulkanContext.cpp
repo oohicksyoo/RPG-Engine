@@ -131,8 +131,8 @@ struct VulkanContext::Internal {
 		return true;
 	}
 
-	void Render(const RPG::Assets::Pipeline& pipeline, const std::vector<RPG::StaticMeshInstance>& staticMeshInstances) {
-		assetManager.GetPipeline(pipeline).Render(device, renderContext.GetActiveCommandBuffer(), assetManager, staticMeshInstances);
+	void Render(const RPG::Assets::Pipeline& pipeline, const std::shared_ptr<RPG::Hierarchy> hierarchy, const glm::mat4 cameraMatrix) {
+		assetManager.GetPipeline(pipeline).Render(device, renderContext.GetActiveCommandBuffer(), assetManager, hierarchy, cameraMatrix);
 	}
 
 	void RenderEnd() {
@@ -153,8 +153,7 @@ bool VulkanContext::RenderBegin() {
 }
 
 void VulkanContext::Render(const RPG::Assets::Pipeline& pipeline, const std::shared_ptr<RPG::Hierarchy> hierarchy, const glm::mat4 cameraMatrix) {
-	//TODO: FIX: Vulkan rendering of the standard render pipeline
-	//internal->Render(pipeline, staticMeshInstances);
+	internal->Render(pipeline, hierarchy, cameraMatrix);
 }
 
 void VulkanContext::RenderToFrameBuffer(const RPG::Assets::Pipeline &pipeline,

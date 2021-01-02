@@ -7,6 +7,7 @@
 #include "../../core/GraphicsWrapper.hpp"
 #include "../../core/InternalPointer.hpp"
 #include "../../core/StaticMeshInstance.hpp"
+#include "../../core/Hierarchy.hpp"
 #include "VulkanDevice.hpp"
 #include "VulkanPhysicalDevice.hpp"
 #include <string>
@@ -26,7 +27,8 @@ namespace RPG {
 			void Render(const RPG::VulkanDevice& device,
 						const vk::CommandBuffer& commandBuffer,
 						const RPG::VulkanAssetManager& assetManager,
-						const std::vector<RPG::StaticMeshInstance>& staticMeshInstances) const;
+						const std::shared_ptr<RPG::Hierarchy> hierarchy,
+						const glm::mat4 cameraMatrix) const;
 
 		private:
 			struct Internal;
