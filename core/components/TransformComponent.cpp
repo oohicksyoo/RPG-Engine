@@ -65,3 +65,27 @@ std::vector<std::shared_ptr<RPG::Property>> TransformComponent::GetProperties() 
 void TransformComponent::SetGetParent(RPG::Action<>::Func<std::shared_ptr<RPG::TransformComponent>> getParentFunc) {
 	internal->getParentFunc = getParentFunc;
 }
+
+void TransformComponent::SetPosition(glm::vec3 position) {
+	internal->position->SetProperty(position);
+}
+
+glm::vec3 TransformComponent::GetPosition() {
+	return std::any_cast<glm::vec3>(internal->position->GetProperty());
+}
+
+void TransformComponent::SetRotation(glm::vec3 rotation) {
+	internal->rotation->SetProperty(rotation);
+}
+
+glm::vec3 TransformComponent::GetRotation() {
+	return std::any_cast<glm::vec3>(internal->rotation->GetProperty());
+}
+
+void TransformComponent::SetScale(glm::vec3 scale) {
+	internal->scale->SetProperty(scale);
+}
+
+glm::vec3 TransformComponent::GetScale() {
+	return std::any_cast<glm::vec3>(internal->scale->GetProperty());
+}
