@@ -152,8 +152,9 @@ bool VulkanContext::RenderBegin() {
 	return internal->RenderBegin();
 }
 
-void VulkanContext::Render(const RPG::Assets::Pipeline& pipeline, const std::vector<RPG::StaticMeshInstance>& staticMeshInstances) {
-	internal->Render(pipeline, staticMeshInstances);
+void VulkanContext::Render(const RPG::Assets::Pipeline& pipeline, const std::shared_ptr<RPG::Hierarchy> hierarchy, const glm::mat4 cameraMatrix) {
+	//TODO: FIX: Vulkan rendering of the standard render pipeline
+	//internal->Render(pipeline, staticMeshInstances);
 }
 
 void VulkanContext::RenderToFrameBuffer(const RPG::Assets::Pipeline &pipeline,

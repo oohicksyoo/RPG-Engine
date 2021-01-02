@@ -100,68 +100,7 @@ struct OpenGLPipeline::Internal {
 			  offsetPosition(0),
 			  offsetTexCoord(3 * sizeof(float)) {}
 
-	void Render(const RPG::OpenGLAssetManager& assetManager, const std::vector<RPG::StaticMeshInstance>& staticMeshInstances) const {
-		// Instruct OpenGL to starting using our shader program.
-		glUseProgram(shaderProgramId);
-
-		// Enable the 'a_vertexPosition' attribute.
-		glEnableVertexAttribArray(attributeLocationVertexPosition);
-
-		// Enable the 'a_texCoord' attribute.
-		glEnableVertexAttribArray(attributeLocationTexCoord);
-
-		for (const auto& staticMeshInstance : staticMeshInstances) {
-			const RPG::OpenGLMesh& mesh = assetManager.GetStaticMesh(staticMeshInstance.GetMesh());
-
-			// Populate the 'u_mvp' uniform in the shader program.
-			glUniformMatrix4fv(uniformLocationMVP, 1, GL_FALSE, &staticMeshInstance.GetTransformMatrix()[0][0]);
-
-			// Apply the texture we want to paint the mesh with.
-			assetManager.GetTexture(staticMeshInstance.GetTexture()).Bind();
-
-			// Bind the vertex and index buffers.
-			glBindBuffer(GL_ARRAY_BUFFER, mesh.GetVertexBufferId());
-			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.GetIndexBufferId());
-
-			// Configure the 'a_vertexPosition' attribute.
-			glVertexAttribPointer(
-					attributeLocationVertexPosition,
-					3,
-					GL_FLOAT,
-					GL_FALSE,
-					stride,
-					reinterpret_cast<const GLvoid*>(offsetPosition)
-			);
-
-			// Configure the 'a_texCoord' attribute.
-			glVertexAttribPointer(attributeLocationTexCoord,
-								  2,
-								  GL_FLOAT,
-								  GL_FALSE,
-								  stride,
-								  reinterpret_cast<const GLvoid*>(offsetTexCoord)
-			);
-
-			// Execute the draw command - with how many indices to iterate.
-			glDrawElements(
-					GL_TRIANGLES,
-					mesh.GetNumIndices(),
-					GL_UNSIGNED_INT,
-					reinterpret_cast<const GLvoid*>(0)
-			);
-		}
-
-		// Tidy up.
-		glDisableVertexAttribArray(attributeLocationVertexPosition);
-		glDisableVertexAttribArray(attributeLocationTexCoord);
-	}
-
-	void RenderToFrameBuffer(const RPG::OpenGLAssetManager& assetManager, const std::shared_ptr<RPG::Hierarchy> hierarchy, const std::shared_ptr<RPG::FrameBuffer> frameBuffer, const glm::mat4 cameraMatrix) const {
-		glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer->GetRenderTextureID());
-		glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // we're not using the stencil buffer now
-		glEnable(GL_DEPTH_TEST);
-
+	void Render(const RPG::OpenGLAssetManager& assetManager, const std::shared_ptr<RPG::Hierarchy> hierarchy, const glm::mat4 cameraMatrix) const {
 		// Instruct OpenGL to starting using our shader program.
 		glUseProgram(shaderProgramId);
 
@@ -178,6 +117,17 @@ struct OpenGLPipeline::Internal {
 		// Tidy up.
 		glDisableVertexAttribArray(attributeLocationVertexPosition);
 		glDisableVertexAttribArray(attributeLocationTexCoord);
+	}
+
+	void RenderToFrameBuffer(const RPG::OpenGLAssetManager& assetManager, const std::shared_ptr<RPG::Hierarchy> hierarchy, const std::shared_ptr<RPG::FrameBuffer> frameBuffer, const glm::mat4 cameraMatrix) const {
+		glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer->GetRenderTextureID());
+		glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // we're not using the stencil buffer now
+		glEnable(GL_DEPTH_TEST);
+
+		Render(assetManager, hierarchy, cameraMatrix);
+
+		//Tidy Up
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	}
 
@@ -248,8 +198,8 @@ struct OpenGLPipeline::Internal {
 
 OpenGLPipeline::OpenGLPipeline(const std::string& shaderName) : internal(RPG::MakeInternalPointer<Internal>(shaderName)) {}
 
-void OpenGLPipeline::Render(const RPG::OpenGLAssetManager& assetManager, const std::vector<RPG::StaticMeshInstance>& staticMeshInstances) const {
-	internal->Render(assetManager, staticMeshInstances);
+void OpenGLPipeline::Render(const RPG::OpenGLAssetManager& assetManager, const std::shared_ptr<RPG::Hierarchy> hierarchy, const glm::mat4 cameraMatrix) const {
+	internal->Render(assetManager, hierarchy, cameraMatrix);
 }
 
 void OpenGLPipeline::RenderToFrameBuffer(const RPG::OpenGLAssetManager &assetManager,

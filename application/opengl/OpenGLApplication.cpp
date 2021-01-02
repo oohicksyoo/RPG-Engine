@@ -124,12 +124,12 @@ struct OpenGLApplication::Internal {
 	const std::shared_ptr<RPG::OpenGLAssetManager> assetManager;
 	RPG::OpenGLRenderer renderer;
 	std::unique_ptr<RPG::IScene> scene;
-	#ifdef RPG_DEBUG
+	#ifdef RPG_EDITOR
 		RPG::EditorManager editorManager;
 		std::shared_ptr<RPG::FrameBuffer> framebuffer;
 	#endif
 
-	#ifdef RPG_DEBUG
+	#ifdef RPG_EDITOR
 		Internal() : window(RPG::SDLWindow(SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI)),
 					 context(::CreateContext(window.GetWindow())),
 					 assetManager(::CreateAssetManager()),
@@ -146,24 +146,24 @@ struct OpenGLApplication::Internal {
 	void Render() {
 		SDL_GL_MakeCurrent(window.GetWindow(), context);
 
-		#ifdef RPG_DEBUG
+		#ifdef RPG_EDITOR
 			GetScene().RenderToFrameBuffer(renderer, framebuffer);
 		#endif
 
-		#ifndef RPG_DEBUG
+		#ifndef RPG_EDITOR
 			glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		#endif
 
-		#ifdef RPG_DEBUG
+		#ifdef RPG_EDITOR
 			editorManager.NewFrame(window);
 		#endif
 
-		#ifndef RPG_DEBUG
+		#ifndef RPG_EDITOR
 			GetScene().Render(renderer);
 		#endif
 
-		#ifdef RPG_DEBUG
+		#ifdef RPG_EDITOR
 			//RPG::Log("FrameBuffer", "Framebuffer ID: " + std::to_string(framebuffer.GetRenderTextureID()));
 			editorManager.BuildGUI(framebuffer, scene->GetHierarchy());
 			editorManager.Render();
@@ -173,7 +173,7 @@ struct OpenGLApplication::Internal {
 	}
 
 	void Update(const float& delta) {
-		#ifdef RPG_DEBUG
+		#ifdef RPG_EDITOR
 			if (editorManager.IsGameRunning() || !hasRanFirstFrame) {
 				hasRanFirstFrame = true;
 				GetScene().Update(delta);
@@ -188,13 +188,13 @@ struct OpenGLApplication::Internal {
 		GetScene().OnWindowResized(RPG::SDL::GetWindowSize(window.GetWindow()));
 		::UpdateViewport(window.GetWindow());
 
-		#ifdef RPG_DEBUG
+		#ifdef RPG_EDITOR
 			::ResizeFrameBuffer(framebuffer, RPG::ApplicationStats::GetInstance().GetWindowSize());
 		#endif
 	}
 
 	void OnGeneralEventData(SDL_Event event) {
-		#ifdef RPG_DEBUG
+		#ifdef RPG_EDITOR
 			editorManager.OnGeneralEventData(event);
 		#endif
 	}
@@ -209,7 +209,7 @@ struct OpenGLApplication::Internal {
 	~Internal() {
 		SDL_GL_DeleteContext(context);
 
-		#ifdef RPG_DEBUG
+		#ifdef RPG_EDITOR
 			renderer.DeleteFrameBuffer(RPG::Assets::Pipeline::Default, framebuffer);
 		#endif
 	}
