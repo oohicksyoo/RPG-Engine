@@ -17,6 +17,8 @@ namespace RPG {
 			void Update() override;
 			std::string Name() { return "MeshComponent";};
 			std::vector<std::shared_ptr<RPG::Property>> GetProperties() override;
+			RPG::Assets::StaticMesh GetMesh();
+			RPG::Assets::Texture GetTexture();
 
 		private:
 			struct Internal;

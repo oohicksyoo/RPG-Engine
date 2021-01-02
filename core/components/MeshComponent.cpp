@@ -29,6 +29,14 @@ void MeshComponent::Update() {
 
 }
 
+RPG::Assets::StaticMesh MeshComponent::GetMesh() {
+	return std::any_cast<RPG::Assets::StaticMesh>(internal->mesh->GetProperty());
+}
+
+RPG::Assets::Texture MeshComponent::GetTexture() {
+	return std::any_cast<RPG::Assets::Texture>(internal->texture->GetProperty());
+}
+
 std::vector<std::shared_ptr<RPG::Property>> MeshComponent::GetProperties() {
 	std::vector<std::shared_ptr<RPG::Property>> list = {};
 	list.push_back(internal->mesh);

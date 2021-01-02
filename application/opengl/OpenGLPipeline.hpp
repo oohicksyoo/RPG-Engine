@@ -7,6 +7,7 @@
 #include "../../core/InternalPointer.hpp"
 #include "../../core/StaticMeshInstance.hpp"
 #include "../../core/FrameBuffer.hpp"
+#include "../../core/Hierarchy.hpp"
 #include <string>
 #include <vector>
 
@@ -17,7 +18,7 @@ namespace RPG {
 		public:
 			OpenGLPipeline(const std::string& shaderName);
 			void Render(const RPG::OpenGLAssetManager& assetManager, const std::vector<RPG::StaticMeshInstance>& staticMeshInstances) const;
-			void RenderToFrameBuffer(const RPG::OpenGLAssetManager& assetManager, const std::vector<RPG::StaticMeshInstance>& staticMeshInstances, const std::shared_ptr<RPG::FrameBuffer> frameBuffer) const;
+			void RenderToFrameBuffer(const RPG::OpenGLAssetManager& assetManager, const std::shared_ptr<RPG::Hierarchy> hierarchy, const std::shared_ptr<RPG::FrameBuffer> frameBuffer, const glm::mat4 cameraMatrix) const;
 			void DeleteFrameBuffer(const std::shared_ptr<RPG::FrameBuffer> framebuffer) const;
 
 		private:

@@ -157,8 +157,9 @@ void VulkanContext::Render(const RPG::Assets::Pipeline& pipeline, const std::vec
 }
 
 void VulkanContext::RenderToFrameBuffer(const RPG::Assets::Pipeline &pipeline,
-										const std::vector<RPG::StaticMeshInstance> &staticMeshInstances,
-										const std::shared_ptr<RPG::FrameBuffer> framebuffer) {
+										const std::shared_ptr<RPG::Hierarchy> hierarchy,
+										const std::shared_ptr<RPG::FrameBuffer> framebuffer,
+										const glm::mat4 cameraMatrix) {
 	//TODO: Vulkan Framebuffer setup
 }
 

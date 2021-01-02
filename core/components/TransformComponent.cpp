@@ -3,7 +3,6 @@
 //
 
 #include "TransformComponent.hpp"
-#include "../GLMWrapper.hpp"
 
 using RPG::TransformComponent;
 
@@ -11,10 +10,13 @@ struct TransformComponent::Internal {
 	std::shared_ptr<RPG::Property> position;
 	std::shared_ptr<RPG::Property> rotation;
 	std::shared_ptr<RPG::Property> scale;
+	const glm::mat4 identity;
+	RPG::Action<>::Func<std::shared_ptr<RPG::TransformComponent>> getParentFunc;
 
 	Internal() : position(std::make_unique<RPG::Property>(glm::vec3{0, 0, 0}, "Position", "glm::vec3")),
 				 rotation(std::make_unique<RPG::Property>(glm::vec3{0, 0, 0}, "Rotation", "glm::vec3")),
-				 scale(std::make_unique<RPG::Property>(glm::vec3{1, 1, 1}, "Scale", "glm::vec3")) {}
+				 scale(std::make_unique<RPG::Property>(glm::vec3{1, 1, 1}, "Scale", "glm::vec3")),
+				 identity(glm::mat4{1.0f}) {}
 };
 
 TransformComponent::TransformComponent() : internal(MakeInternalPointer<Internal>()) {}
@@ -31,6 +33,26 @@ void TransformComponent::Update() {
 
 }
 
+glm::mat4 TransformComponent::GetTransformMatrix() {
+	glm::vec3 rotation = std::any_cast<glm::vec3>(internal->rotation->GetProperty());
+	glm::fquat rot{rotation};
+
+	glm::mat4 modelMatrix = internal->identity;
+	modelMatrix = glm::translate(modelMatrix, std::any_cast<glm::vec3>(internal->position->GetProperty()));
+	modelMatrix = glm::rotate(modelMatrix, glm::radians(rotation.x), glm::vec3{1.0f, 0.0f, 0.0f});
+	modelMatrix = glm::rotate(modelMatrix, glm::radians(rotation.y), glm::vec3{0.0f, 1.0f, 0.0f});
+	modelMatrix = glm::rotate(modelMatrix, glm::radians(rotation.z), glm::vec3{0.0f, 0.0f, 1.0f});
+	modelMatrix = glm::scale(modelMatrix, std::any_cast<glm::vec3>(internal->scale->GetProperty()));
+
+	//Using parent we need to multiply this by the parents GetTransformMatrix as well
+	auto parentTransform = internal->getParentFunc();
+	if (parentTransform != nullptr) {
+		modelMatrix = parentTransform->GetTransformMatrix() * modelMatrix;
+	}
+
+	return modelMatrix;
+}
+
 std::vector<std::shared_ptr<RPG::Property>> TransformComponent::GetProperties() {
 	std::vector<std::shared_ptr<RPG::Property>> list = {};
 	list.push_back(internal->position);
@@ -38,4 +60,8 @@ std::vector<std::shared_ptr<RPG::Property>> TransformComponent::GetProperties() 
 	list.push_back(internal->scale);
 
 	return list;
+}
+
+void TransformComponent::SetGetParent(RPG::Action<>::Func<std::shared_ptr<RPG::TransformComponent>> getParentFunc) {
+	internal->getParentFunc = getParentFunc;
 }

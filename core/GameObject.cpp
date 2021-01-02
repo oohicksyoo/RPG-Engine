@@ -22,6 +22,13 @@ struct GameObject::Internal {
 	Internal(std::string gameObjectName) : name(gameObjectName),
 										   guid(RPG::Guid::GenerateGuid()),
 										   transform(std::make_unique<RPG::TransformComponent>(RPG::TransformComponent())) {
+		transform->SetGetParent([this]() -> std::shared_ptr<RPG::TransformComponent> {
+			//Do we have parent
+			if (parent != nullptr) {
+				return parent->GetTransform();
+			}
+			return nullptr;
+		});
 		AddComponent(transform);
 	}
 
@@ -118,4 +125,8 @@ void GameObject::SetParent(std::shared_ptr<RPG::GameObject> gameObject, std::sha
 
 bool GameObject::HasParent() {
 	return internal->parent != nullptr;
+}
+
+std::shared_ptr<RPG::TransformComponent> GameObject::GetTransform() {
+	return internal->transform;
 }

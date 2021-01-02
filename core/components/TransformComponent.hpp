@@ -6,7 +6,8 @@
 
 #include "../IComponent.hpp"
 #include "../InternalPointer.hpp"
-#include "../GameObject.hpp"
+#include "../GLMWrapper.hpp"
+#include "../Action.hpp"
 
 namespace RPG {
 	struct TransformComponent : public IComponent {
@@ -17,6 +18,8 @@ namespace RPG {
 			void Update() override;
 			std::string Name() { return "TransformComponent";};
 			std::vector<std::shared_ptr<RPG::Property>> GetProperties() override;
+			glm::mat4 GetTransformMatrix();
+			void SetGetParent(RPG::Action<>::Func<std::shared_ptr<RPG::TransformComponent>> getParentFunc);
 
 		private:
 			struct Internal;
