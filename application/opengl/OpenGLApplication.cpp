@@ -12,8 +12,11 @@
 #include <string>
 
 #include "../ApplicationStats.hpp"
-#include "../../../editor/EditorManager.hpp"
-#include "../../core/FrameBuffer.hpp"
+
+#ifdef RPG_EDITOR
+	#include "../../../editor/EditorManager.hpp"
+	#include "../../core/FrameBuffer.hpp"
+#endif
 
 using RPG::OpenGLApplication;
 
