@@ -7,18 +7,16 @@
 #include "../IComponent.hpp"
 #include "../InternalPointer.hpp"
 #include "../GameObject.hpp"
-#include <string>
-#include <vector>
-#include <memory>
 
 namespace RPG {
 	struct TransformComponent : public IComponent {
 		public:
 			TransformComponent();
-			virtual void Awake() override;
-			virtual void Start() override;
-			virtual void Update() override;
-			virtual std::string Name() { return "TransformComponent";};
+			void Awake() override;
+			void Start() override;
+			void Update() override;
+			std::string Name() { return "TransformComponent";};
+			std::vector<std::shared_ptr<RPG::Property>> GetProperties() override;
 
 		private:
 			struct Internal;
