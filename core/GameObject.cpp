@@ -53,6 +53,36 @@ struct GameObject::Internal {
 
 GameObject::GameObject(std::string name) : internal(RPG::MakeInternalPointer<Internal>(name)) {}
 
+void GameObject::Awake() {
+	for (auto child : internal->children) {
+		child->Awake();
+	}
+
+	for (auto component : internal->components) {
+		component->Awake();
+	}
+}
+
+void GameObject::Start() {
+	for (auto child : internal->children) {
+		child->Start();
+	}
+
+	for (auto component : internal->components) {
+		component->Start();
+	}
+}
+
+void GameObject::Update(const float &delta) {
+	for (auto child : internal->children) {
+		child->Update(delta);
+	}
+
+	for (auto component : internal->components) {
+		component->Update(delta);
+	}
+}
+
 std::shared_ptr<RPG::IComponent> GameObject::AddComponent(std::shared_ptr<RPG::IComponent> component) {
 	return internal->AddComponent(component) ? component : nullptr;
 }

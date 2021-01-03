@@ -29,7 +29,7 @@ void TransformComponent::Start() {
 
 }
 
-void TransformComponent::Update() {
+void TransformComponent::Update(const float &delta) {
 
 }
 

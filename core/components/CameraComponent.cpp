@@ -22,7 +22,7 @@ void CameraComponent::Start() {
 
 }
 
-void CameraComponent::Update() {
+void CameraComponent::Update(const float &delta) {
 
 }
 

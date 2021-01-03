@@ -128,6 +128,7 @@ struct OpenGLApplication::Internal {
 	RPG::OpenGLRenderer renderer;
 	std::unique_ptr<RPG::IScene> scene;
 	#ifdef RPG_EDITOR
+		bool hasRanPreviewFrame = false;
 		RPG::EditorManager editorManager;
 		std::shared_ptr<RPG::FrameBuffer> framebuffer;
 	#endif
@@ -177,11 +178,23 @@ struct OpenGLApplication::Internal {
 
 	void Update(const float& delta) {
 		#ifdef RPG_EDITOR
-			if (editorManager.IsGameRunning() || !hasRanFirstFrame) {
-				hasRanFirstFrame = true;
+			if (editorManager.IsGameRunning() || !hasRanPreviewFrame) {
+				if (hasRanPreviewFrame && !hasRanFirstFrame) {
+					hasRanFirstFrame = true;
+					GetScene().Awake();
+					GetScene().Start();
+				}
+				hasRanPreviewFrame = true;
 				GetScene().Update(delta);
+			} else {
+				hasRanFirstFrame = false;
 			}
 		#else
+			if (!hasRanFirstFrame) {
+				hasRanFirstFrame = true;
+				GetScene().Awake();
+				GetScene().Start();
+			}
 			GetScene().Update(delta);
 		#endif
 

@@ -25,7 +25,7 @@ void MeshComponent::Start() {
 
 }
 
-void MeshComponent::Update() {
+void MeshComponent::Update(const float &delta) {
 
 }
 

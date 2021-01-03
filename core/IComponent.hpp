@@ -17,7 +17,7 @@ namespace RPG {
 			IComponent() {};
 			virtual void Awake() = 0;
 			virtual void Start() = 0;
-			virtual void Update() = 0;
+			virtual void Update(const float &delta) = 0;
 			virtual std::string Name() = 0;
 			virtual std::vector<std::shared_ptr<RPG::Property>> GetProperties() = 0;
 	};

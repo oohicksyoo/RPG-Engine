@@ -13,7 +13,7 @@ namespace RPG {
 			LuaScriptComponent(std::string path);
 			void Awake() override;
 			void Start() override;
-			void Update() override;
+			void Update(const float &delta) override;
 			std::string Name() { return "LuaScriptComponent";};
 			std::vector<std::shared_ptr<RPG::Property>> GetProperties() override;
 

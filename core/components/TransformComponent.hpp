@@ -15,7 +15,7 @@ namespace RPG {
 			TransformComponent();
 			void Awake() override;
 			void Start() override;
-			void Update() override;
+			void Update(const float &delta) override;
 			std::string Name() { return "TransformComponent";};
 			std::vector<std::shared_ptr<RPG::Property>> GetProperties() override;
 			glm::mat4 GetTransformMatrix();

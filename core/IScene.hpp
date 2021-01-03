@@ -18,6 +18,8 @@ namespace RPG {
 		virtual ~IScene() = default;
 		virtual RPG::AssetManifest GetAssetManifest() = 0;
 		virtual void Prepare() = 0;
+		virtual void Awake() = 0;
+		virtual void Start() = 0;
 		virtual void Update(const float& delta) = 0;
 		virtual void Render(RPG::IRenderer& renderer) = 0;
 		virtual void RenderToFrameBuffer(RPG::IRenderer& renderer, std::shared_ptr<RPG::FrameBuffer> frameBuffer) = 0;

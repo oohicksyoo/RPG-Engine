@@ -17,6 +17,10 @@ namespace RPG {
 	struct GameObject {
 		public:
 			GameObject(std::string name = "GameObject");
+			void Awake();
+			void Start();
+			void Update(const float& delta);
+
 			std::shared_ptr<RPG::IComponent> AddComponent(std::shared_ptr<RPG::IComponent> component);
 			std::vector<std::shared_ptr<RPG::IComponent>> GetComponents();
 			std::string GetGuid();
