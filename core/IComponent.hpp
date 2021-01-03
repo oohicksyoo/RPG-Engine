@@ -20,5 +20,7 @@ namespace RPG {
 			virtual void Update(const float &delta) = 0;
 			virtual std::string Name() = 0;
 			virtual std::vector<std::shared_ptr<RPG::Property>> GetProperties() = 0;
+			virtual std::string Guid() = 0;
+			virtual bool AllowMultiple() = 0;
 	};
 }

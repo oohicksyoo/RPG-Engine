@@ -3,15 +3,18 @@
 //
 
 #include "MeshComponent.hpp"
+#include "../Guid.hpp"
 
 using RPG::MeshComponent;
 
 struct MeshComponent::Internal {
+	std::string guid;
 	std::shared_ptr<RPG::Property> mesh;
 	std::shared_ptr<RPG::Property> texture;
 
 	Internal(RPG::Assets::StaticMesh mesh, RPG::Assets::Texture texture)
-	: mesh(std::make_unique<RPG::Property>(mesh, "Mesh", "RPG::Assets::StaticMesh")),
+	: guid(RPG::Guid::GenerateGuid()),
+	  mesh(std::make_unique<RPG::Property>(mesh, "Mesh", "RPG::Assets::StaticMesh")),
 	  texture(std::make_unique<RPG::Property>(texture, "Texture", "RPG::Assets::Texture")) {}
 };
 
@@ -27,6 +30,10 @@ void MeshComponent::Start() {
 
 void MeshComponent::Update(const float &delta) {
 
+}
+
+std::string MeshComponent::Guid() {
+	return internal->guid;
 }
 
 RPG::Assets::StaticMesh MeshComponent::GetMesh() {

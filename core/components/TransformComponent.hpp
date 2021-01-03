@@ -18,6 +18,8 @@ namespace RPG {
 			void Update(const float &delta) override;
 			std::string Name() { return "TransformComponent";};
 			std::vector<std::shared_ptr<RPG::Property>> GetProperties() override;
+			std::string Guid() override;
+			bool AllowMultiple() { return false; };
 			glm::mat4 GetTransformMatrix();
 			void SetGetParent(RPG::Action<>::Func<std::shared_ptr<RPG::TransformComponent>> getParentFunc);
 			void SetPosition(glm::vec3 position);

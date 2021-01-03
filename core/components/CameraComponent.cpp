@@ -3,13 +3,16 @@
 //
 
 #include "CameraComponent.hpp"
+#include "../Guid.hpp"
 
 using RPG::CameraComponent;
 
 struct CameraComponent::Internal {
+	std::string guid;
 	std::shared_ptr<RPG::Property> cameraType;
 
-	Internal() : cameraType(std::make_unique<RPG::Property>(RPG::CameraType::Perspective, "Camera Type", "RPG::CameraType")) {}
+	Internal() : guid(RPG::Guid::GenerateGuid()),
+				 cameraType(std::make_unique<RPG::Property>(RPG::CameraType::Perspective, "Camera Type", "RPG::CameraType")) {}
 };
 
 CameraComponent::CameraComponent() : internal(MakeInternalPointer<Internal>()) {}
@@ -24,6 +27,10 @@ void CameraComponent::Start() {
 
 void CameraComponent::Update(const float &delta) {
 
+}
+
+std::string CameraComponent::Guid() {
+	return internal->guid;
 }
 
 std::vector<std::shared_ptr<RPG::Property>> CameraComponent::GetProperties() {

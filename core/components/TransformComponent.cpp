@@ -3,17 +3,20 @@
 //
 
 #include "TransformComponent.hpp"
+#include "../Guid.hpp"
 
 using RPG::TransformComponent;
 
 struct TransformComponent::Internal {
+	std::string guid;
 	std::shared_ptr<RPG::Property> position;
 	std::shared_ptr<RPG::Property> rotation;
 	std::shared_ptr<RPG::Property> scale;
 	const glm::mat4 identity;
 	RPG::Action<>::Func<std::shared_ptr<RPG::TransformComponent>> getParentFunc;
 
-	Internal() : position(std::make_unique<RPG::Property>(glm::vec3{0, 0, 0}, "Position", "glm::vec3")),
+	Internal() : guid(RPG::Guid::GenerateGuid()),
+			     position(std::make_unique<RPG::Property>(glm::vec3{0, 0, 0}, "Position", "glm::vec3")),
 				 rotation(std::make_unique<RPG::Property>(glm::vec3{0, 0, 0}, "Rotation", "glm::vec3")),
 				 scale(std::make_unique<RPG::Property>(glm::vec3{1, 1, 1}, "Scale", "glm::vec3")),
 				 identity(glm::mat4{1.0f}) {}
@@ -31,6 +34,10 @@ void TransformComponent::Start() {
 
 void TransformComponent::Update(const float &delta) {
 
+}
+
+std::string TransformComponent::Guid() {
+	return internal->guid;
 }
 
 glm::mat4 TransformComponent::GetTransformMatrix() {

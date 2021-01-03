@@ -6,14 +6,17 @@
 #include "../LuaWrapper.hpp"
 #include "../Log.hpp"
 #include "../Assets.hpp"
+#include "../Guid.hpp"
 
 using RPG::LuaScriptComponent;
 
 struct LuaScriptComponent::Internal {
+	std::string guid;
 	std::shared_ptr<RPG::Property> path;
 	lua_State* L;
 
-	Internal(std::string path)  : path(std::make_unique<RPG::Property>(path, "Path", "std::string")),
+	Internal(std::string path)  : guid(RPG::Guid::GenerateGuid()),
+								  path(std::make_unique<RPG::Property>(path, "Path", "std::string")),
 								  L(luaL_newstate()) {}
 
 	~Internal() {
@@ -70,6 +73,10 @@ void LuaScriptComponent::Start() {
 
 void LuaScriptComponent::Update(const float &delta) {
 	internal->Update(delta);
+}
+
+std::string LuaScriptComponent::Guid() {
+	return internal->guid;
 }
 
 std::vector<std::shared_ptr<RPG::Property>> LuaScriptComponent::GetProperties() {

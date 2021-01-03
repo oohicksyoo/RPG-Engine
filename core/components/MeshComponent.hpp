@@ -17,6 +17,8 @@ namespace RPG {
 			void Update(const float &delta) override;
 			std::string Name() { return "MeshComponent";};
 			std::vector<std::shared_ptr<RPG::Property>> GetProperties() override;
+			std::string Guid() override;
+			bool AllowMultiple() { return false; };
 			RPG::Assets::StaticMesh GetMesh();
 			RPG::Assets::Texture GetTexture();
 

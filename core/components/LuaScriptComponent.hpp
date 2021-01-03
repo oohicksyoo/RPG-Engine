@@ -16,6 +16,8 @@ namespace RPG {
 			void Update(const float &delta) override;
 			std::string Name() { return "LuaScriptComponent";};
 			std::vector<std::shared_ptr<RPG::Property>> GetProperties() override;
+			std::string Guid() override;
+			bool AllowMultiple() { return true; };
 
 		private:
 			struct Internal;
