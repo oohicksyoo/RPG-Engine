@@ -50,6 +50,11 @@ struct LuaScriptComponent::Internal {
 		lua_getfield(L, -1, "OnUpdate");
 		lua_pushnumber(L, delta);
 		lua_pcall(L, 1, 0, 0);
+
+		lua_getglobal(L, "Class");
+		lua_getfield(L, -1, "Resume");
+		lua_pushnumber(L, delta);
+		lua_pcall(L, 1, 0, 0);
 	}
 };
 
