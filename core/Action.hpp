@@ -54,9 +54,9 @@ namespace RPG {
 	template<class... Args>
 	bool Action<Args...>::RemoveListener(Callback callback) {
 		for (auto const& [key, value] : callbacks) {
-			RPG::Log("Action", std::to_string(value.target_type().hash_code()) + "|" + std::to_string(callback.target_type().hash_code()));
+			//RPG::Log("Action", std::to_string(value.target_type().hash_code()) + "|" + std::to_string(callback.target_type().hash_code()));
 			if (value.target_type() == callback.target_type()) {
-				RPG::Log("Action", "Found Callback");
+				//RPG::Log("Action", "Found Callback");
 				callbacks.erase(key);
 				return true;
 			}
