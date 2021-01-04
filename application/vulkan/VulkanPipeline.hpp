@@ -6,7 +6,6 @@
 
 #include "../../core/GraphicsWrapper.hpp"
 #include "../../core/InternalPointer.hpp"
-#include "../../core/StaticMeshInstance.hpp"
 #include "../../core/Hierarchy.hpp"
 #include "VulkanDevice.hpp"
 #include "VulkanPhysicalDevice.hpp"

@@ -5,7 +5,6 @@
 #pragma once
 
 #include "AssetInventory.hpp"
-#include "StaticMeshInstance.hpp"
 #include "FrameBuffer.hpp"
 #include "Hierarchy.hpp"
 #include <vector>

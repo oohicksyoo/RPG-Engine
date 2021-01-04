@@ -5,7 +5,6 @@
 #pragma once
 
 #include "../../core/InternalPointer.hpp"
-#include "../../core/StaticMeshInstance.hpp"
 #include "../../core/FrameBuffer.hpp"
 #include "../../core/Hierarchy.hpp"
 #include <string>

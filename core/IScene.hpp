@@ -8,7 +8,6 @@
 #include "IRenderer.hpp"
 #include "FrameBuffer.hpp"
 #include "WindowSize.hpp"
-#include "StaticMeshInstance.hpp"
 #include "Hierarchy.hpp"
 #include <vector>
 
