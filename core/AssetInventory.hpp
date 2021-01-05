@@ -12,11 +12,13 @@ namespace RPG::Assets {
 	};
 
 	enum class StaticMesh {
+		Quad,
 		Crate
 	};
 
 	enum class Texture {
-		Crate
+		Crate,
+		Sprite
 	};
 
 	std::string ResolvePipelinePath(const RPG::Assets::Pipeline& pipeline);

@@ -10,6 +10,7 @@
 #include <vector>
 
 #include "../../core/components/MeshComponent.hpp"
+#include "../../core/components/SpriteComponent.hpp"
 
 using RPG::OpenGLPipeline;
 
@@ -110,6 +111,10 @@ struct OpenGLPipeline::Internal {
 		// Enable the 'a_texCoord' attribute.
 		glEnableVertexAttribArray(attributeLocationTexCoord);
 
+		//Enable Transparent
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
 		for (auto gameObject : hierarchy->GetHierarchy()) {
 			RenderGameObject(assetManager, gameObject, cameraMatrix);
 		}
@@ -139,19 +144,23 @@ struct OpenGLPipeline::Internal {
 
 		auto transform = gameObject->GetTransform();
 		auto meshComponent = gameObject->GetComponent<std::shared_ptr<RPG::MeshComponent>, RPG::MeshComponent>(std::make_unique<RPG::MeshComponent>(RPG::Assets::StaticMesh::Crate, RPG::Assets::Texture::Crate));
+		std::shared_ptr<RPG::SpriteComponent> spriteComponent;
 		if (meshComponent == nullptr) {
-			return;
+			spriteComponent = gameObject->GetComponent<std::shared_ptr<RPG::SpriteComponent>, RPG::SpriteComponent>(std::make_unique<RPG::SpriteComponent>(RPG::Assets::Texture::Crate));
+			if (spriteComponent == nullptr)  {
+				return;
+			}
 		}
 
 		//Render Mesh
-		const RPG::OpenGLMesh& mesh = assetManager.GetStaticMesh(meshComponent->GetMesh());
+		const RPG::OpenGLMesh& mesh = assetManager.GetStaticMesh((meshComponent != nullptr) ? meshComponent->GetMesh() : spriteComponent->GetMesh());
 
 		// Populate the 'u_mvp' uniform in the shader program.
 		//TODO: Get reference to the current rendering camera and its CameraMatrix to do the final multiplication
 		glUniformMatrix4fv(uniformLocationMVP, 1, GL_FALSE, &(cameraMatrix * transform->GetTransformMatrix())[0][0]);
 
 		// Apply the texture we want to paint the mesh with.
-		assetManager.GetTexture(meshComponent->GetTexture()).Bind();
+		assetManager.GetTexture((meshComponent != nullptr) ? meshComponent->GetTexture() : spriteComponent->GetTexture()).Bind();
 
 		// Bind the vertex and index buffers.
 		glBindBuffer(GL_ARRAY_BUFFER, mesh.GetVertexBufferId());
