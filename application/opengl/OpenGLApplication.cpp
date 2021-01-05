@@ -68,7 +68,7 @@ namespace {
 		return scene;
 	}
 
-	#ifndef __EMSCRIPTEN__
+	#if ! defined(__EMSCRIPTEN__) && ! defined(__APPLE__) && ! defined(__ANDROID__)
 		void ResizeFrameBuffer(std::shared_ptr<RPG::FrameBuffer> frameBuffer, glm::vec2 size) {
 			//Resize
 			//Resize Texture
