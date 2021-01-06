@@ -7,6 +7,7 @@
 #include "../../core/Assets.hpp"
 #include "../../core/Vertex.hpp"
 #include "../../core/components/MeshComponent.hpp"
+#include "../../core/components/SpriteComponent.hpp"
 #include "../../core/Log.hpp"
 #include "VulkanMesh.hpp"
 #include "VulkanTexture.hpp"
@@ -372,12 +373,16 @@ struct VulkanPipeline::Internal {
 
 		auto t = gameObject->GetTransform();
 		auto meshComponent = gameObject->GetComponent<std::shared_ptr<RPG::MeshComponent>, RPG::MeshComponent>(std::make_unique<RPG::MeshComponent>(RPG::Assets::StaticMesh::Crate, RPG::Assets::Texture::Crate));
+		std::shared_ptr<RPG::SpriteComponent> spriteComponent;
 		if (meshComponent == nullptr) {
-			return;
+			spriteComponent = gameObject->GetComponent<std::shared_ptr<RPG::SpriteComponent>, RPG::SpriteComponent>(std::make_unique<RPG::SpriteComponent>(RPG::Assets::Texture::Crate));
+			if (spriteComponent == nullptr)  {
+				return;
+			}
 		}
 
 		//Vulkan Rendering
-		const RPG::VulkanMesh& mesh{ assetManager.GetStaticMesh(meshComponent->GetMesh()) };
+		const RPG::VulkanMesh& mesh{assetManager.GetStaticMesh((meshComponent != nullptr) ? meshComponent->GetMesh() : spriteComponent->GetMesh())};
 		const glm::mat4& transform{cameraMatrix *  t->GetTransformMatrix()};
 
 		commandBuffer.pushConstants(pipelineLayout.get(),
@@ -393,7 +398,7 @@ struct VulkanPipeline::Internal {
 
 		commandBuffer.bindIndexBuffer(mesh.GetIndexBuffer(), 0, vk::IndexType::eUint32);
 
-		const RPG::VulkanTexture& texture{ assetManager.GetTexture(meshComponent->GetTexture()) };
+		const RPG::VulkanTexture& texture{assetManager.GetTexture((meshComponent != nullptr) ? meshComponent->GetTexture() : spriteComponent->GetTexture())};
 
 		const vk::DescriptorSet& textureSamplerDescriptorSet{
 				GetTextureSamplerDescriptorSet(device, texture) };
