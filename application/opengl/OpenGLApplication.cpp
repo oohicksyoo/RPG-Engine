@@ -6,7 +6,6 @@
 #include "../../core/GraphicsWrapper.hpp"
 #include "../../core/Log.hpp"
 #include "../../core/SDLWindow.hpp"
-#include "../../../project/SceneMain.hpp"
 #include "OpenGLAssetManager.hpp"
 #include "OpenGLRenderer.hpp"
 #include <string>
@@ -17,6 +16,8 @@
 	#include "../../../editor/EditorManager.hpp"
 	#include "../../core/FrameBuffer.hpp"
 #endif
+
+#include "../../core/Serializer.hpp"
 
 using RPG::OpenGLApplication;
 
@@ -61,7 +62,7 @@ namespace {
 	}
 
 	std::unique_ptr<RPG::IScene> CreateMainScene(const RPG::SDLWindow& window, RPG::OpenGLAssetManager& assetManager) {
-		std::unique_ptr<RPG::IScene> scene{std::make_unique<RPG::SceneMain>(RPG::SDL::GetWindowSize(window.GetWindow()))};
+		std::unique_ptr<RPG::IScene> scene{RPG::Serializer::LoadScene(RPG::SDL::GetWindowSize(window.GetWindow()))};
 		assetManager.LoadAssetManifest(scene->GetAssetManifest());
 		scene->Prepare();
 

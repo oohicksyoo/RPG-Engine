@@ -5,14 +5,14 @@
 #include "VulkanApplication.hpp"
 #include "../../core/GraphicsWrapper.hpp"
 #include "../../core/SDLWrapper.hpp"
-#include "../../../project/SceneMain.hpp"
+#include "../../core/Serializer.hpp"
 #include "VulkanContext.hpp"
 
 using RPG::VulkanApplication;
 
 namespace {
 	std::unique_ptr<RPG::IScene> CreateMainScene(RPG::VulkanContext& context) {
-		std::unique_ptr<RPG::IScene> scene{std::make_unique<RPG::SceneMain>(context.GetCurrentWindowSize())};
+		std::unique_ptr<RPG::IScene> scene{RPG::Serializer::LoadScene(context.GetCurrentWindowSize())};
 		context.LoadAssetManifest(scene->GetAssetManifest());
 		scene->Prepare();
 

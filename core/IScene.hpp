@@ -10,6 +10,7 @@
 #include "WindowSize.hpp"
 #include "Hierarchy.hpp"
 #include <vector>
+#include <string>
 
 namespace RPG {
 	struct IScene {
@@ -24,5 +25,6 @@ namespace RPG {
 		virtual void RenderToFrameBuffer(RPG::IRenderer& renderer, std::shared_ptr<RPG::FrameBuffer> frameBuffer) = 0;
 		virtual void OnWindowResized(const RPG::WindowSize& size) = 0;
 		virtual std::shared_ptr<RPG::Hierarchy> GetHierarchy() = 0;
+		virtual std::string GetGuid() = 0;
 	};
 }
