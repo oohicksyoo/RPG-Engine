@@ -12,13 +12,13 @@ struct MeshComponent::Internal {
 	std::shared_ptr<RPG::Property> mesh;
 	std::shared_ptr<RPG::Property> texture;
 
-	Internal(RPG::Assets::StaticMesh mesh, RPG::Assets::Texture texture)
-	: guid(RPG::Guid::GenerateGuid()),
+	Internal(RPG::Assets::StaticMesh mesh, RPG::Assets::Texture texture, std::string guid)
+	: guid(guid),
 	  mesh(std::make_unique<RPG::Property>(mesh, "Mesh", "RPG::Assets::StaticMesh")),
 	  texture(std::make_unique<RPG::Property>(texture, "Texture", "RPG::Assets::Texture")) {}
 };
 
-MeshComponent::MeshComponent(RPG::Assets::StaticMesh mesh, RPG::Assets::Texture texture) : internal(MakeInternalPointer<Internal>(mesh, texture)) {}
+MeshComponent::MeshComponent(RPG::Assets::StaticMesh mesh, RPG::Assets::Texture texture, std::string guid) : internal(MakeInternalPointer<Internal>(mesh, texture, guid)) {}
 
 void MeshComponent::Awake() {
 

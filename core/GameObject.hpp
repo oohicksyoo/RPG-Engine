@@ -16,7 +16,7 @@
 namespace RPG {
 	struct GameObject {
 		public:
-			GameObject(std::string name = "GameObject");
+			GameObject(std::string name = "GameObject", std::string guid = RPG::Guid::GenerateGuid());
 			void Awake();
 			void Start();
 			void Update(const float& delta);

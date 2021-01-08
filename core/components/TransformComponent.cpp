@@ -15,14 +15,14 @@ struct TransformComponent::Internal {
 	const glm::mat4 identity;
 	RPG::Action<>::Func<std::shared_ptr<RPG::TransformComponent>> getParentFunc;
 
-	Internal() : guid(RPG::Guid::GenerateGuid()),
+	Internal(std::string guid) : guid(guid),
 			     position(std::make_unique<RPG::Property>(glm::vec3{0, 0, 0}, "Position", "glm::vec3")),
 				 rotation(std::make_unique<RPG::Property>(glm::vec3{0, 0, 0}, "Rotation", "glm::vec3")),
 				 scale(std::make_unique<RPG::Property>(glm::vec3{1, 1, 1}, "Scale", "glm::vec3")),
 				 identity(glm::mat4{1.0f}) {}
 };
 
-TransformComponent::TransformComponent() : internal(MakeInternalPointer<Internal>()) {}
+TransformComponent::TransformComponent(std::string guid) : internal(MakeInternalPointer<Internal>(guid)) {}
 
 void TransformComponent::Awake() {
 

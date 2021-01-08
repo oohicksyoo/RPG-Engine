@@ -12,7 +12,7 @@
 namespace RPG {
 	struct Scene : public IScene {
 		public:
-			Scene(const RPG::WindowSize& frameSize);
+			Scene(const RPG::WindowSize& frameSize, std::string guid = RPG::Guid::GenerateGuid());
 			RPG::AssetManifest GetAssetManifest() override;
 			void Prepare() override;
 			void Awake() override;

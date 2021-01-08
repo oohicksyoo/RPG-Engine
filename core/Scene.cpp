@@ -25,7 +25,7 @@ struct Scene::Internal {
 	const uint8_t* keyboardState;
 	std::shared_ptr<RPG::Hierarchy> hierarchy;
 
-	Internal(const RPG::WindowSize& size) : guid(RPG::Guid::GenerateGuid()),
+	Internal(const RPG::WindowSize& size, std::string guid) : guid(guid),
 											camera(::CreateCamera(size)),
 											keyboardState(SDL_GetKeyboardState(nullptr)),
 											hierarchy(std::make_unique<RPG::Hierarchy>(RPG::Hierarchy())) {}
@@ -58,6 +58,7 @@ struct Scene::Internal {
 		ProcessInput(delta);
 		camera.Configure(glm::vec3{ 0.0f, 0.0f, 2.0f }, glm::vec3{ 0.0f, 0.0f, 1.0f }); //TODO: Replace this with current Camera.Main
 
+
 		for (auto gameObject : hierarchy->GetHierarchy()) {
 			gameObject->Update(delta);
 		}
@@ -80,7 +81,7 @@ struct Scene::Internal {
 };
 
 
-Scene::Scene(const RPG::WindowSize& size) : internal(RPG::MakeInternalPointer<Internal>(size)) {}
+Scene::Scene(const RPG::WindowSize& size, std::string guid) : internal(RPG::MakeInternalPointer<Internal>(size, guid)) {}
 
 RPG::AssetManifest Scene::GetAssetManifest() {
 	return internal->GetAssetManifest();

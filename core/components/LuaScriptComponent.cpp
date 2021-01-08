@@ -15,7 +15,7 @@ struct LuaScriptComponent::Internal {
 	std::shared_ptr<RPG::Property> path;
 	lua_State* L;
 
-	Internal(std::string path)  : guid(RPG::Guid::GenerateGuid()),
+	Internal(std::string path, std::string guid)  : guid(guid),
 								  path(std::make_unique<RPG::Property>(path, "Path", "std::string")),
 								  L(luaL_newstate()) {}
 
@@ -61,7 +61,7 @@ struct LuaScriptComponent::Internal {
 	}
 };
 
-LuaScriptComponent::LuaScriptComponent(std::string path) : internal(MakeInternalPointer<Internal>(path)) {}
+LuaScriptComponent::LuaScriptComponent(std::string path, std::string guid) : internal(MakeInternalPointer<Internal>(path, guid)) {}
 
 void LuaScriptComponent::Awake() {
 	internal->Awake();

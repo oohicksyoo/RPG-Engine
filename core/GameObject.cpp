@@ -19,8 +19,8 @@ struct GameObject::Internal {
 	std::vector<std::shared_ptr<RPG::IComponent>> components;
 	std::shared_ptr<RPG::GameObject> parent;
 
-	Internal(std::string gameObjectName) : name(gameObjectName),
-										   guid(RPG::Guid::GenerateGuid()),
+	Internal(std::string gameObjectName, std::string guid) : name(gameObjectName),
+										   guid(guid),
 										   transform(std::make_unique<RPG::TransformComponent>(RPG::TransformComponent())) {
 		transform->SetGetParent([this]() -> std::shared_ptr<RPG::TransformComponent> {
 			//Do we have parent
@@ -53,7 +53,7 @@ struct GameObject::Internal {
 	}
 };
 
-GameObject::GameObject(std::string name) : internal(RPG::MakeInternalPointer<Internal>(name)) {}
+GameObject::GameObject(std::string name, std::string guid) : internal(RPG::MakeInternalPointer<Internal>(name, guid)) {}
 
 void GameObject::Awake() {
 	for (auto child : internal->children) {

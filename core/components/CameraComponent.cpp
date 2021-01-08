@@ -11,11 +11,11 @@ struct CameraComponent::Internal {
 	std::string guid;
 	std::shared_ptr<RPG::Property> cameraType;
 
-	Internal() : guid(RPG::Guid::GenerateGuid()),
+	Internal(std::string guid) : guid(guid),
 				 cameraType(std::make_unique<RPG::Property>(RPG::CameraType::Perspective, "Camera Type", "RPG::CameraType")) {}
 };
 
-CameraComponent::CameraComponent() : internal(MakeInternalPointer<Internal>()) {}
+CameraComponent::CameraComponent(std::string guid) : internal(MakeInternalPointer<Internal>(guid)) {}
 
 void CameraComponent::Awake() {
 

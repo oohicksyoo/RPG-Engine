@@ -12,7 +12,7 @@ using RPG::VulkanApplication;
 
 namespace {
 	std::unique_ptr<RPG::IScene> CreateMainScene(RPG::VulkanContext& context) {
-		std::unique_ptr<RPG::IScene> scene{RPG::Serializer::LoadScene(context.GetCurrentWindowSize())};
+		std::unique_ptr<RPG::IScene> scene{RPG::Serializer::GetInstance().LoadScene(context.GetCurrentWindowSize(), "assets/scenes/scene.json")};
 		context.LoadAssetManifest(scene->GetAssetManifest());
 		scene->Prepare();
 

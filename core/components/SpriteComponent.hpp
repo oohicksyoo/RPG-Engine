@@ -11,7 +11,7 @@
 namespace RPG {
 	struct SpriteComponent : public IComponent {
 		public:
-			SpriteComponent(RPG::Assets::Texture texture);
+			SpriteComponent(RPG::Assets::Texture texture, std::string guid = RPG::Guid::GenerateGuid());
 			void Awake() override;
 			void Start() override;
 			void Update(const float &delta) override;

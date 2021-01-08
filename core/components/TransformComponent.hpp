@@ -12,7 +12,7 @@
 namespace RPG {
 	struct TransformComponent : public IComponent {
 		public:
-			TransformComponent();
+			TransformComponent(std::string guid = RPG::Guid::GenerateGuid());
 			void Awake() override;
 			void Start() override;
 			void Update(const float &delta) override;

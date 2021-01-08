@@ -15,7 +15,7 @@ namespace RPG {
 
 	struct CameraComponent : public IComponent {
 		public:
-			CameraComponent();
+			CameraComponent(std::string guid = RPG::Guid::GenerateGuid());
 			void Awake() override;
 			void Start() override;
 			void Update(const float &delta) override;

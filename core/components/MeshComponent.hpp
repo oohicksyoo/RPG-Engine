@@ -11,7 +11,7 @@
 namespace RPG {
 	struct MeshComponent : public IComponent {
 		public:
-			MeshComponent(RPG::Assets::StaticMesh mesh, RPG::Assets::Texture texture);
+			MeshComponent(RPG::Assets::StaticMesh mesh, RPG::Assets::Texture texture, std::string guid = RPG::Guid::GenerateGuid());
 			void Awake() override;
 			void Start() override;
 			void Update(const float &delta) override;

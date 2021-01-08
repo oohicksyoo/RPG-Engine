@@ -10,7 +10,7 @@
 namespace RPG {
 	struct LuaScriptComponent : public IComponent {
 		public:
-			LuaScriptComponent(std::string path);
+			LuaScriptComponent(std::string path, std::string guid = RPG::Guid::GenerateGuid());
 			void Awake() override;
 			void Start() override;
 			void Update(const float &delta) override;

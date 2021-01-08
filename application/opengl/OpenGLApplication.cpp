@@ -62,7 +62,7 @@ namespace {
 	}
 
 	std::unique_ptr<RPG::IScene> CreateMainScene(const RPG::SDLWindow& window, RPG::OpenGLAssetManager& assetManager) {
-		std::unique_ptr<RPG::IScene> scene{RPG::Serializer::LoadScene(RPG::SDL::GetWindowSize(window.GetWindow()))};
+		std::unique_ptr<RPG::IScene> scene{RPG::Serializer::GetInstance().LoadScene(RPG::SDL::GetWindowSize(window.GetWindow()), "assets/scenes/scene.json")};
 		assetManager.LoadAssetManifest(scene->GetAssetManifest());
 		scene->Prepare();
 
@@ -221,6 +221,7 @@ struct OpenGLApplication::Internal {
 	RPG::IScene& GetScene() {
 		if (!scene) {
 			scene = ::CreateMainScene(window, *assetManager);
+			//RPG::Serializer::GetInstance().SaveScene(*scene, "assets/scenes/scene.json");
 		}
 		return *scene;
 	}

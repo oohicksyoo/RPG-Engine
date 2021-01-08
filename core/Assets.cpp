@@ -21,6 +21,13 @@ std::string RPG::Assets::LoadTextFile(const std::string& path) {
 	return result;
 }
 
+void RPG::Assets::SaveTextFile(const std::string &content, const std::string &path) {
+	std::ofstream file;
+	file.open(path);
+	file << content << std::endl;
+	file.close();
+}
+
 RPG::Mesh RPG::Assets::LoadOBJFile(const std::string& path) {
 	std::istringstream sourceStream(RPG::Assets::LoadTextFile(path));
 

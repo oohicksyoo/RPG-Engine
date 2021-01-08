@@ -12,6 +12,7 @@
 #endif
 #include <stdexcept>
 #include <SDL_image.h>
+#include "Serializer.hpp"
 
 using RPG::Engine;
 
@@ -29,6 +30,8 @@ struct Engine::Internal {
 			throw std::runtime_error("[" + logTag + "] Could not initialize SDL2_Image");
 		}
 		RPG::Log(logTag, "SDL2_image initialized successfully with PNG support");
+
+		RPG::Serializer::GetInstance().LoadDefaultPropertyTypes();
 
 		ResolveApplication()->StartApplication();
 	}
