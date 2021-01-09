@@ -70,8 +70,8 @@ struct Scene::Internal {
 		renderer.Render(Pipeline::Default, hierarchy, {camera.GetProjectionMatrix() * camera.GetViewMatrix()});
 	}
 
-	void RenderToFrameBuffer(RPG::IRenderer& renderer, std::shared_ptr<RPG::FrameBuffer>frameBuffer) {
-		renderer.RenderToFrameBuffer(Pipeline::Default, hierarchy, frameBuffer, {camera.GetProjectionMatrix() * camera.GetViewMatrix()});
+	void RenderToFrameBuffer(RPG::IRenderer& renderer, std::shared_ptr<RPG::FrameBuffer>frameBuffer, glm::vec3 clearColor) {
+		renderer.RenderToFrameBuffer(Pipeline::Default, hierarchy, frameBuffer, {camera.GetProjectionMatrix() * camera.GetViewMatrix()}, clearColor);
 	}
 
 	void OnWindowResized(const RPG::WindowSize& size) {
@@ -109,8 +109,8 @@ void Scene::Render(RPG::IRenderer& renderer) {
 	internal->Render(renderer);
 }
 
-void Scene::RenderToFrameBuffer(RPG::IRenderer &renderer, std::shared_ptr<RPG::FrameBuffer> frameBuffer) {
-	internal->RenderToFrameBuffer(renderer, frameBuffer);
+void Scene::RenderToFrameBuffer(RPG::IRenderer &renderer, std::shared_ptr<RPG::FrameBuffer> frameBuffer, glm::vec3 clearColor) {
+	internal->RenderToFrameBuffer(renderer, frameBuffer, clearColor);
 }
 
 void Scene::OnWindowResized(const RPG::WindowSize& size) {

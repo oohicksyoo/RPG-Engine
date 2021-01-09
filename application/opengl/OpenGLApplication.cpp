@@ -126,6 +126,7 @@ struct OpenGLApplication::Internal {
 		bool hasRanPreviewFrame = false;
 		RPG::EditorManager editorManager;
 		std::shared_ptr<RPG::FrameBuffer> framebuffer;
+		std::shared_ptr<RPG::FrameBuffer> gameFramebuffer;
 	#endif
 
 	#ifdef RPG_EDITOR
@@ -134,7 +135,8 @@ struct OpenGLApplication::Internal {
 					 assetManager(::CreateAssetManager()),
 					 renderer(::CreateRenderer(assetManager)),
 					 editorManager(window, context),
-					 framebuffer(::CreateFrameBuffer(glm::vec2{1280, 720})) {}
+					 framebuffer(::CreateFrameBuffer(glm::vec2{1280, 720})),
+					 gameFramebuffer(::CreateFrameBuffer(glm::vec2{1280, 720})) {}
 	#else
 		Internal() : window(RPG::SDLWindow(SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI)),
 					 context(::CreateContext(window.GetWindow())),
@@ -146,7 +148,8 @@ struct OpenGLApplication::Internal {
 		SDL_GL_MakeCurrent(window.GetWindow(), context);
 
 		#ifdef RPG_EDITOR
-			GetScene()->RenderToFrameBuffer(renderer, framebuffer);
+			GetScene()->RenderToFrameBuffer(renderer, framebuffer, {0.3f, 0.3f, 0.3f});
+			GetScene()->RenderToFrameBuffer(renderer, gameFramebuffer, {0.0f, 0.0f, 0.0f});
 		#endif
 
 		#ifndef RPG_EDITOR
@@ -163,7 +166,7 @@ struct OpenGLApplication::Internal {
 		#endif
 
 		#ifdef RPG_EDITOR
-			editorManager.BuildGUI(framebuffer, GetScene()->GetHierarchy());
+			editorManager.BuildGUI(framebuffer, gameFramebuffer, GetScene()->GetHierarchy());
 			editorManager.Render();
 		#endif
 

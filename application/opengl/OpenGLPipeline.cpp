@@ -124,9 +124,9 @@ struct OpenGLPipeline::Internal {
 		glDisableVertexAttribArray(attributeLocationTexCoord);
 	}
 
-	void RenderToFrameBuffer(const RPG::OpenGLAssetManager& assetManager, const std::shared_ptr<RPG::Hierarchy> hierarchy, const std::shared_ptr<RPG::FrameBuffer> frameBuffer, const glm::mat4 cameraMatrix) const {
+	void RenderToFrameBuffer(const RPG::OpenGLAssetManager& assetManager, const std::shared_ptr<RPG::Hierarchy> hierarchy, const std::shared_ptr<RPG::FrameBuffer> frameBuffer, const glm::mat4 cameraMatrix, const glm::vec3 clearColor) const {
 		glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer->GetRenderTextureID());
-		glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+		glClearColor(clearColor.x, clearColor.y, clearColor.z, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // we're not using the stencil buffer now
 		glEnable(GL_DEPTH_TEST);
 
@@ -214,8 +214,9 @@ void OpenGLPipeline::Render(const RPG::OpenGLAssetManager& assetManager, const s
 void OpenGLPipeline::RenderToFrameBuffer(const RPG::OpenGLAssetManager &assetManager,
 										 const std::shared_ptr<RPG::Hierarchy> hierarchy,
 										 const std::shared_ptr<RPG::FrameBuffer> frameBuffer,
-										 const glm::mat4 cameraMatrix) const {
-	internal->RenderToFrameBuffer(assetManager, hierarchy, frameBuffer, cameraMatrix);
+										 const glm::mat4 cameraMatrix,
+										 const glm::vec3 clearColor) const {
+	internal->RenderToFrameBuffer(assetManager, hierarchy, frameBuffer, cameraMatrix, clearColor);
 }
 
 void OpenGLPipeline::DeleteFrameBuffer(const std::shared_ptr<RPG::FrameBuffer> framebuffer) const {

@@ -19,7 +19,7 @@ namespace RPG {
 			void Start() override;
 			void Update(const float& delta) override;
 			void Render(RPG::IRenderer& renderer) override;
-			void RenderToFrameBuffer(RPG::IRenderer& renderer, std::shared_ptr<RPG::FrameBuffer> frameBuffer) override;
+			void RenderToFrameBuffer(RPG::IRenderer& renderer, std::shared_ptr<RPG::FrameBuffer> frameBuffer, glm::vec3 clearColor) override;
 			void OnWindowResized(const RPG::WindowSize& size) override;
 			std::shared_ptr<RPG::Hierarchy> GetHierarchy() override;
 			std::string GetGuid() override;
