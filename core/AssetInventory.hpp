@@ -8,7 +8,8 @@
 
 namespace RPG::Assets {
 	enum class Pipeline {
-		Default
+		Default,
+		SceneLines
 	};
 
 	enum class StaticMesh {

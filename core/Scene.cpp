@@ -34,7 +34,7 @@ struct Scene::Internal {
 
 	RPG::AssetManifest GetAssetManifest() {
 		return RPG::AssetManifest{
-				{Pipeline::Default},
+				{{Pipeline::Default, Pipeline::SceneLines}},
 				{{StaticMesh::Quad, StaticMesh::Crate}},
 				{{Texture::Crate, Texture::Sprite}}
 		};
@@ -58,7 +58,7 @@ struct Scene::Internal {
 
 	void Update(const float& delta) {
 		ProcessInput(delta);
-		camera.Configure(glm::vec3{ 0.0f, 0.0f, 2.0f }, glm::vec3{ 0.0f, 0.0f, 1.0f }); //TODO: Replace this with current Camera.Main
+		camera.Configure(glm::vec3{ 0.0f, 6.0f, 10.0f }, glm::vec3{ 0.0f, 0.0f, 1.0f }); //TODO: Replace this with current Camera.Main
 
 
 		for (auto gameObject : hierarchy->GetHierarchy()) {
@@ -72,6 +72,10 @@ struct Scene::Internal {
 
 	void RenderToFrameBuffer(RPG::IRenderer& renderer, std::shared_ptr<RPG::FrameBuffer>frameBuffer, glm::vec3 clearColor) {
 		renderer.RenderToFrameBuffer(Pipeline::Default, hierarchy, frameBuffer, {camera.GetProjectionMatrix() * camera.GetViewMatrix()}, clearColor);
+	}
+
+	void RenderLinesToFrameBuffer(RPG::IRenderer& renderer, std::shared_ptr<RPG::FrameBuffer> frameBuffer) {
+		renderer.RenderLinesToFrameBuffer(Pipeline::SceneLines, frameBuffer, {camera.GetProjectionMatrix() * camera.GetViewMatrix()});
 	}
 
 	void OnWindowResized(const RPG::WindowSize& size) {
@@ -111,6 +115,10 @@ void Scene::Render(RPG::IRenderer& renderer) {
 
 void Scene::RenderToFrameBuffer(RPG::IRenderer &renderer, std::shared_ptr<RPG::FrameBuffer> frameBuffer, glm::vec3 clearColor) {
 	internal->RenderToFrameBuffer(renderer, frameBuffer, clearColor);
+}
+
+void Scene::RenderLinesToFrameBuffer(RPG::IRenderer& renderer, std::shared_ptr<RPG::FrameBuffer> frameBuffer) {
+	internal->RenderLinesToFrameBuffer(renderer, frameBuffer);
 }
 
 void Scene::OnWindowResized(const RPG::WindowSize& size) {

@@ -17,6 +17,7 @@ using RPG::OpenGLPipeline;
 namespace {
 	GLuint CompileShader(const GLenum& shaderType, const std::string& shaderSource) {
 		const std::string logTag{"RPG::OpenGLPipeline::CompileShader"};
+		RPG::Log(logTag, "Compiling pipeline");
 		GLuint shaderId{glCreateShader(shaderType)};
 
 		const char* shaderData{shaderSource.c_str()};
@@ -44,7 +45,11 @@ namespace {
 		RPG::Log(logTag, "Creating pipeline for '" + shaderName + "'");
 
 		const std::string vertexShaderCode{RPG::Assets::LoadTextFile("assets/shaders/opengl/" + shaderName + ".vert")};
+		RPG::Log(logTag, "Getting vertex shader for pipeline '" + shaderName + "' " + vertexShaderCode);
+
 		const std::string fragmentShaderCode{RPG::Assets::LoadTextFile("assets/shaders/opengl/" + shaderName + ".frag")};
+		RPG::Log(logTag, "Getting fragment shader for pipeline '" + shaderName + "' " + fragmentShaderCode);
+
 
 		#ifdef USING_GLES
 			std::string vertexShaderSource{"#version 100\n" + vertexShaderCode};
@@ -54,6 +59,7 @@ namespace {
 			std::string fragmentShaderSource{"#version 120\n" + fragmentShaderCode};
 		#endif
 
+		RPG::Log(logTag, "Creating shader for pipeline '" + shaderName + "'");
 		GLuint shaderProgramId{glCreateProgram()};
 		GLuint vertexShaderId{::CompileShader(GL_VERTEX_SHADER, vertexShaderSource)};
 		GLuint fragmentShaderId{::CompileShader(GL_FRAGMENT_SHADER, fragmentShaderSource)};
@@ -131,6 +137,60 @@ struct OpenGLPipeline::Internal {
 		glEnable(GL_DEPTH_TEST);
 
 		Render(assetManager, hierarchy, cameraMatrix);
+
+		//Tidy Up
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	}
+
+	void RenderLinesToFrameBuffer(const RPG::OpenGLAssetManager &assetManager, const std::shared_ptr<RPG::FrameBuffer> frameBuffer, const glm::mat4 cameraMatrix) const {
+		glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer->GetRenderTextureID());
+		glEnable(GL_DEPTH_TEST);
+		glLineWidth(3);
+
+		// Instruct OpenGL to starting using our shader program.
+		glUseProgram(shaderProgramId);
+
+		// Enable the 'a_vertexPosition' attribute.
+		glEnableVertexAttribArray(attributeLocationVertexPosition);
+
+		//Render Mesh
+		const RPG::OpenGLMesh& mesh = assetManager.GetSceneLines();
+
+		// Populate the 'u_mvp' uniform in the shader program.
+
+		glUniformMatrix4fv(uniformLocationMVP, 1, GL_FALSE, &(cameraMatrix)[0][0]);
+
+		// Apply the texture we want to paint the mesh with.
+		//assetManager.GetTexture((meshComponent != nullptr) ? meshComponent->GetTexture() : spriteComponent->GetTexture()).Bind();
+
+		// Bind the vertex and index buffers.
+		glBindBuffer(GL_ARRAY_BUFFER, mesh.GetVertexBufferId());
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.GetIndexBufferId());
+
+		// Configure the 'a_vertexPosition' attribute.
+		glVertexAttribPointer(
+				attributeLocationVertexPosition,
+				3,
+				GL_FLOAT,
+				GL_FALSE,
+				stride,
+				reinterpret_cast<const GLvoid*>(offsetPosition)
+		);
+
+		// Configure the 'a_texCoord' attribute.
+		glVertexAttribPointer(attributeLocationTexCoord,
+							  2,
+							  GL_FLOAT,
+							  GL_FALSE,
+							  stride,
+							  reinterpret_cast<const GLvoid*>(offsetTexCoord)
+		);
+
+		// Execute the draw command - with how many indices to iterate.
+		glDrawArrays(GL_LINES, 0, 484);
+
+		// Tidy up.
+		glDisableVertexAttribArray(attributeLocationVertexPosition);
 
 		//Tidy Up
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -217,6 +277,12 @@ void OpenGLPipeline::RenderToFrameBuffer(const RPG::OpenGLAssetManager &assetMan
 										 const glm::mat4 cameraMatrix,
 										 const glm::vec3 clearColor) const {
 	internal->RenderToFrameBuffer(assetManager, hierarchy, frameBuffer, cameraMatrix, clearColor);
+}
+
+void OpenGLPipeline::RenderLinesToFrameBuffer(const RPG::OpenGLAssetManager &assetManager,
+											  const std::shared_ptr<RPG::FrameBuffer> framebuffer,
+											  const glm::mat4 cameraMatrix) const {
+	internal->RenderLinesToFrameBuffer(assetManager, framebuffer, cameraMatrix);
 }
 
 void OpenGLPipeline::DeleteFrameBuffer(const std::shared_ptr<RPG::FrameBuffer> framebuffer) const {

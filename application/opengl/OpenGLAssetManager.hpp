@@ -18,6 +18,7 @@ namespace RPG {
 			const RPG::OpenGLPipeline& GetPipeline(const RPG::Assets::Pipeline& pipeline) const;
 			const RPG::OpenGLMesh& GetStaticMesh(const RPG::Assets::StaticMesh& staticMesh) const;
 			const RPG::OpenGLTexture& GetTexture(const RPG::Assets::Texture& texture) const;
+			const RPG::OpenGLMesh& GetSceneLines() const;
 
 		private:
 			struct Internal;

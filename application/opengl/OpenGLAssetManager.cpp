@@ -4,16 +4,40 @@
 
 #include "OpenGLAssetManager.hpp"
 #include "../../core/Assets.hpp"
+#include "../../core/Log.hpp"
 #include <unordered_map>
 
 using RPG::OpenGLAssetManager;
+
+namespace {
+	RPG::OpenGLMesh CreateSceneGridLines() {
+		std::vector<RPG::Vertex> lines;
+
+		float width = 10;
+		float offset = -(width * 0.5f);
+		for (int x = 0; x <= width; x++) {
+			for (int z = 0; z <= width; z++) {
+				lines.push_back(RPG::Vertex{{x + offset, 0, -offset}, {0, 0}});
+				lines.push_back(RPG::Vertex{{x + offset, 0, offset}, {0, 0}});
+
+				lines.push_back(RPG::Vertex{{-offset, 0, z + offset}, {0, 0}});
+				lines.push_back(RPG::Vertex{{offset, 0, z + offset}, {0, 0}});
+			}
+		}
+
+		RPG::Log("Grid", "Lines: " + std::to_string(lines.size()));
+
+		return RPG::OpenGLMesh(RPG::Mesh(lines, {}));
+	}
+}
 
 struct OpenGLAssetManager::Internal {
 	std::unordered_map<RPG::Assets::Pipeline, RPG::OpenGLPipeline> pipelineCache;
 	std::unordered_map<RPG::Assets::StaticMesh, RPG::OpenGLMesh> staticMeshCache;
 	std::unordered_map<RPG::Assets::Texture, RPG::OpenGLTexture> textureCache;
+	RPG::OpenGLMesh lines;
 
-	Internal() {}
+	Internal() : lines(::CreateSceneGridLines()) {}
 
 	void LoadPipelines(const std::vector<RPG::Assets::Pipeline>& pipelines) {
 		for (const auto& pipeline : pipelines) 	{
@@ -62,4 +86,8 @@ const RPG::OpenGLMesh& OpenGLAssetManager::GetStaticMesh(const RPG::Assets::Stat
 
 const RPG::OpenGLTexture& OpenGLAssetManager::GetTexture(const RPG::Assets::Texture& texture) const {
 	return internal->textureCache.at(texture);
+}
+
+const RPG::OpenGLMesh& OpenGLAssetManager::GetSceneLines() const {
+	return internal->lines;
 }

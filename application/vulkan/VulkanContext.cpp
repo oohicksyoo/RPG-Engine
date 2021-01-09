@@ -164,6 +164,12 @@ void VulkanContext::RenderToFrameBuffer(const RPG::Assets::Pipeline &pipeline,
 	//TODO: Vulkan Framebuffer setup
 }
 
+void VulkanContext::RenderLinesToFrameBuffer(const RPG::Assets::Pipeline &pipeline,
+											 const std::shared_ptr<RPG::FrameBuffer> framebuffer,
+											 const glm::mat4 cameraMatrix) {
+	//TODO: Vulkan render lines to framebuffer
+}
+
 void VulkanContext::DeleteFrameBuffer(const RPG::Assets::Pipeline &pipeline, const std::shared_ptr<RPG::FrameBuffer> framebuffer) {
 	//TODO: Clean up framebuffer
 }

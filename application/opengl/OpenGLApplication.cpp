@@ -16,6 +16,7 @@
 #ifdef RPG_EDITOR
 	#include "../../../editor/EditorManager.hpp"
 	#include "../../core/FrameBuffer.hpp"
+	#include "../../core/Vertex.hpp"
 #endif
 
 #include "../../core/Serializer.hpp"
@@ -149,6 +150,7 @@ struct OpenGLApplication::Internal {
 
 		#ifdef RPG_EDITOR
 			GetScene()->RenderToFrameBuffer(renderer, framebuffer, {0.3f, 0.3f, 0.3f});
+			GetScene()->RenderLinesToFrameBuffer(renderer, framebuffer);
 			GetScene()->RenderToFrameBuffer(renderer, gameFramebuffer, {0.0f, 0.0f, 0.0f});
 		#endif
 

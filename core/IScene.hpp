@@ -23,6 +23,7 @@ namespace RPG {
 		virtual void Update(const float& delta) = 0;
 		virtual void Render(RPG::IRenderer& renderer) = 0;
 		virtual void RenderToFrameBuffer(RPG::IRenderer& renderer, std::shared_ptr<RPG::FrameBuffer> frameBuffer, glm::vec3 clearColor) = 0;
+		virtual void RenderLinesToFrameBuffer(RPG::IRenderer& renderer, std::shared_ptr<RPG::FrameBuffer> frameBuffer) = 0;
 		virtual void OnWindowResized(const RPG::WindowSize& size) = 0;
 		virtual std::shared_ptr<RPG::Hierarchy> GetHierarchy() = 0;
 		virtual std::string GetGuid() = 0;
