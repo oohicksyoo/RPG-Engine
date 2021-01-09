@@ -214,6 +214,7 @@ struct OpenGLApplication::Internal {
 		if (!scene->HasLoaded()) {
 			assetManager->LoadAssetManifest(scene->GetAssetManifest());
 			scene->Prepare();
+			hasRanPreviewFrame = false;
 		}
 		return scene;
 	}
