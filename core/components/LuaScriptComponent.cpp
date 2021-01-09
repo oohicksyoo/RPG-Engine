@@ -14,6 +14,7 @@ struct LuaScriptComponent::Internal {
 	std::string guid;
 	std::shared_ptr<RPG::Property> path;
 	lua_State* L;
+	bool isRunnable = false;
 
 	Internal(std::string path, std::string guid)  : guid(guid),
 								  path(std::make_unique<RPG::Property>(path, "Path", "std::string")),
@@ -40,6 +41,8 @@ struct LuaScriptComponent::Internal {
 		if (result != LUA_OK) {
 			RPG::Log("Lua", lua_tostring(L, -1));
 		}
+
+		isRunnable = true;
 	}
 
 	void Start() {
@@ -49,6 +52,8 @@ struct LuaScriptComponent::Internal {
 	}
 
 	void Update(const float &delta) {
+		if (!isRunnable) return;
+
 		lua_getglobal(L, "Class");
 		lua_getfield(L, -1, "OnUpdate");
 		lua_pushnumber(L, delta);
