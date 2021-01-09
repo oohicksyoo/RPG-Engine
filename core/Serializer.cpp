@@ -20,8 +20,8 @@ using RPG::Assets::Texture;
 using json = nlohmann::json;
 
 //Saving
-void Serializer::SaveScene(RPG::IScene& scene, const std::string& path) {
-	auto hierarchy = scene.GetHierarchy();
+void Serializer::SaveScene(std::shared_ptr<RPG::IScene> scene, const std::string& path) {
+	auto hierarchy = scene->GetHierarchy();
 	json j;
 	auto js = json::object();
 
@@ -30,7 +30,7 @@ void Serializer::SaveScene(RPG::IScene& scene, const std::string& path) {
 	js.push_back({"Build", 0});
 	j["Information"] = {
 		{"Name", "Scene"},
-		{"Guid", scene.GetGuid()},
+		{"Guid", scene->GetGuid()},
 		{"Version", js}
 	};
 
@@ -102,23 +102,6 @@ std::unique_ptr<RPG::IScene> Serializer::LoadScene(const RPG::WindowSize& frameS
 
 	std::unique_ptr<RPG::IScene> scene = std::make_unique<RPG::Scene>(RPG::Scene(frameSize, j["Information"]["Guid"].get<std::string>()));
 	auto hierarchy = scene->GetHierarchy();
-
-	//Setup sample hierarchy for the engine
-	/*{
-		std::shared_ptr<RPG::GameObject> crateGameObject = std::make_unique<RPG::GameObject>(RPG::GameObject("Crate"));
-		crateGameObject->GetTransform()->SetPosition({0.0f, 0.0f, -5.0f});
-		crateGameObject->AddComponent(std::make_unique<RPG::MeshComponent>(RPG::MeshComponent(RPG::Assets::StaticMesh::Crate, RPG::Assets::Texture::Crate)));
-		hierarchy->Add(crateGameObject);
-
-		std::shared_ptr<RPG::GameObject> spriteGameObject = std::make_unique<RPG::GameObject>(RPG::GameObject("Sprite"));
-		spriteGameObject->GetTransform()->SetPosition({0.0f, 0.0f, 0.0f});
-		spriteGameObject->GetTransform()->SetRotation({90, 0, 0});
-		spriteGameObject->AddComponent(std::make_unique<RPG::SpriteComponent>(RPG::SpriteComponent(RPG::Assets::Texture::Sprite)));
-		hierarchy->Add(spriteGameObject);
-
-		std::shared_ptr<RPG::GameObject> emptyGameObject = std::make_unique<RPG::GameObject>(RPG::GameObject("Empty"));
-		hierarchy->Add(emptyGameObject, spriteGameObject);
-	}*/
 
 	for (auto [key, gameObject] : j["Hierarchy"].items()) {
 		hierarchy->Add(LoadGameObject(gameObject));

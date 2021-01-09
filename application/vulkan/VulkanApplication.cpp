@@ -5,20 +5,10 @@
 #include "VulkanApplication.hpp"
 #include "../../core/GraphicsWrapper.hpp"
 #include "../../core/SDLWrapper.hpp"
-#include "../../core/Serializer.hpp"
+#include "../../core/SceneManager.hpp"
 #include "VulkanContext.hpp"
 
 using RPG::VulkanApplication;
-
-namespace {
-	std::unique_ptr<RPG::IScene> CreateMainScene(RPG::VulkanContext& context) {
-		std::unique_ptr<RPG::IScene> scene{RPG::Serializer::GetInstance().LoadScene(context.GetCurrentWindowSize(), "assets/scenes/scene.json")};
-		context.LoadAssetManifest(scene->GetAssetManifest());
-		scene->Prepare();
-
-		return scene;
-	}
-}
 
 struct VulkanApplication::Internal {
 	RPG::VulkanContext context;
@@ -26,27 +16,28 @@ struct VulkanApplication::Internal {
 
 	Internal() : context(RPG::VulkanContext()) {}
 
-	RPG::IScene& GetScene() {
-		if (!scene) {
-			scene = ::CreateMainScene(context);
+	std::shared_ptr<RPG::IScene> GetScene() {
+		auto scene = RPG::SceneManager::GetInstance().GetCurrentScene();
+		if (!scene->HasLoaded()) {
+			context.LoadAssetManifest(scene->GetAssetManifest());
+			scene->Prepare();
 		}
-
-		return *scene;
+		return scene;
 	}
 
 	void Update(const float& delta) {
-		GetScene().Update(delta);
+		GetScene()->Update(delta);
 	}
 
 	void Render() {
 		if (context.RenderBegin()) {
-			GetScene().Render(context);
+			GetScene()->Render(context);
 			context.RenderEnd();
 		}
 	}
 
 	void OnWindowResized() {
-		GetScene().OnWindowResized(context.GetCurrentWindowSize());
+		GetScene()->OnWindowResized(context.GetCurrentWindowSize());
 	}
 };
 

@@ -26,5 +26,6 @@ namespace RPG {
 		virtual void OnWindowResized(const RPG::WindowSize& size) = 0;
 		virtual std::shared_ptr<RPG::Hierarchy> GetHierarchy() = 0;
 		virtual std::string GetGuid() = 0;
+		virtual bool HasLoaded() = 0;
 	};
 }

@@ -23,6 +23,7 @@ namespace RPG {
 			void OnWindowResized(const RPG::WindowSize& size) override;
 			std::shared_ptr<RPG::Hierarchy> GetHierarchy() override;
 			std::string GetGuid() override;
+			bool HasLoaded() override;
 
 		private:
 			struct Internal;

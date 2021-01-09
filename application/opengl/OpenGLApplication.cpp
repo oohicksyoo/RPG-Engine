@@ -8,6 +8,7 @@
 #include "../../core/SDLWindow.hpp"
 #include "OpenGLAssetManager.hpp"
 #include "OpenGLRenderer.hpp"
+#include "../../core/SceneManager.hpp"
 #include <string>
 
 #include "../ApplicationStats.hpp"
@@ -59,14 +60,6 @@ namespace {
 
 	RPG::OpenGLRenderer CreateRenderer(std::shared_ptr<RPG::OpenGLAssetManager> assetManager) {
 		return RPG::OpenGLRenderer(assetManager);
-	}
-
-	std::unique_ptr<RPG::IScene> CreateMainScene(const RPG::SDLWindow& window, RPG::OpenGLAssetManager& assetManager) {
-		std::unique_ptr<RPG::IScene> scene{RPG::Serializer::GetInstance().LoadScene(RPG::SDL::GetWindowSize(window.GetWindow()), "assets/scenes/scene.json")};
-		assetManager.LoadAssetManifest(scene->GetAssetManifest());
-		scene->Prepare();
-
-		return scene;
 	}
 
 	#if ! defined(USING_GLES)
@@ -129,7 +122,6 @@ struct OpenGLApplication::Internal {
 	SDL_GLContext context;
 	const std::shared_ptr<RPG::OpenGLAssetManager> assetManager;
 	RPG::OpenGLRenderer renderer;
-	std::unique_ptr<RPG::IScene> scene;
 	#ifdef RPG_EDITOR
 		bool hasRanPreviewFrame = false;
 		RPG::EditorManager editorManager;
@@ -154,7 +146,7 @@ struct OpenGLApplication::Internal {
 		SDL_GL_MakeCurrent(window.GetWindow(), context);
 
 		#ifdef RPG_EDITOR
-			GetScene().RenderToFrameBuffer(renderer, framebuffer);
+			GetScene()->RenderToFrameBuffer(renderer, framebuffer);
 		#endif
 
 		#ifndef RPG_EDITOR
@@ -167,12 +159,11 @@ struct OpenGLApplication::Internal {
 		#endif
 
 		#ifndef RPG_EDITOR
-			GetScene().Render(renderer);
+			GetScene()->Render(renderer);
 		#endif
 
 		#ifdef RPG_EDITOR
-			//RPG::Log("FrameBuffer", "Framebuffer ID: " + std::to_string(framebuffer.GetRenderTextureID()));
-			editorManager.BuildGUI(framebuffer, scene->GetHierarchy());
+			editorManager.BuildGUI(framebuffer, GetScene()->GetHierarchy());
 			editorManager.Render();
 		#endif
 
@@ -184,27 +175,27 @@ struct OpenGLApplication::Internal {
 			if (editorManager.IsGameRunning() || !hasRanPreviewFrame) {
 				if (hasRanPreviewFrame && !hasRanFirstFrame) {
 					hasRanFirstFrame = true;
-					GetScene().Awake();
-					GetScene().Start();
+					GetScene()->Awake();
+					GetScene()->Start();
 				}
 				hasRanPreviewFrame = true;
-				GetScene().Update(delta);
+				GetScene()->Update(delta);
 			} else {
 				hasRanFirstFrame = false;
 			}
 		#else
 			if (!hasRanFirstFrame) {
 				hasRanFirstFrame = true;
-				GetScene().Awake();
-				GetScene().Start();
+				GetScene()->Awake();
+				GetScene()->Start();
 			}
-			GetScene().Update(delta);
+			GetScene()->Update(delta);
 		#endif
 
 	}
 
 	void OnWindowResized() {
-		GetScene().OnWindowResized(RPG::SDL::GetWindowSize(window.GetWindow()));
+		GetScene()->OnWindowResized(RPG::SDL::GetWindowSize(window.GetWindow()));
 		::UpdateViewport(window.GetWindow());
 
 		#ifdef RPG_EDITOR
@@ -218,12 +209,13 @@ struct OpenGLApplication::Internal {
 		#endif
 	}
 
-	RPG::IScene& GetScene() {
-		if (!scene) {
-			scene = ::CreateMainScene(window, *assetManager);
-			//RPG::Serializer::GetInstance().SaveScene(*scene, "assets/scenes/scene.json");
+	std::shared_ptr<RPG::IScene> GetScene() {
+		auto scene = RPG::SceneManager::GetInstance().GetCurrentScene();
+		if (!scene->HasLoaded()) {
+			assetManager->LoadAssetManifest(scene->GetAssetManifest());
+			scene->Prepare();
 		}
-		return *scene;
+		return scene;
 	}
 
 	~Internal() {

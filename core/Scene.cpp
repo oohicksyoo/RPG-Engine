@@ -21,11 +21,13 @@ namespace {
 
 struct Scene::Internal {
 	std::string guid;
+	bool hasLoaded;
 	RPG::PerspectiveCamera camera;
 	const uint8_t* keyboardState;
 	std::shared_ptr<RPG::Hierarchy> hierarchy;
 
 	Internal(const RPG::WindowSize& size, std::string guid) : guid(guid),
+											hasLoaded(false),
 											camera(::CreateCamera(size)),
 											keyboardState(SDL_GetKeyboardState(nullptr)),
 											hierarchy(std::make_unique<RPG::Hierarchy>(RPG::Hierarchy())) {}
@@ -39,7 +41,7 @@ struct Scene::Internal {
 	}
 
 	void Prepare() {
-
+		hasLoaded = true;
 	}
 
 	void Awake() {
@@ -121,4 +123,8 @@ std::shared_ptr<RPG::Hierarchy> Scene::GetHierarchy() {
 
 std::string Scene::GetGuid() {
 	return internal->guid;
+}
+
+bool Scene::HasLoaded() {
+	return internal->hasLoaded;
 }

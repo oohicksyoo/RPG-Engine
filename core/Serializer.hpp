@@ -16,7 +16,7 @@ namespace RPG {
 		friend struct Singleton<Serializer>;
 
 		public:
-			void SaveScene(RPG::IScene& scene, const std::string& path);
+			void SaveScene(std::shared_ptr<RPG::IScene> scene, const std::string& path);
 			std::unique_ptr<RPG::IScene> LoadScene(const RPG::WindowSize& frameSize, const std::string& path);
 
 			//Inspector Properties

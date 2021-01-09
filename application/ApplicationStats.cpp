@@ -15,7 +15,7 @@ ApplicationStats::~ApplicationStats() {
 }
 
 glm::vec2 ApplicationStats::GetWindowSize() {
-	return windowSize;
+	return (windowSize.x != 0 && windowSize.y != 0) ? windowSize : GetRenderingSize();
 }
 
 void ApplicationStats::SetWindowSize(glm::vec2 size) {
