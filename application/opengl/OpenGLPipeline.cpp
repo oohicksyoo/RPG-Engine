@@ -45,10 +45,7 @@ namespace {
 		RPG::Log(logTag, "Creating pipeline for '" + shaderName + "'");
 
 		const std::string vertexShaderCode{RPG::Assets::LoadTextFile("assets/shaders/opengl/" + shaderName + ".vert")};
-		RPG::Log(logTag, "Getting vertex shader for pipeline '" + shaderName + "' " + vertexShaderCode);
-
 		const std::string fragmentShaderCode{RPG::Assets::LoadTextFile("assets/shaders/opengl/" + shaderName + ".frag")};
-		RPG::Log(logTag, "Getting fragment shader for pipeline '" + shaderName + "' " + fragmentShaderCode);
 
 
 		#ifdef USING_GLES
