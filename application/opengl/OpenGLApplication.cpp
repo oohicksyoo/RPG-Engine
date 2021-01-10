@@ -205,6 +205,7 @@ struct OpenGLApplication::Internal {
 
 		#ifdef RPG_EDITOR
 			::ResizeFrameBuffer(framebuffer, RPG::ApplicationStats::GetInstance().GetWindowSize());
+			hasRanPreviewFrame = false;
 		#endif
 	}
 
