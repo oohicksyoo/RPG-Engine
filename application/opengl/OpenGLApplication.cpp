@@ -150,6 +150,7 @@ struct OpenGLApplication::Internal {
 
 		#ifdef RPG_EDITOR
 			GetScene()->RenderToFrameBuffer(renderer, framebuffer, {0.3f, 0.3f, 0.3f}, false);
+			GetScene()->RenderLinesToFrameBuffer(renderer, framebuffer);
 			GetScene()->RenderToFrameBuffer(renderer, gameFramebuffer, {0.0f, 0.0f, 0.0f});
 		#endif
 
@@ -186,6 +187,7 @@ struct OpenGLApplication::Internal {
 				GetScene()->Update(delta);
 			} else {
 				hasRanFirstFrame = false;
+				GetScene()->UpdateEditorScene(delta);
 			}
 		#else
 			if (!hasRanFirstFrame) {

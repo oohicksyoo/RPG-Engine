@@ -184,7 +184,7 @@ struct OpenGLPipeline::Internal {
 		);
 
 		// Execute the draw command - with how many indices to iterate.
-		glDrawArrays(GL_LINES, 0, 484);
+		glDrawArrays(GL_LINES, 0, 1764);
 
 		// Tidy up.
 		glDisableVertexAttribArray(attributeLocationVertexPosition);

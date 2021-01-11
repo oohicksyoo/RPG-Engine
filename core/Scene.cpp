@@ -68,6 +68,55 @@ struct Scene::Internal {
 		}
 	}
 
+	void UpdateEditorScene(const float& delta) {
+		auto transform = sceneCamera->GetTransform();
+		auto position = transform->GetPosition();
+		auto rotation = transform->GetRotation();
+
+		//Update function
+		//Forwards
+		if (keyboardState[SDL_SCANCODE_E]) {
+			transform->SetPosition(position + glm::vec3{0,0,1} * delta);
+		}
+
+		//Backwards
+		if (keyboardState[SDL_SCANCODE_Q]) {
+			transform->SetPosition(position + glm::vec3{0,0,-1} * delta);
+		}
+
+		//Up
+		if (keyboardState[SDL_SCANCODE_W]) {
+			transform->SetPosition(position + glm::vec3{0,1,0} * delta);
+		}
+
+		//Down
+		if (keyboardState[SDL_SCANCODE_S]) {
+			transform->SetPosition(position + glm::vec3{0,-1,0} * delta);
+		}
+
+		//Left
+		if (keyboardState[SDL_SCANCODE_A]) {
+			transform->SetRotation(rotation + glm::vec3{0,-1,0} * delta);
+		}
+
+		//Right
+		if (keyboardState[SDL_SCANCODE_D]) {
+			transform->SetRotation(rotation + glm::vec3{0,1,0} * delta);
+		}
+
+		if (SDL_GetMouseState(NULL, NULL) & SDL_BUTTON(SDL_BUTTON_LEFT)) {
+			RPG::Log("Input", "Left");
+		}
+
+		if (SDL_GetMouseState(NULL, NULL) & SDL_BUTTON(SDL_BUTTON_MIDDLE)) {
+			RPG::Log("Input", "Middle");
+		}
+
+		if (SDL_GetMouseState(NULL, NULL) & SDL_BUTTON(SDL_BUTTON_RIGHT)) {
+			RPG::Log("Input", "Right");
+		}
+	}
+
 	void Render(RPG::IRenderer& renderer) {
 		renderer.Render(Pipeline::Default, hierarchy, GetSceneCameraMatrix());
 	}
@@ -107,33 +156,7 @@ struct Scene::Internal {
 	}
 
 	void ProcessInput(const float& delta) {
-		const uint8_t* keyboardState;
-		keyboardState(SDL_GetKeyboardState(nullptr));
 
-		//Update function
-		if (keyboardState[SDL_SCANCODE_UP]) {
-			//player.MoveForward(delta);
-		}
-
-		if (keyboardState[SDL_SCANCODE_DOWN]) {
-			//player.MoveBackward(delta);
-		}
-
-		if (keyboardState[SDL_SCANCODE_A]) {
-			//player.MoveUp(delta);
-		}
-
-		if (keyboardState[SDL_SCANCODE_Z]) {
-			//player.MoveDown(delta);
-		}
-
-		if (keyboardState[SDL_SCANCODE_LEFT]) {
-			//player.TurnLeft(delta);
-		}
-
-		if (keyboardState[SDL_SCANCODE_RIGHT]) {
-			//player.TurnRight(delta);
-		}
 	}
 };
 
@@ -158,6 +181,10 @@ void Scene::Start() {
 
 void Scene::Update(const float& delta) {
 	internal->Update(delta);
+}
+
+void Scene::UpdateEditorScene(const float &delta) {
+	internal->UpdateEditorScene(delta);
 }
 
 void Scene::Render(RPG::IRenderer& renderer) {

@@ -13,7 +13,7 @@ namespace {
 	RPG::OpenGLMesh CreateSceneGridLines() {
 		std::vector<RPG::Vertex> lines;
 
-		float width = 10;
+		float width = 20;
 		float offset = -(width * 0.5f);
 		for (int x = 0; x <= width; x++) {
 			for (int z = 0; z <= width; z++) {

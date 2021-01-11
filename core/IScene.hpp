@@ -22,6 +22,7 @@ namespace RPG {
 		virtual void Awake() = 0;
 		virtual void Start() = 0;
 		virtual void Update(const float& delta) = 0;
+		virtual void UpdateEditorScene(const float& delta) = 0;
 		virtual void Render(RPG::IRenderer& renderer) = 0;
 		virtual void RenderToFrameBuffer(RPG::IRenderer& renderer, std::shared_ptr<RPG::FrameBuffer> frameBuffer, glm::vec3 clearColor, bool isGameCamera = true) = 0;
 		virtual void RenderLinesToFrameBuffer(RPG::IRenderer& renderer, std::shared_ptr<RPG::FrameBuffer> frameBuffer) = 0;

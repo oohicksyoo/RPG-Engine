@@ -18,6 +18,7 @@ namespace RPG {
 			void Awake() override;
 			void Start() override;
 			void Update(const float& delta) override;
+			void UpdateEditorScene(const float& delta) override;
 			void Render(RPG::IRenderer& renderer) override;
 			void RenderToFrameBuffer(RPG::IRenderer& renderer, std::shared_ptr<RPG::FrameBuffer> frameBuffer, glm::vec3 clearColor, bool isGameCamera) override;
 			void RenderLinesToFrameBuffer(RPG::IRenderer& renderer, std::shared_ptr<RPG::FrameBuffer> frameBuffer) override;
