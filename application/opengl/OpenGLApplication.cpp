@@ -149,8 +149,7 @@ struct OpenGLApplication::Internal {
 		SDL_GL_MakeCurrent(window.GetWindow(), context);
 
 		#ifdef RPG_EDITOR
-			GetScene()->RenderToFrameBuffer(renderer, framebuffer, {0.3f, 0.3f, 0.3f});
-			GetScene()->RenderLinesToFrameBuffer(renderer, framebuffer);
+			GetScene()->RenderToFrameBuffer(renderer, framebuffer, {0.3f, 0.3f, 0.3f}, false);
 			GetScene()->RenderToFrameBuffer(renderer, gameFramebuffer, {0.0f, 0.0f, 0.0f});
 		#endif
 

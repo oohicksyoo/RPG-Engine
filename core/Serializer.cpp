@@ -8,6 +8,7 @@
 #include "Hierarchy.hpp"
 #include "Assets.hpp"
 #include "Log.hpp"
+#include "../application/ApplicationStats.hpp"
 #include "components/MeshComponent.hpp"
 #include "components/SpriteComponent.hpp"
 #include "components/CameraComponent.hpp"
@@ -292,6 +293,7 @@ void Serializer::LoadDefaultLoadComponentTypes() {
 
 	AddComponentLoad({"CameraComponent", [](nlohmann::json j, std::shared_ptr<RPG::GameObject> go) -> std::shared_ptr<RPG::IComponent> {
 		//TODO: Fix this to camera properties
-		return std::make_unique<RPG::CameraComponent>(j["Guid"].get<std::string>());
+		auto size = RPG::ApplicationStats::GetInstance().GetWindowSize();
+		return std::make_unique<RPG::CameraComponent>(size.x, size.y, j["Guid"].get<std::string>());
 	}});
 }

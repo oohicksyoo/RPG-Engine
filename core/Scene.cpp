@@ -3,10 +3,10 @@
 //
 
 #include "Scene.hpp"
-#include "PerspectiveCamera.hpp"
 #include "SDLWrapper.hpp"
 #include "Log.hpp"
 #include "Guid.hpp"
+#include "components/CameraComponent.hpp"
 
 using RPG::Scene;
 using RPG::Assets::Pipeline;
@@ -14,23 +14,27 @@ using RPG::Assets::StaticMesh;
 using RPG::Assets::Texture;
 
 namespace {
-	RPG::PerspectiveCamera CreateCamera(const RPG::WindowSize& size) {
-		return RPG::PerspectiveCamera(static_cast<float>(size.width), static_cast<float>(size.height));
+	std::shared_ptr<RPG::GameObject> CreateSceneCamera(const RPG::WindowSize& size) {
+		std::shared_ptr<RPG::GameObject> go = std::make_unique<RPG::GameObject>();
+		go->AddComponent(std::make_unique<RPG::CameraComponent>(static_cast<float>(size.width), static_cast<float>(size.height)));
+		return go;
 	}
 }
 
 struct Scene::Internal {
 	std::string guid;
 	bool hasLoaded;
-	RPG::PerspectiveCamera camera;
 	const uint8_t* keyboardState;
 	std::shared_ptr<RPG::Hierarchy> hierarchy;
+	std::shared_ptr<RPG::GameObject> sceneCamera;
+	std::shared_ptr<RPG::GameObject> gameCamera;
 
 	Internal(const RPG::WindowSize& size, std::string guid) : guid(guid),
 											hasLoaded(false),
-											camera(::CreateCamera(size)),
 											keyboardState(SDL_GetKeyboardState(nullptr)),
-											hierarchy(std::make_unique<RPG::Hierarchy>(RPG::Hierarchy())) {}
+											hierarchy(std::make_unique<RPG::Hierarchy>(RPG::Hierarchy())),
+											sceneCamera(::CreateSceneCamera(size)),
+										    gameCamera(nullptr) {}
 
 	RPG::AssetManifest GetAssetManifest() {
 		return RPG::AssetManifest{
@@ -58,8 +62,6 @@ struct Scene::Internal {
 
 	void Update(const float& delta) {
 		ProcessInput(delta);
-		camera.Configure(glm::vec3{ 0.0f, 6.0f, 10.0f }, glm::vec3{ 0.0f, 0.0f, 1.0f }); //TODO: Replace this with current Camera.Main
-
 
 		for (auto gameObject : hierarchy->GetHierarchy()) {
 			gameObject->Update(delta);
@@ -67,22 +69,71 @@ struct Scene::Internal {
 	}
 
 	void Render(RPG::IRenderer& renderer) {
-		renderer.Render(Pipeline::Default, hierarchy, {camera.GetProjectionMatrix() * camera.GetViewMatrix()});
+		renderer.Render(Pipeline::Default, hierarchy, GetSceneCameraMatrix());
 	}
 
-	void RenderToFrameBuffer(RPG::IRenderer& renderer, std::shared_ptr<RPG::FrameBuffer>frameBuffer, glm::vec3 clearColor) {
-		renderer.RenderToFrameBuffer(Pipeline::Default, hierarchy, frameBuffer, {camera.GetProjectionMatrix() * camera.GetViewMatrix()}, clearColor);
+	void RenderToFrameBuffer(RPG::IRenderer& renderer, std::shared_ptr<RPG::FrameBuffer>frameBuffer, glm::vec3 clearColor, bool isGameCamera = true) {
+		renderer.RenderToFrameBuffer(Pipeline::Default, hierarchy, frameBuffer, (isGameCamera) ? GetGameCameraMatrix() : GetSceneCameraMatrix(), clearColor);
 	}
 
 	void RenderLinesToFrameBuffer(RPG::IRenderer& renderer, std::shared_ptr<RPG::FrameBuffer> frameBuffer) {
-		renderer.RenderLinesToFrameBuffer(Pipeline::SceneLines, frameBuffer, {camera.GetProjectionMatrix() * camera.GetViewMatrix()});
+		renderer.RenderLinesToFrameBuffer(Pipeline::SceneLines, frameBuffer, GetSceneCameraMatrix());
 	}
 
 	void OnWindowResized(const RPG::WindowSize& size) {
-		camera = ::CreateCamera(size);
+		sceneCamera = ::CreateSceneCamera(size);
+	}
+
+	std::shared_ptr<RPG::CameraComponent> GetSceneCameraComponent() {
+		return sceneCamera->GetComponent<std::shared_ptr<RPG::CameraComponent>, RPG::CameraComponent>(std::make_unique<RPG::CameraComponent>(1, 1));
+	}
+
+	std::shared_ptr<RPG::CameraComponent> GetGameCameraComponent() {
+		return gameCamera->GetComponent<std::shared_ptr<RPG::CameraComponent>, RPG::CameraComponent>(std::make_unique<RPG::CameraComponent>(1, 1));
+	}
+
+	glm::mat4 GetSceneCameraMatrix() {
+		auto cameraComponent = GetSceneCameraComponent();
+		return {cameraComponent->GetProjectionMatrix() * cameraComponent->GetViewMatrix(sceneCamera->GetTransform()->GetPosition())};
+	}
+
+	glm::mat4 GetGameCameraMatrix() {
+		if (gameCamera == nullptr) {
+			return GetSceneCameraMatrix();
+		}
+
+		auto cameraComponent = GetGameCameraComponent();
+		return {cameraComponent->GetProjectionMatrix() * cameraComponent->GetViewMatrix(gameCamera->GetTransform()->GetPosition())};
 	}
 
 	void ProcessInput(const float& delta) {
+		const uint8_t* keyboardState;
+		keyboardState(SDL_GetKeyboardState(nullptr));
+
+		//Update function
+		if (keyboardState[SDL_SCANCODE_UP]) {
+			//player.MoveForward(delta);
+		}
+
+		if (keyboardState[SDL_SCANCODE_DOWN]) {
+			//player.MoveBackward(delta);
+		}
+
+		if (keyboardState[SDL_SCANCODE_A]) {
+			//player.MoveUp(delta);
+		}
+
+		if (keyboardState[SDL_SCANCODE_Z]) {
+			//player.MoveDown(delta);
+		}
+
+		if (keyboardState[SDL_SCANCODE_LEFT]) {
+			//player.TurnLeft(delta);
+		}
+
+		if (keyboardState[SDL_SCANCODE_RIGHT]) {
+			//player.TurnRight(delta);
+		}
 	}
 };
 
@@ -113,8 +164,8 @@ void Scene::Render(RPG::IRenderer& renderer) {
 	internal->Render(renderer);
 }
 
-void Scene::RenderToFrameBuffer(RPG::IRenderer &renderer, std::shared_ptr<RPG::FrameBuffer> frameBuffer, glm::vec3 clearColor) {
-	internal->RenderToFrameBuffer(renderer, frameBuffer, clearColor);
+void Scene::RenderToFrameBuffer(RPG::IRenderer &renderer, std::shared_ptr<RPG::FrameBuffer> frameBuffer, glm::vec3 clearColor, bool isGameCamera = true) {
+	internal->RenderToFrameBuffer(renderer, frameBuffer, clearColor, isGameCamera);
 }
 
 void Scene::RenderLinesToFrameBuffer(RPG::IRenderer& renderer, std::shared_ptr<RPG::FrameBuffer> frameBuffer) {
@@ -135,4 +186,12 @@ std::string Scene::GetGuid() {
 
 bool Scene::HasLoaded() {
 	return internal->hasLoaded;
+}
+
+std::shared_ptr<RPG::CameraComponent> Scene::GetCamera() {
+	return internal->GetSceneCameraComponent();
+}
+
+glm::vec3 Scene::GetCameraPosition() {
+	return internal->sceneCamera->GetTransform()->GetPosition();
 }

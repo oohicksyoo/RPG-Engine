@@ -6,6 +6,7 @@
 
 #include "../IComponent.hpp"
 #include "../InternalPointer.hpp"
+#include "../GLMWrapper.hpp"
 
 namespace RPG {
 	enum class CameraType {
@@ -15,7 +16,7 @@ namespace RPG {
 
 	struct CameraComponent : public IComponent {
 		public:
-			CameraComponent(std::string guid = RPG::Guid::GenerateGuid());
+			CameraComponent(float width, float height, std::string guid = RPG::Guid::GenerateGuid());
 			void Awake() override;
 			void Start() override;
 			void Update(const float &delta) override;
@@ -23,6 +24,8 @@ namespace RPG {
 			std::vector<std::shared_ptr<RPG::Property>> GetProperties() override;
 			std::string Guid() override;
 			bool AllowMultiple() { return false; };
+			glm::mat4 GetProjectionMatrix() const;
+			glm::mat4 GetViewMatrix(glm::vec3 position) const;
 
 		private:
 			struct Internal;
