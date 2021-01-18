@@ -39,6 +39,10 @@ struct VulkanApplication::Internal {
 	void OnWindowResized() {
 		GetScene()->OnWindowResized(context.GetCurrentWindowSize());
 	}
+
+	glm::vec2 GetWindowPosition() {
+		return context.GetWindowPosition();
+	}
 };
 
 VulkanApplication::VulkanApplication() : internal(RPG::MakeInternalPointer<Internal>()) {}
@@ -57,4 +61,8 @@ void VulkanApplication::OnWindowResized() {
 
 void VulkanApplication::OnGeneralEventData(SDL_Event event) {
 	//TODO: Set this up for systems like ImGUI that may need events
+}
+
+glm::vec2 VulkanApplication::GetWindowPosition() {
+	return internal->GetWindowPosition();
 }

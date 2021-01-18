@@ -140,6 +140,12 @@ struct VulkanContext::Internal {
 			RecreateRenderContext();
 		}
 	}
+
+	glm::vec2 GetWindowPosition() {
+		int windowX, windowY;
+		SDL_GetWindowPosition(window.GetWindow(), &windowX, &windowY);
+		return {windowX, windowY};
+	}
 };
 
 VulkanContext::VulkanContext() : internal(RPG::MakeInternalPointer<Internal>()) {}
@@ -180,4 +186,8 @@ void VulkanContext::RenderEnd() {
 
 RPG::WindowSize VulkanContext::GetCurrentWindowSize() const {
 	return RPG::SDL::GetWindowSize(internal->window.GetWindow());
+}
+
+glm::vec2 VulkanContext::GetWindowPosition() {
+	return internal->GetWindowPosition();
 }

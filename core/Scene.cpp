@@ -8,6 +8,11 @@
 #include "Guid.hpp"
 #include "components/CameraComponent.hpp"
 
+#ifdef RPG_EDITOR
+	#include "../../editor/EditorStats.hpp"
+	#include "input/InputManager.hpp"
+#endif
+
 using RPG::Scene;
 using RPG::Assets::Pipeline;
 using RPG::Assets::StaticMesh;
@@ -28,13 +33,15 @@ struct Scene::Internal {
 	std::shared_ptr<RPG::Hierarchy> hierarchy;
 	std::shared_ptr<RPG::GameObject> sceneCamera;
 	std::shared_ptr<RPG::GameObject> gameCamera;
+	glm::vec2 oldMousePosition;
 
 	Internal(const RPG::WindowSize& size, std::string guid) : guid(guid),
 											hasLoaded(false),
 											keyboardState(SDL_GetKeyboardState(nullptr)),
 											hierarchy(std::make_unique<RPG::Hierarchy>(RPG::Hierarchy())),
 											sceneCamera(::CreateSceneCamera(size)),
-										    gameCamera(nullptr) {}
+										    gameCamera(nullptr),
+											oldMousePosition({0,0}) {}
 
 	RPG::AssetManifest GetAssetManifest() {
 		return RPG::AssetManifest{
@@ -69,52 +76,51 @@ struct Scene::Internal {
 	}
 
 	void UpdateEditorScene(const float& delta) {
-		auto transform = sceneCamera->GetTransform();
-		auto position = transform->GetPosition();
-		auto rotation = transform->GetRotation();
+		#ifdef RPG_EDITOR
+			auto cameraComponent = GetSceneCameraComponent();
 
-		//Update function
-		//Forwards
-		if (keyboardState[SDL_SCANCODE_E]) {
-			transform->SetPosition(position + glm::vec3{0,0,1} * delta);
-		}
+			if (InputManager::GetInstance().IsKeyPressed(RPG::Input::Key::Q)) {
+				RPG::EditorStats::GetInstance().SetGizmoTool(-1);
+			}
 
-		//Backwards
-		if (keyboardState[SDL_SCANCODE_Q]) {
-			transform->SetPosition(position + glm::vec3{0,0,-1} * delta);
-		}
+			if (InputManager::GetInstance().IsKeyPressed(RPG::Input::Key::W)) {
+				RPG::EditorStats::GetInstance().SetGizmoTool(0);//ImGuizmo::OPERATION::TRANSLATE;
+			}
 
-		//Up
-		if (keyboardState[SDL_SCANCODE_W]) {
-			transform->SetPosition(position + glm::vec3{0,1,0} * delta);
-		}
+			if (InputManager::GetInstance().IsKeyPressed(RPG::Input::Key::E)) {
+				RPG::EditorStats::GetInstance().SetGizmoTool(1);//ImGuizmo::OPERATION::ROTATE;
+			}
 
-		//Down
-		if (keyboardState[SDL_SCANCODE_S]) {
-			transform->SetPosition(position + glm::vec3{0,-1,0} * delta);
-		}
+			if (InputManager::GetInstance().IsKeyPressed(RPG::Input::Key::R)) {
+				RPG::EditorStats::GetInstance().SetGizmoTool(2);//ImGuizmo::OPERATION::SCALE;
+			}
 
-		//Left
-		if (keyboardState[SDL_SCANCODE_A]) {
-			transform->SetRotation(rotation + glm::vec3{0,-1,0} * delta);
-		}
+			if (InputManager::GetInstance().IsKeyDown(RPG::Input::Key::LeftControl)) {
+				glm::vec2 mousePosition = InputManager::GetInstance().GetMousePosition();
+				glm::vec2 mouseDelta = (mousePosition - oldMousePosition) * 0.003f;
+				oldMousePosition = mousePosition;
 
-		//Right
-		if (keyboardState[SDL_SCANCODE_D]) {
-			transform->SetRotation(rotation + glm::vec3{0,1,0} * delta);
-		}
+				if (InputManager::GetInstance().IsMouseButtonDown(RPG::Input::MouseButton::Middle)) {
+					cameraComponent->Pan(mouseDelta);
+				} else if (InputManager::GetInstance().IsMouseButtonDown(RPG::Input::MouseButton::Left)) {
+					cameraComponent->Rotate(mouseDelta);
+				} else if (InputManager::GetInstance().IsMouseButtonDown(RPG::Input::MouseButton::Right)) {
+					cameraComponent->Zoom(mouseDelta.y);
+				}
 
-		if (SDL_GetMouseState(NULL, NULL) & SDL_BUTTON(SDL_BUTTON_LEFT)) {
-			RPG::Log("Input", "Left");
-		}
+				auto mouseWheel = InputManager::GetInstance().GetMouseWheel();
+				if (mouseWheel != glm::vec2{0, 0}) {
+					if (mouseWheel.y > 1) {
+						mouseWheel.y = 1;
+					} else if (mouseWheel.y < -1) {
+						mouseWheel.y = -1;
+					}
+					cameraComponent->Zoom(mouseWheel.y * 0.5f);
+				}
+			}
 
-		if (SDL_GetMouseState(NULL, NULL) & SDL_BUTTON(SDL_BUTTON_MIDDLE)) {
-			RPG::Log("Input", "Middle");
-		}
-
-		if (SDL_GetMouseState(NULL, NULL) & SDL_BUTTON(SDL_BUTTON_RIGHT)) {
-			RPG::Log("Input", "Right");
-		}
+			cameraComponent->Update(delta);
+		#endif
 	}
 
 	void Render(RPG::IRenderer& renderer) {

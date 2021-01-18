@@ -11,6 +11,10 @@
 
 using RPG::SceneManager;
 
+SceneManager::SceneManager() {
+	LoadScene("assets/scenes/demo.scene");
+}
+
 std::shared_ptr<RPG::IScene> SceneManager::GetCurrentScene() {
 	return (currentScene != nullptr) ? currentScene : CreateNewScene();
 }

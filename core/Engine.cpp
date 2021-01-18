@@ -23,7 +23,7 @@ struct Engine::Internal {
 
 	void Run() {
 		RPG::Log(logTag, "Starting engine up");
-		SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS);
+		SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS | SDL_INIT_JOYSTICK | SDL_INIT_GAMECONTROLLER);
 		RPG::Log(logTag, "SDL2 initialized successfully");
 
 		if (IMG_Init(IMG_INIT_PNG) != IMG_INIT_PNG) {

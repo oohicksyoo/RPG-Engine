@@ -19,6 +19,7 @@ namespace RPG {
 			virtual void Update(const float& delta) = 0;
 			virtual void OnWindowResized() = 0;
 			virtual void OnGeneralEventData(SDL_Event event) = 0;
+			virtual glm::vec2 GetWindowPosition() = 0;
 
 		private:
 			struct Internal;

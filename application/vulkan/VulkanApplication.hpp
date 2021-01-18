@@ -15,6 +15,7 @@ namespace RPG {
 			void Render() override;
 			void OnWindowResized() override;
 			void OnGeneralEventData(SDL_Event event) override;
+			glm::vec2 GetWindowPosition() override;
 
 		private:
 			struct Internal;

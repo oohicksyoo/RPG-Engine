@@ -226,6 +226,12 @@ struct OpenGLApplication::Internal {
 		return scene;
 	}
 
+	glm::vec2 GetWindowPosition() {
+		int windowX, windowY;
+		SDL_GetWindowPosition(window.GetWindow(), &windowX, &windowY);
+		return {windowX, windowY};
+	}
+
 	~Internal() {
 		SDL_GL_DeleteContext(context);
 
@@ -251,4 +257,8 @@ void OpenGLApplication::OnWindowResized() {
 
 void OpenGLApplication::OnGeneralEventData(SDL_Event event) {
 	internal->OnGeneralEventData(event);
+}
+
+glm::vec2 OpenGLApplication::GetWindowPosition() {
+	return internal->GetWindowPosition();
 }

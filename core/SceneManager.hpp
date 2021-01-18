@@ -12,6 +12,7 @@ namespace RPG {
 		friend struct Singleton<SceneManager>;
 
 		public:
+			SceneManager();
 			std::shared_ptr<RPG::IScene> GetCurrentScene();
 			std::shared_ptr<RPG::IScene> CreateNewScene();
 			std::shared_ptr<RPG::IScene> LoadScene(std::string path);

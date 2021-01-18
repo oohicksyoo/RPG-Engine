@@ -7,6 +7,9 @@
 #include "../Log.hpp"
 #include "../Assets.hpp"
 #include "../Guid.hpp"
+#include "../GameObject.hpp"
+#include "../SceneManager.hpp"
+#include "MeshComponent.hpp"
 
 using RPG::LuaScriptComponent;
 
@@ -25,16 +28,9 @@ struct LuaScriptComponent::Internal {
 	}
 
 	void Awake() {
-		auto Log = [](lua_State* L) -> int {
-			if (lua_gettop(L) != 1) return -1;
-			const char* value = lua_tostring(L, -1);
-			RPG::Log("Lua", value);
-			return 0;
-		};
 
 		luaL_openlibs(L);
-		lua_pushcfunction(L, Log);
-		lua_setglobal(L, "Log");
+		CreateBindingFunctions();
 
 		std::string luaScript = std::any_cast<std::string>(path->GetProperty());
 		int result = luaL_dostring(L, RPG::Assets::LoadTextFile(luaScript).c_str());
@@ -63,6 +59,66 @@ struct LuaScriptComponent::Internal {
 		lua_getfield(L, -1, "Resume");
 		lua_pushnumber(L, delta);
 		lua_pcall(L, 1, 0, 0);
+	}
+
+	void CreateBindingFunctions() {
+		//RPG::Log(string, string);
+		lua_pushcfunction(L, [](lua_State* L) -> int {
+			if (lua_gettop(L) != 1) return -1;
+			const char* value = lua_tostring(L, -1);
+			RPG::Log("Lua", value);
+			return 0;
+		});
+		lua_setglobal(L, "Log");
+
+		//Creates a GameObject for the lua script
+		lua_pushcfunction(L, [](lua_State* L) -> int {
+			void* memory = lua_newuserdata(L, sizeof(std::shared_ptr<RPG::GameObject>));
+			auto gameObject = std::make_shared<RPG::GameObject>();
+			new(memory) std::shared_ptr<RPG::GameObject>(gameObject);
+
+			gameObject->AddComponent(std::make_shared<RPG::MeshComponent>(RPG::Assets::StaticMesh::Crate, RPG::Assets::Texture::Crate));
+
+			RPG::SceneManager::GetInstance().GetCurrentScene()->GetHierarchy()->Add(gameObject);
+
+			return 1;
+		});
+		lua_setglobal(L, "CreateGameObject");
+
+		//Move GameObject to location
+		lua_pushcfunction(L, [](lua_State* L) -> int {
+			if (lua_gettop(L) != 4) return -1;
+			auto gameObject = static_cast<std::shared_ptr<RPG::GameObject>*>(lua_touserdata(L, -4));
+
+			float posX = (float)lua_tonumber(L, -3);
+			float posY = (float)lua_tonumber(L, -2);
+			float posZ = (float)lua_tonumber(L, -1);
+			gameObject->get()->GetTransform()->SetPosition({posX, posY, posZ});
+			return 0;
+		});
+		lua_setglobal(L, "MoveGameObject");
+
+		//Math Lerp
+		lua_pushcfunction(L, [](lua_State* L) -> int {
+			if (lua_gettop(L) != 3) return -1;
+			float a = (float)lua_tonumber(L, -3);
+			float b = (float)lua_tonumber(L, -2);
+			float t = (float)lua_tonumber(L, -1);
+
+			lua_pushnumber(L, a + (b - a) * t);
+
+			return 1;
+		});
+		lua_setglobal(L, "Lerp");
+
+		/*
+		 lua_pushcfunction(L, [](lua_State* L) -> int {
+			return 0;
+		 });
+		 lua_setglobal(L, "Log");
+		 */
+
+
 	}
 };
 

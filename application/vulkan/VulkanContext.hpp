@@ -22,6 +22,7 @@ namespace RPG {
 			void DeleteFrameBuffer(const RPG::Assets::Pipeline &pipeline, const std::shared_ptr<RPG::FrameBuffer> framebuffer) override;
 			void RenderEnd();
 			RPG::WindowSize GetCurrentWindowSize() const;
+			glm::vec2 GetWindowPosition();
 
 		private:
 			struct Internal;
