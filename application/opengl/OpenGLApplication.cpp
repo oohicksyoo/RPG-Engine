@@ -221,7 +221,9 @@ struct OpenGLApplication::Internal {
 		if (!scene->HasLoaded()) {
 			assetManager->LoadAssetManifest(scene->GetAssetManifest());
 			scene->Prepare();
-			hasRanPreviewFrame = false;
+			#ifdef RPG_EDITOR
+				hasRanPreviewFrame = false;
+			#endif
 		}
 		return scene;
 	}
