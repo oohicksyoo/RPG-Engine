@@ -21,7 +21,7 @@ using RPG::Assets::Texture;
 namespace {
 	std::shared_ptr<RPG::GameObject> CreateSceneCamera(const RPG::WindowSize& size) {
 		std::shared_ptr<RPG::GameObject> go = std::make_unique<RPG::GameObject>();
-		go->AddComponent(std::make_unique<RPG::CameraComponent>(static_cast<float>(size.width), static_cast<float>(size.height)));
+		go->AddComponent(std::make_unique<RPG::CameraComponent>(static_cast<float>(size.width), static_cast<float>(size.height), go->GetTransform()));
 		return go;
 	}
 }
@@ -120,6 +120,9 @@ struct Scene::Internal {
 			}
 
 			cameraComponent->Update(delta);
+			if (gameCamera != nullptr) {
+				gameCamera->Update(delta);
+			}
 		#endif
 	}
 
@@ -140,11 +143,11 @@ struct Scene::Internal {
 	}
 
 	std::shared_ptr<RPG::CameraComponent> GetSceneCameraComponent() {
-		return sceneCamera->GetComponent<std::shared_ptr<RPG::CameraComponent>, RPG::CameraComponent>(std::make_unique<RPG::CameraComponent>(1, 1));
+		return sceneCamera->GetComponent<std::shared_ptr<RPG::CameraComponent>, RPG::CameraComponent>(std::make_unique<RPG::CameraComponent>(1, 1, sceneCamera->GetTransform()));
 	}
 
 	std::shared_ptr<RPG::CameraComponent> GetGameCameraComponent() {
-		return gameCamera->GetComponent<std::shared_ptr<RPG::CameraComponent>, RPG::CameraComponent>(std::make_unique<RPG::CameraComponent>(1, 1));
+		return gameCamera->GetComponent<std::shared_ptr<RPG::CameraComponent>, RPG::CameraComponent>(std::make_unique<RPG::CameraComponent>(1, 1, gameCamera->GetTransform()));
 	}
 
 	glm::mat4 GetSceneCameraMatrix() {
@@ -154,11 +157,42 @@ struct Scene::Internal {
 
 	glm::mat4 GetGameCameraMatrix() {
 		if (gameCamera == nullptr) {
-			return GetSceneCameraMatrix();
+			//Attempt to find a camera component in the scene to use
+			auto gc = GetGameCameraInScene();
+			if (gc == nullptr) {
+				return GetSceneCameraMatrix();
+			}
+			gameCamera = gc;
 		}
 
 		auto cameraComponent = GetGameCameraComponent();
 		return {cameraComponent->GetProjectionMatrix() * cameraComponent->GetViewMatrix(gameCamera->GetTransform()->GetPosition())};
+	}
+
+	std::shared_ptr<RPG::GameObject> GetGameCameraInScene() {
+		for (auto child : hierarchy->GetHierarchy()) {
+			auto go = HasCameraComponent(child);
+			if (go != nullptr) {
+				return go;
+			}
+		}
+
+		return nullptr;
+	}
+
+	std::shared_ptr<RPG::GameObject> HasCameraComponent(std::shared_ptr<RPG::GameObject> gameObject) {
+		for (auto child : gameObject->GetChildren()) {
+			if (HasCameraComponent(child) != nullptr) {
+				return child;
+			}
+		}
+
+		auto cameraComponent = gameObject->GetComponent<std::shared_ptr<RPG::CameraComponent>, RPG::CameraComponent>(std::make_unique<RPG::CameraComponent>(1280, 720, gameObject->GetTransform()));
+		if (cameraComponent != nullptr) {
+			return gameObject;
+		}
+
+		return nullptr;
 	}
 
 	void ProcessInput(const float& delta) {

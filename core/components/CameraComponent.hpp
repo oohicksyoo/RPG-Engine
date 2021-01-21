@@ -7,6 +7,7 @@
 #include "../IComponent.hpp"
 #include "../InternalPointer.hpp"
 #include "../GLMWrapper.hpp"
+#include "../components/TransformComponent.hpp"
 
 namespace RPG {
 	enum class CameraType {
@@ -16,7 +17,7 @@ namespace RPG {
 
 	struct CameraComponent : public IComponent {
 		public:
-			CameraComponent(float width, float height, std::string guid = RPG::Guid::GenerateGuid());
+			CameraComponent(float width, float height, std::shared_ptr<RPG::TransformComponent> transformComponent, std::string guid = RPG::Guid::GenerateGuid());
 			void Awake() override;
 			void Start() override;
 			void Update(const float &delta) override;
@@ -29,6 +30,8 @@ namespace RPG {
 			void Pan(glm::vec2 delta);
 			void Rotate(glm::vec2 delta);
 			void Zoom(float delta);
+			void SetDistance(float value);
+			void SetIsMainCamera(bool value);
 
 		private:
 			struct Internal;

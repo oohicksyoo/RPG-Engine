@@ -15,23 +15,24 @@ struct CameraComponent::Internal {
 
 	const glm::mat4 projectionMatrix;
 	glm::mat4 viewMatrix;
-	glm::vec3 target;
 	float pitch = 0;
 	float yaw = 0;
-	float distance = 10;
+	std::shared_ptr<RPG::TransformComponent> transform;
 
 	//Properties
 	std::shared_ptr<RPG::Property> cameraType;
-	//std::shared_ptr<RPG::Property> cameraDistance;
+	std::shared_ptr<RPG::Property> cameraDistance;
+	std::shared_ptr<RPG::Property> isMainCamera;
 
-	Internal(float width, float height, std::string guid) :
+	Internal(float width, float height, std::shared_ptr<RPG::TransformComponent> transformComponent, std::string guid) :
 			     guid(guid),
 			     width(width),
 			     height(height),
+				 transform(transformComponent),
 				 cameraType(std::make_unique<RPG::Property>(RPG::CameraType::Perspective, "Camera Type", "RPG::CameraType")),
-				 //cameraDistance(std::make_unique<RPG::Property>(10, "Distance", "int")),
-				 projectionMatrix(glm::perspective(glm::radians(60.0f), width / height, 0.01f, 100.0f)),
-				 target({0, 0, 0}) {
+				 cameraDistance(std::make_unique<RPG::Property>(10.0f, "Distance", "float")),
+				 isMainCamera(std::make_unique<RPG::Property>(false, "Is Main Camera", "bool")),
+				 projectionMatrix(glm::perspective(glm::radians(60.0f), width / height, 0.01f, 100.0f)) {
 		UpdateViewMatrix();
 	}
 
@@ -46,7 +47,7 @@ struct CameraComponent::Internal {
 	}
 
 	float ZoomSpeed() {
-		//float distance = std::any_cast<float>(cameraDistance);
+		float distance = std::any_cast<float>(cameraDistance->GetProperty());
 		float d = distance * 0.2f;
 		d = std::max(d, 0.0f);
 		float speed = d * d;
@@ -60,9 +61,11 @@ struct CameraComponent::Internal {
 
 	void Pan(glm::vec2 delta) {
 		glm::vec2 panSpeed = PanSpeed();
-		//float distance = std::any_cast<float>(cameraDistance);
+		float distance = std::any_cast<float>(cameraDistance->GetProperty());
+		glm::vec3 target = transform->GetPosition();
 		target += -GetRightDirection() * delta.x * panSpeed.x * distance;
 		target += GetUpDirection() * delta.y * panSpeed.y * distance;
+		transform->SetPosition(target);
 	}
 
 	void Rotate(glm::vec2 delta) {
@@ -72,13 +75,15 @@ struct CameraComponent::Internal {
 	}
 
 	void Zoom(float delta) {
-		//float distance = std::any_cast<float>(cameraDistance);
+		float distance = std::any_cast<float>(cameraDistance->GetProperty());
 		distance -= delta * ZoomSpeed();
 		if (distance < 1.0f) {
+			glm::vec3 target = transform->GetPosition();
 			target += GetForwardDirection();
+			transform->SetPosition(target);
 			distance = 1.0f;
 		}
-		//cameraDistance->SetProperty(distance);
+		cameraDistance->SetProperty(distance);
 	}
 
 	void UpdateViewMatrix() {
@@ -102,7 +107,8 @@ struct CameraComponent::Internal {
 	}
 
 	glm::vec3 CalculatePosition() {
-		//float distance = std::any_cast<float>(cameraDistance);
+		float distance = std::any_cast<float>(cameraDistance->GetProperty());
+		glm::vec3 target = transform->GetPosition();
 		return target - GetForwardDirection() * distance;
 	}
 
@@ -111,7 +117,7 @@ struct CameraComponent::Internal {
 	}
 };
 
-CameraComponent::CameraComponent(float width, float height, std::string guid) : internal(MakeInternalPointer<Internal>(width, height, guid)) {}
+CameraComponent::CameraComponent(float width, float height, std::shared_ptr<RPG::TransformComponent> transformComponent, std::string guid) : internal(MakeInternalPointer<Internal>(width, height, transformComponent, guid)) {}
 
 void CameraComponent::Awake() {
 
@@ -132,7 +138,8 @@ std::string CameraComponent::Guid() {
 std::vector<std::shared_ptr<RPG::Property>> CameraComponent::GetProperties() {
 	std::vector<std::shared_ptr<RPG::Property>> list = {};
 	list.push_back(internal->cameraType);
-	//list.push_back(internal->cameraDistance);
+	list.push_back(internal->cameraDistance);
+	list.push_back(internal->isMainCamera);
 
 	return list;
 }
@@ -155,4 +162,13 @@ void CameraComponent::Rotate(glm::vec2 delta) {
 
 void CameraComponent::Zoom(float delta) {
 	internal->Zoom(delta);
+}
+
+void CameraComponent::SetDistance(float value) {
+	value = (value < 0.1f) ? 0.1f : value;
+	internal->cameraDistance->SetProperty(value);
+}
+
+void CameraComponent::SetIsMainCamera(bool value) {
+	internal->isMainCamera->SetProperty(value);
 }

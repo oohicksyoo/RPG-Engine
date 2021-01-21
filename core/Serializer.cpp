@@ -194,6 +194,17 @@ void Serializer::LoadDefaultSavePropertyTypes() {
 		return obj;
 	}});
 
+	AddPropertySave({"bool", [](std::shared_ptr<RPG::Property> property) -> nlohmann::json {
+		std::any prop = property->GetProperty();
+		bool v = std::any_cast<bool>(prop);
+
+		json obj = json::object();
+
+		obj["Value"] = v;
+
+		return obj;
+	}});
+
 	AddPropertySave({"glm::vec2", [](std::shared_ptr<RPG::Property> property) -> nlohmann::json {
 		std::any prop = property->GetProperty();
 		glm::vec2 v = std::any_cast<glm::vec2>(prop);
@@ -294,6 +305,10 @@ void Serializer::LoadDefaultLoadComponentTypes() {
 	AddComponentLoad({"CameraComponent", [](nlohmann::json j, std::shared_ptr<RPG::GameObject> go) -> std::shared_ptr<RPG::IComponent> {
 		//TODO: Fix this to camera properties
 		auto size = RPG::ApplicationStats::GetInstance().GetWindowSize();
-		return std::make_unique<RPG::CameraComponent>(size.x, size.y, j["Guid"].get<std::string>());
+		auto component = std::make_unique<RPG::CameraComponent>(size.x, size.y, go->GetTransform(), j["Guid"].get<std::string>());
+		component->SetDistance(j["Properties"][1]["Value"].get<float>());
+		component->SetIsMainCamera(j["Properties"][2]["Value"].get<bool>());
+
+		return component;
 	}});
 }
