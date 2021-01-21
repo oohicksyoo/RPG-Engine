@@ -11,6 +11,8 @@
 using RPG::VulkanApplication;
 
 struct VulkanApplication::Internal {
+	bool hasRanFirstFrame = false;
+
 	RPG::VulkanContext context;
 	std::unique_ptr<RPG::IScene> scene;
 
@@ -26,6 +28,11 @@ struct VulkanApplication::Internal {
 	}
 
 	void Update(const float& delta) {
+		if (!hasRanFirstFrame) {
+			hasRanFirstFrame = true;
+			GetScene()->Awake();
+			GetScene()->Start();
+		}
 		GetScene()->Update(delta);
 	}
 
