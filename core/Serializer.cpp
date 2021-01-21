@@ -288,7 +288,7 @@ void Serializer::LoadDefaultLoadComponentTypes() {
 	}});
 
 	AddComponentLoad({"LuaScriptComponent", [](nlohmann::json j, std::shared_ptr<RPG::GameObject> go) -> std::shared_ptr<RPG::IComponent> {
-		return std::make_unique<RPG::LuaScriptComponent>(j["Properties"][0]["Value"].get<std::string>(), j["Guid"].get<std::string>());
+		return std::make_unique<RPG::LuaScriptComponent>(j["Properties"][0]["Value"].get<std::string>(), go, j["Guid"].get<std::string>());
 	}});
 
 	AddComponentLoad({"CameraComponent", [](nlohmann::json j, std::shared_ptr<RPG::GameObject> go) -> std::shared_ptr<RPG::IComponent> {

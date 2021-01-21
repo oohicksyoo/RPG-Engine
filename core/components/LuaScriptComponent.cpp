@@ -16,11 +16,13 @@ using RPG::LuaScriptComponent;
 struct LuaScriptComponent::Internal {
 	std::string guid;
 	std::shared_ptr<RPG::Property> path;
+	std::shared_ptr<RPG::GameObject> myGameObject;
 	lua_State* L;
 	bool isRunnable = false;
 
-	Internal(std::string path, std::string guid)  : guid(guid),
+	Internal(std::string path, std::shared_ptr<RPG::GameObject> gameObject, std::string guid)  : guid(guid),
 								  path(std::make_unique<RPG::Property>(path, "Path", "std::string")),
+								  myGameObject(gameObject),
 								  L(luaL_newstate()) {}
 
 	~Internal() {
@@ -44,7 +46,9 @@ struct LuaScriptComponent::Internal {
 	void Start() {
 		lua_getglobal(L, "Class");
 		lua_getfield(L, -1, "OnStart");
-		lua_pcall(L, 0, 0, 0);
+		void* memory = lua_newuserdata(L, sizeof(std::shared_ptr<RPG::GameObject>));
+		new(memory) std::shared_ptr<RPG::GameObject>(myGameObject);
+		lua_pcall(L, 1, 0, 0);
 	}
 
 	void Update(const float &delta) {
@@ -111,18 +115,17 @@ struct LuaScriptComponent::Internal {
 		});
 		lua_setglobal(L, "Lerp");
 
-		/*
-		 lua_pushcfunction(L, [](lua_State* L) -> int {
-			return 0;
-		 });
-		 lua_setglobal(L, "Log");
-		 */
 
+	}
 
+	int GetGameObject(lua_State* L) {
+		void* memory = lua_newuserdata(L, sizeof(std::shared_ptr<RPG::GameObject>));
+		new(memory) std::shared_ptr<RPG::GameObject>(myGameObject);
+		return 1;
 	}
 };
 
-LuaScriptComponent::LuaScriptComponent(std::string path, std::string guid) : internal(MakeInternalPointer<Internal>(path, guid)) {}
+LuaScriptComponent::LuaScriptComponent(std::string path, std::shared_ptr<RPG::GameObject> gameObject, std::string guid) : internal(MakeInternalPointer<Internal>(path, gameObject, guid)) {}
 
 void LuaScriptComponent::Awake() {
 	internal->Awake();
