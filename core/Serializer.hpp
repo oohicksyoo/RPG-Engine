@@ -10,14 +10,16 @@
 #include "IComponent.hpp"
 #include "nlohmann/json.hpp"
 #include <unordered_map>
+#include <string>
 
 namespace RPG {
 	struct Serializer : public Singleton<Serializer> {
 		friend struct Singleton<Serializer>;
 
 		public:
-			void SaveScene(std::shared_ptr<RPG::IScene> scene, const std::string& path);
+			std::string SaveScene(std::shared_ptr<RPG::IScene> scene, const std::string& path);
 			std::unique_ptr<RPG::IScene> LoadScene(const RPG::WindowSize& frameSize, const std::string& path);
+			std::unique_ptr<RPG::IScene> LoadSceneData(const RPG::WindowSize& frameSize, const std::string& sceneData);
 
 			//Inspector Properties
 			void AddPropertyLayout(std::pair<std::string, RPG::Action<std::shared_ptr<RPG::Property>>::Callback> pair);

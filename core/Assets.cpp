@@ -10,6 +10,7 @@
 #include <unordered_map>
 #include <vector>
 #include <SDL_image.h>
+#include <stdio.h>
 
 std::string RPG::Assets::LoadTextFile(const std::string& path) {
 	SDL_RWops* file{SDL_RWFromFile(path.c_str(), "r")};
@@ -26,6 +27,10 @@ void RPG::Assets::SaveTextFile(const std::string &content, const std::string &pa
 	file.open(path);
 	file << content << std::endl;
 	file.close();
+}
+
+void RPG::Assets::RemoveFile(const std::string &path) {
+	remove(path.c_str());
 }
 
 RPG::Mesh RPG::Assets::LoadOBJFile(const std::string& path) {

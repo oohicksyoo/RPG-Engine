@@ -21,7 +21,7 @@ using RPG::Assets::Texture;
 using json = nlohmann::json;
 
 //Saving
-void Serializer::SaveScene(std::shared_ptr<RPG::IScene> scene, const std::string& path) {
+std::string Serializer::SaveScene(std::shared_ptr<RPG::IScene> scene, const std::string& path) {
 	auto hierarchy = scene->GetHierarchy();
 	json j;
 	auto js = json::object();
@@ -43,6 +43,7 @@ void Serializer::SaveScene(std::shared_ptr<RPG::IScene> scene, const std::string
 
 
 	RPG::Assets::SaveTextFile(j.dump(), path);
+	return j.dump();
 }
 
 nlohmann::json Serializer::SaveGameObject(std::shared_ptr<RPG::GameObject> gameObject) {
@@ -98,9 +99,13 @@ nlohmann::json Serializer::SavePropertyValue(std::shared_ptr<RPG::Property> prop
 
 //Loading
 std::unique_ptr<RPG::IScene> Serializer::LoadScene(const RPG::WindowSize& frameSize, const std::string& path) {
-	json j = json::parse(RPG::Assets::LoadTextFile(path)); //TODO: Validate path exists
-	RPG::Log("Serializer - Load", j.dump());
+	//TODO: Validate path is okay for scene
+	return LoadSceneData(frameSize, RPG::Assets::LoadTextFile(path));
+}
 
+std::unique_ptr<RPG::IScene> Serializer::LoadSceneData(const RPG::WindowSize &frameSize,
+													   const std::string &sceneData) {
+	json j = json::parse(sceneData);
 	std::unique_ptr<RPG::IScene> scene = std::make_unique<RPG::Scene>(RPG::Scene(frameSize, j["Information"]["Guid"].get<std::string>()));
 	auto hierarchy = scene->GetHierarchy();
 
