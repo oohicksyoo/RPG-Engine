@@ -86,9 +86,19 @@ glm::vec3 TransformComponent::GetWorldPosition() {
 
 	auto parentTransform = internal->getParentFunc();
 	if (parentTransform != nullptr) {
-		vec *= parentTransform->GetWorldPosition();
+		vec += parentTransform->GetWorldPosition();
 	}
 	return vec;
+}
+
+void TransformComponent::SetWorldPosition(glm::vec3 value) {
+	auto parentTransform = internal->getParentFunc();
+	if (parentTransform != nullptr) {
+		glm::vec3 newPosition = parentTransform->GetWorldPosition() - value;
+		SetPosition(newPosition);
+	} else {
+		SetPosition(value);
+	}
 }
 
 void TransformComponent::SetRotation(glm::vec3 rotation) {

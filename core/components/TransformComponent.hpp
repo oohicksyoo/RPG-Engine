@@ -25,6 +25,7 @@ namespace RPG {
 			void SetPosition(glm::vec3 position);
 			glm::vec3 GetPosition();
 			glm::vec3 GetWorldPosition();
+			void SetWorldPosition(glm::vec3 value);
 			void SetRotation(glm::vec3 rotation);
 			glm::vec3 GetRotation();
 			void SetScale(glm::vec3 scale);
