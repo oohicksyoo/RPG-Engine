@@ -5,8 +5,10 @@
 #pragma once
 #include "IResourceLoader.hpp"
 #include "resourceLoader/MeshLoader.hpp"
+#include "resourceLoader/BitmapLoader.hpp"
 #include <memory>
 #include <string>
+#include <vector>
 
 namespace RPG {
 	template <typename T>
@@ -17,6 +19,7 @@ namespace RPG {
 
 		private:
 			std::shared_ptr<IResourceLoader<T>> loader;
+			std::unordered_map<std::string, std::shared_ptr<T>> cache;
 	};
 
 	template <typename T>
@@ -24,7 +27,23 @@ namespace RPG {
 
 	template <typename T>
 	inline std::shared_ptr<T> ResourceCache<T>::Load(std::string path) {
+		//Determine if this asset is already loaded or not
+		for (auto [key, value] : cache) {
+			if (key == path) {
+				RPG::Log("Resource Cache", "Asset (" + path + ") was found in the cache.");
+				return value;
+			}
+		}
+
 		std::shared_ptr<T> v = loader.get()->Load(path);
+
+		if (v != nullptr) {
+			cache.insert({path, v});
+			RPG::Log("Resource Cache", "Asset (" + path + ") was loaded into the cache.");
+		} else {
+			RPG::Log("Resource Cache", "Asset (" + path + ") failed to load into the cache");
+		}
+
 		return v;
 	}
 }

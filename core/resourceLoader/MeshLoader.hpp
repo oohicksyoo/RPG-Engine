@@ -4,6 +4,7 @@
 
 #pragma once
 #include "../Mesh.hpp"
+#include "../Assets.hpp"
 #include <memory>
 #include <string>
 
@@ -18,8 +19,7 @@ namespace RPG {
 	};
 
 	inline std::shared_ptr<RPG::Mesh> IResourceLoader<RPG::Mesh>::Load(std::string path) {
-		RPG::Log("MeshLoader", "Attempting to load a mesh at: " + path);
-		return nullptr;
+		return std::make_unique<RPG::Mesh>(RPG::Assets::LoadOBJFile(path));
 	}
 }
 

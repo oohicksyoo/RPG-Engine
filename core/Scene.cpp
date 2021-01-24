@@ -13,8 +13,9 @@
 	#include "input/InputManager.hpp"
 #endif
 
-#include "ResourceCache.hpp"
+#include "Bitmap.hpp"
 #include "Mesh.hpp"
+#include "Content.hpp"
 
 using RPG::Scene;
 using RPG::Assets::Pipeline;
@@ -37,7 +38,6 @@ struct Scene::Internal {
 	std::shared_ptr<RPG::GameObject> sceneCamera;
 	std::shared_ptr<RPG::GameObject> gameCamera;
 	glm::vec2 oldMousePosition;
-	ResourceCache<RPG::Mesh> meshResourceCache;
 
 	Internal(const RPG::WindowSize& size, std::string guid) : guid(guid),
 											hasLoaded(false),
@@ -45,10 +45,15 @@ struct Scene::Internal {
 											hierarchy(std::make_unique<RPG::Hierarchy>(RPG::Hierarchy())),
 											sceneCamera(::CreateSceneCamera(size)),
 										    gameCamera(nullptr),
-											oldMousePosition({0,0}),
-										    meshResourceCache() {}
+											oldMousePosition({0,0}) {}
 
 	RPG::AssetManifest GetAssetManifest() {
+		std::shared_ptr<RPG::Mesh> mesh = RPG::Content::GetInstance().Load<RPG::Mesh>("assets/models/1_Meter_Cube.obj");
+		std::shared_ptr<RPG::Mesh> mesh2 = RPG::Content::GetInstance().Load<RPG::Mesh>("assets/models/1_Meter_Cube.obj");
+
+		std::shared_ptr<RPG::Bitmap> bitmap = RPG::Content::GetInstance().Load<RPG::Bitmap>("assets/textures/default.png");
+		std::shared_ptr<RPG::Bitmap> bitmap2 = RPG::Content::GetInstance().Load<RPG::Bitmap>("assets/textures/default.png");
+
 		return RPG::AssetManifest{
 				{{Pipeline::Default, Pipeline::SceneLines}},
 				{{StaticMesh::Quad, StaticMesh::Crate, StaticMesh::Cube}},
@@ -58,8 +63,6 @@ struct Scene::Internal {
 
 	void Prepare() {
 		hasLoaded = true;
-
-		meshResourceCache.Load("assets/models/1_Meter_Cube.obj");
 	}
 
 	void Awake() {
