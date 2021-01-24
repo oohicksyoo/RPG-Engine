@@ -126,7 +126,8 @@ std::shared_ptr<RPG::GameObject> Serializer::LoadGameObject(nlohmann::json j) {
 	}
 
 	for (auto [key, gameObject] : j["Children"].items()) {
-		go->AddChild(LoadGameObject(gameObject));
+		auto g = LoadGameObject(gameObject);
+		g->SetParent(g, go);
 	}
 
 	return go;
