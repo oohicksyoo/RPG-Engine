@@ -15,14 +15,14 @@ struct CameraComponent::Internal {
 
 	const glm::mat4 projectionMatrix;
 	glm::mat4 viewMatrix;
-	float pitch = 0;
-	float yaw = 0;
 	std::shared_ptr<RPG::TransformComponent> transform;
 
 	//Properties
 	std::shared_ptr<RPG::Property> cameraType;
 	std::shared_ptr<RPG::Property> cameraDistance;
 	std::shared_ptr<RPG::Property> isMainCamera;
+	std::shared_ptr<RPG::Property> pitch;
+	std::shared_ptr<RPG::Property> yaw;
 
 	Internal(float width, float height, std::shared_ptr<RPG::TransformComponent> transformComponent, std::string guid) :
 			     guid(guid),
@@ -32,6 +32,8 @@ struct CameraComponent::Internal {
 				 cameraType(std::make_unique<RPG::Property>(RPG::CameraType::Perspective, "Camera Type", "RPG::CameraType")),
 				 cameraDistance(std::make_unique<RPG::Property>(10.0f, "Distance", "float")),
 				 isMainCamera(std::make_unique<RPG::Property>(false, "Is Main Camera", "bool")),
+				 pitch(std::make_unique<RPG::Property>(0.0f, "Pitch (Vertical)", "float")),
+				 yaw(std::make_unique<RPG::Property>(0.0f, "Yaw (Horizontal)", "float")),
 				 projectionMatrix(glm::perspective(glm::radians(60.0f), width / height, 0.01f, 100.0f)) {
 		UpdateViewMatrix();
 	}
@@ -56,31 +58,36 @@ struct CameraComponent::Internal {
 	}
 
 	float RotationSpeed() {
-		return 0.8f;
+		return 50.0f;
 	}
 
 	void Pan(glm::vec2 delta) {
 		glm::vec2 panSpeed = PanSpeed();
 		float distance = std::any_cast<float>(cameraDistance->GetProperty());
-		glm::vec3 target = transform->GetPosition();
+		glm::vec3 target = transform->GetWorldPosition();
 		target += -GetRightDirection() * delta.x * panSpeed.x * distance;
 		target += GetUpDirection() * delta.y * panSpeed.y * distance;
-		transform->SetPosition(target);
+		transform->SetWorldPosition(target);
 	}
 
 	void Rotate(glm::vec2 delta) {
+		float y = std::any_cast<float>(yaw->GetProperty());
+		float p = std::any_cast<float>(pitch->GetProperty());
 		float yawSign = GetUpDirection().y < 0 ? -1.0f : 1.0f;
-		yaw += yawSign * delta.x * RotationSpeed();
-		pitch += delta.y * RotationSpeed();
+		y += yawSign * delta.x * RotationSpeed();
+		p += delta.y * RotationSpeed();
+
+		yaw->SetProperty(y);
+		pitch->SetProperty(p);
 	}
 
 	void Zoom(float delta) {
 		float distance = std::any_cast<float>(cameraDistance->GetProperty());
 		distance -= delta * ZoomSpeed();
 		if (distance < 1.0f) {
-			glm::vec3 target = transform->GetPosition();
+			glm::vec3 target = transform->GetWorldPosition();
 			target += GetForwardDirection();
-			transform->SetPosition(target);
+			transform->SetWorldPosition(target);
 			distance = 1.0f;
 		}
 		cameraDistance->SetProperty(distance);
@@ -108,12 +115,18 @@ struct CameraComponent::Internal {
 
 	glm::vec3 CalculatePosition() {
 		float distance = std::any_cast<float>(cameraDistance->GetProperty());
-		glm::vec3 target = transform->GetPosition();
+		glm::vec3 target = transform->GetWorldPosition();
 		return target - GetForwardDirection() * distance;
 	}
 
 	glm::quat GetOrientation() {
-		return glm::quat(glm::vec3(-pitch, -yaw, 0.0f));
+		float y = std::any_cast<float>(yaw->GetProperty());
+		float p = std::any_cast<float>(pitch->GetProperty());
+
+		y *= 3.14159f / 180;
+		p *= 3.14159f / 180;
+
+		return glm::quat(glm::vec3(-p, -y, 0.0f));
 	}
 };
 
@@ -140,6 +153,8 @@ std::vector<std::shared_ptr<RPG::Property>> CameraComponent::GetProperties() {
 	list.push_back(internal->cameraType);
 	list.push_back(internal->cameraDistance);
 	list.push_back(internal->isMainCamera);
+	list.push_back(internal->yaw);
+	list.push_back(internal->pitch);
 
 	return list;
 }
@@ -171,4 +186,12 @@ void CameraComponent::SetDistance(float value) {
 
 void CameraComponent::SetIsMainCamera(bool value) {
 	internal->isMainCamera->SetProperty(value);
+}
+
+void CameraComponent::SetYaw(float value) {
+	internal->yaw->SetProperty(value);
+}
+
+void CameraComponent::SetPitch(float value) {
+	internal->pitch->SetProperty(value);
 }

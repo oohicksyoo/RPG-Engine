@@ -314,6 +314,8 @@ void Serializer::LoadDefaultLoadComponentTypes() {
 		auto component = std::make_unique<RPG::CameraComponent>(size.x, size.y, go->GetTransform(), j["Guid"].get<std::string>());
 		component->SetDistance(j["Properties"][1]["Value"].get<float>());
 		component->SetIsMainCamera(j["Properties"][2]["Value"].get<bool>());
+		component->SetYaw(j["Properties"][3]["Value"].get<float>());
+		component->SetPitch(j["Properties"][4]["Value"].get<float>());
 
 		return component;
 	}});

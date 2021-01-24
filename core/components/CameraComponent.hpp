@@ -32,6 +32,8 @@ namespace RPG {
 			void Zoom(float delta);
 			void SetDistance(float value);
 			void SetIsMainCamera(bool value);
+			void SetYaw(float value);
+			void SetPitch(float value);
 
 		private:
 			struct Internal;
