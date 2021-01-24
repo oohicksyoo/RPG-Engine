@@ -13,6 +13,9 @@
 	#include "input/InputManager.hpp"
 #endif
 
+#include "ResourceCache.hpp"
+#include "Mesh.hpp"
+
 using RPG::Scene;
 using RPG::Assets::Pipeline;
 using RPG::Assets::StaticMesh;
@@ -34,6 +37,7 @@ struct Scene::Internal {
 	std::shared_ptr<RPG::GameObject> sceneCamera;
 	std::shared_ptr<RPG::GameObject> gameCamera;
 	glm::vec2 oldMousePosition;
+	ResourceCache<RPG::Mesh> meshResourceCache;
 
 	Internal(const RPG::WindowSize& size, std::string guid) : guid(guid),
 											hasLoaded(false),
@@ -41,7 +45,8 @@ struct Scene::Internal {
 											hierarchy(std::make_unique<RPG::Hierarchy>(RPG::Hierarchy())),
 											sceneCamera(::CreateSceneCamera(size)),
 										    gameCamera(nullptr),
-											oldMousePosition({0,0}) {}
+											oldMousePosition({0,0}),
+										    meshResourceCache() {}
 
 	RPG::AssetManifest GetAssetManifest() {
 		return RPG::AssetManifest{
@@ -53,6 +58,8 @@ struct Scene::Internal {
 
 	void Prepare() {
 		hasLoaded = true;
+
+		meshResourceCache.Load("assets/models/1_Meter_Cube.obj");
 	}
 
 	void Awake() {
@@ -131,7 +138,7 @@ struct Scene::Internal {
 	}
 
 	void RenderToFrameBuffer(RPG::IRenderer& renderer, std::shared_ptr<RPG::FrameBuffer>frameBuffer, glm::vec3 clearColor, bool isGameCamera = true) {
-		renderer.RenderToFrameBuffer(Pipeline::Default, hierarchy, frameBuffer, (isGameCamera) ? GetGameCameraMatrix() : GetSceneCameraMatrix(), clearColor);
+		renderer.RenderToFrameBuffer(Pipeline::Default, hierarchy, frameBuffer, (isGameCamera) ? GetGameCameraMatrix() : GetSceneCameraMatrix(), clearColor, isGameCamera);
 	}
 
 	void RenderLinesToFrameBuffer(RPG::IRenderer& renderer, std::shared_ptr<RPG::FrameBuffer> frameBuffer) {
