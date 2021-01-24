@@ -105,7 +105,7 @@ struct OpenGLPipeline::Internal {
 			  offsetPosition(0),
 			  offsetTexCoord(3 * sizeof(float)) {}
 
-	void Render(const RPG::OpenGLAssetManager& assetManager, const std::shared_ptr<RPG::Hierarchy> hierarchy, const glm::mat4 cameraMatrix) const {
+	void Render(const RPG::OpenGLAssetManager& assetManager, const std::shared_ptr<RPG::Hierarchy> hierarchy, const glm::mat4 cameraMatrix, const bool isGameCamera) const {
 		// Instruct OpenGL to starting using our shader program.
 		glUseProgram(shaderProgramId);
 
@@ -120,7 +120,7 @@ struct OpenGLPipeline::Internal {
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 		for (auto gameObject : hierarchy->GetHierarchy()) {
-			RenderGameObject(assetManager, gameObject, cameraMatrix);
+			RenderGameObject(assetManager, gameObject, cameraMatrix, isGameCamera);
 		}
 
 		// Tidy up.
@@ -128,13 +128,13 @@ struct OpenGLPipeline::Internal {
 		glDisableVertexAttribArray(attributeLocationTexCoord);
 	}
 
-	void RenderToFrameBuffer(const RPG::OpenGLAssetManager& assetManager, const std::shared_ptr<RPG::Hierarchy> hierarchy, const std::shared_ptr<RPG::FrameBuffer> frameBuffer, const glm::mat4 cameraMatrix, const glm::vec3 clearColor) const {
+	void RenderToFrameBuffer(const RPG::OpenGLAssetManager& assetManager, const std::shared_ptr<RPG::Hierarchy> hierarchy, const std::shared_ptr<RPG::FrameBuffer> frameBuffer, const glm::mat4 cameraMatrix, const glm::vec3 clearColor, const bool isGameCamera) const {
 		glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer->GetRenderTextureID());
 		glClearColor(clearColor.x, clearColor.y, clearColor.z, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // we're not using the stencil buffer now
 		glEnable(GL_DEPTH_TEST);
 
-		Render(assetManager, hierarchy, cameraMatrix);
+		Render(assetManager, hierarchy, cameraMatrix, isGameCamera);
 
 		//Tidy Up
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -194,10 +194,10 @@ struct OpenGLPipeline::Internal {
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	}
 
-	void RenderGameObject(const RPG::OpenGLAssetManager& assetManager, std::shared_ptr<RPG::GameObject> gameObject, const glm::mat4 cameraMatrix) const {
+	void RenderGameObject(const RPG::OpenGLAssetManager& assetManager, std::shared_ptr<RPG::GameObject> gameObject, const glm::mat4 cameraMatrix, const bool isGameCamera) const {
 		//Render Children First
 		for (auto childGameObject : gameObject->GetChildren()) {
-			RenderGameObject(assetManager, childGameObject, cameraMatrix);
+			RenderGameObject(assetManager, childGameObject, cameraMatrix, isGameCamera);
 		}
 
 		bool canRenderMesh = true;
@@ -211,62 +211,66 @@ struct OpenGLPipeline::Internal {
 			}
 		}
 
-		std::shared_ptr<RPG::BoxColliderComponent> boxColliderComponent = gameObject->GetComponent<std::shared_ptr<RPG::BoxColliderComponent>, RPG::BoxColliderComponent>(std::make_unique<RPG::BoxColliderComponent>(glm::vec3{1, 1, 1}, false));
-		if (boxColliderComponent != nullptr) {
-			//Draw box
-			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+		if (!isGameCamera) {
+			std::shared_ptr<RPG::BoxColliderComponent> boxColliderComponent = gameObject->GetComponent<std::shared_ptr<RPG::BoxColliderComponent>, RPG::BoxColliderComponent>(
+					std::make_unique<RPG::BoxColliderComponent>(glm::vec3{1, 1, 1}, false));
+			if (boxColliderComponent != nullptr) {
+				//Draw box
+				glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
-			const RPG::OpenGLMesh& mesh = assetManager.GetStaticMesh(RPG::Assets::StaticMesh::Cube);
+				const RPG::OpenGLMesh &mesh = assetManager.GetStaticMesh(RPG::Assets::StaticMesh::Cube);
 
-			// Populate the 'u_mvp' uniform in the shader program.
+				// Populate the 'u_mvp' uniform in the shader program.
 
-			glm::vec3 rotation = transform->GetRotation();
-			glm::fquat rot{rotation};
+				glm::vec3 rotation = transform->GetRotation();
+				glm::fquat rot{rotation};
 
-			glm::mat4 modelMatrix = glm::mat4{1.0f};
-			modelMatrix = glm::translate(modelMatrix, transform->GetWorldPosition());
-			modelMatrix = glm::rotate(modelMatrix, glm::radians(rotation.x), glm::vec3{1.0f, 0.0f, 0.0f});
-			modelMatrix = glm::rotate(modelMatrix, glm::radians(rotation.y), glm::vec3{0.0f, 1.0f, 0.0f});
-			modelMatrix = glm::rotate(modelMatrix, glm::radians(rotation.z), glm::vec3{0.0f, 0.0f, 1.0f});
-			modelMatrix = glm::scale(modelMatrix, std::any_cast<glm::vec3>(boxColliderComponent->GetSize()));
+				glm::mat4 modelMatrix = glm::mat4{1.0f};
+				modelMatrix = glm::translate(modelMatrix, transform->GetWorldPosition());
+				modelMatrix = glm::rotate(modelMatrix, glm::radians(rotation.x), glm::vec3{1.0f, 0.0f, 0.0f});
+				modelMatrix = glm::rotate(modelMatrix, glm::radians(rotation.y), glm::vec3{0.0f, 1.0f, 0.0f});
+				modelMatrix = glm::rotate(modelMatrix, glm::radians(rotation.z), glm::vec3{0.0f, 0.0f, 1.0f});
+				modelMatrix = glm::scale(modelMatrix, std::any_cast<glm::vec3>(boxColliderComponent->GetSize()));
 
-			glUniformMatrix4fv(uniformLocationMVP, 1, GL_FALSE, &(cameraMatrix * modelMatrix)[0][0]);
+				glUniformMatrix4fv(uniformLocationMVP, 1, GL_FALSE, &(cameraMatrix * modelMatrix)[0][0]);
 
-			// Apply the texture we want to paint the mesh with.
-			assetManager.GetTexture((boxColliderComponent->IsTrigger()) ? RPG::Assets::Texture::Trigger : RPG::Assets::Texture::Collider).Bind();
+				// Apply the texture we want to paint the mesh with.
+				assetManager.GetTexture((boxColliderComponent->IsTrigger()) ? RPG::Assets::Texture::Trigger
+																			: RPG::Assets::Texture::Collider).Bind();
 
-			// Bind the vertex and index buffers.
-			glBindBuffer(GL_ARRAY_BUFFER, mesh.GetVertexBufferId());
-			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.GetIndexBufferId());
+				// Bind the vertex and index buffers.
+				glBindBuffer(GL_ARRAY_BUFFER, mesh.GetVertexBufferId());
+				glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.GetIndexBufferId());
 
-			// Configure the 'a_vertexPosition' attribute.
-			glVertexAttribPointer(
-					attributeLocationVertexPosition,
-					3,
-					GL_FLOAT,
-					GL_FALSE,
-					stride,
-					reinterpret_cast<const GLvoid*>(offsetPosition)
-			);
+				// Configure the 'a_vertexPosition' attribute.
+				glVertexAttribPointer(
+						attributeLocationVertexPosition,
+						3,
+						GL_FLOAT,
+						GL_FALSE,
+						stride,
+						reinterpret_cast<const GLvoid *>(offsetPosition)
+				);
 
-			// Configure the 'a_texCoord' attribute.
-			glVertexAttribPointer(attributeLocationTexCoord,
-								  2,
-								  GL_FLOAT,
-								  GL_FALSE,
-								  stride,
-								  reinterpret_cast<const GLvoid*>(offsetTexCoord)
-			);
+				// Configure the 'a_texCoord' attribute.
+				glVertexAttribPointer(attributeLocationTexCoord,
+									  2,
+									  GL_FLOAT,
+									  GL_FALSE,
+									  stride,
+									  reinterpret_cast<const GLvoid *>(offsetTexCoord)
+				);
 
-			// Execute the draw command - with how many indices to iterate.
-			glDrawElements(
-					GL_TRIANGLES,
-					mesh.GetNumIndices(),
-					GL_UNSIGNED_INT,
-					reinterpret_cast<const GLvoid*>(0)
-			);
+				// Execute the draw command - with how many indices to iterate.
+				glDrawElements(
+						GL_TRIANGLES,
+						mesh.GetNumIndices(),
+						GL_UNSIGNED_INT,
+						reinterpret_cast<const GLvoid *>(0)
+				);
 
-			glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+				glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+			}
 		}
 
 		if (!canRenderMesh) {
@@ -332,15 +336,16 @@ struct OpenGLPipeline::Internal {
 OpenGLPipeline::OpenGLPipeline(const std::string& shaderName) : internal(RPG::MakeInternalPointer<Internal>(shaderName)) {}
 
 void OpenGLPipeline::Render(const RPG::OpenGLAssetManager& assetManager, const std::shared_ptr<RPG::Hierarchy> hierarchy, const glm::mat4 cameraMatrix) const {
-	internal->Render(assetManager, hierarchy, cameraMatrix);
+	internal->Render(assetManager, hierarchy, cameraMatrix, true);
 }
 
 void OpenGLPipeline::RenderToFrameBuffer(const RPG::OpenGLAssetManager &assetManager,
 										 const std::shared_ptr<RPG::Hierarchy> hierarchy,
 										 const std::shared_ptr<RPG::FrameBuffer> frameBuffer,
 										 const glm::mat4 cameraMatrix,
-										 const glm::vec3 clearColor) const {
-	internal->RenderToFrameBuffer(assetManager, hierarchy, frameBuffer, cameraMatrix, clearColor);
+										 const glm::vec3 clearColor,
+										 const bool isGameCamera) const {
+	internal->RenderToFrameBuffer(assetManager, hierarchy, frameBuffer, cameraMatrix, clearColor, isGameCamera);
 }
 
 void OpenGLPipeline::RenderLinesToFrameBuffer(const RPG::OpenGLAssetManager &assetManager,

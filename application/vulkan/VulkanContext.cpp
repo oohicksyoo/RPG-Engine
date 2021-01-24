@@ -166,7 +166,8 @@ void VulkanContext::RenderToFrameBuffer(const RPG::Assets::Pipeline &pipeline,
 										const std::shared_ptr<RPG::Hierarchy> hierarchy,
 										const std::shared_ptr<RPG::FrameBuffer> framebuffer,
 										const glm::mat4 cameraMatrix,
-										const glm::vec3 clearColor) {
+										const glm::vec3 clearColor,
+										const bool isGameCamera) {
 	//TODO: Vulkan Framebuffer setup
 }
 
