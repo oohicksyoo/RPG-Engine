@@ -38,7 +38,7 @@ struct GameObject::Internal {
 
 	bool AddComponent(std::shared_ptr<RPG::IComponent> component) {
 		std::string name = component->Name();
-		RPG::Log("GameObject", "Component: " + name + "\nAllow Multiples? " + (component->AllowMultiple() ? "True" : "False"));
+		//RPG::Log("GameObject", "Component: " + name + "\nAllow Multiples? " + (component->AllowMultiple() ? "True" : "False"));
 
 		if (!component->AllowMultiple()) {
 			for (auto c : components) {
