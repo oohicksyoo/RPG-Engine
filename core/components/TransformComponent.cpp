@@ -81,6 +81,16 @@ glm::vec3 TransformComponent::GetPosition() {
 	return std::any_cast<glm::vec3>(internal->position->GetProperty());
 }
 
+glm::vec3 TransformComponent::GetWorldPosition() {
+	glm::vec3 vec = std::any_cast<glm::vec3>(internal->position->GetProperty());
+
+	auto parentTransform = internal->getParentFunc();
+	if (parentTransform != nullptr) {
+		vec *= parentTransform->GetWorldPosition();
+	}
+	return vec;
+}
+
 void TransformComponent::SetRotation(glm::vec3 rotation) {
 	internal->rotation->SetProperty(rotation);
 }

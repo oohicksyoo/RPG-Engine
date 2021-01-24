@@ -11,6 +11,7 @@
 
 #include "../../core/components/MeshComponent.hpp"
 #include "../../core/components/SpriteComponent.hpp"
+#include "../../core/components/BoxColliderComponent.hpp"
 
 using RPG::OpenGLPipeline;
 
@@ -199,25 +200,91 @@ struct OpenGLPipeline::Internal {
 			RenderGameObject(assetManager, childGameObject, cameraMatrix);
 		}
 
+		bool canRenderMesh = true;
 		auto transform = gameObject->GetTransform();
 		auto meshComponent = gameObject->GetComponent<std::shared_ptr<RPG::MeshComponent>, RPG::MeshComponent>(std::make_unique<RPG::MeshComponent>(RPG::Assets::StaticMesh::Crate, RPG::Assets::Texture::Crate));
 		std::shared_ptr<RPG::SpriteComponent> spriteComponent;
 		if (meshComponent == nullptr) {
 			spriteComponent = gameObject->GetComponent<std::shared_ptr<RPG::SpriteComponent>, RPG::SpriteComponent>(std::make_unique<RPG::SpriteComponent>(RPG::Assets::Texture::Crate));
 			if (spriteComponent == nullptr)  {
-				return;
+				canRenderMesh = false;
 			}
 		}
 
+		std::shared_ptr<RPG::BoxColliderComponent> boxColliderComponent = gameObject->GetComponent<std::shared_ptr<RPG::BoxColliderComponent>, RPG::BoxColliderComponent>(std::make_unique<RPG::BoxColliderComponent>(glm::vec3{1, 1, 1}, false));
+		if (boxColliderComponent != nullptr) {
+			//Draw box
+			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+
+			const RPG::OpenGLMesh& mesh = assetManager.GetStaticMesh(RPG::Assets::StaticMesh::Cube);
+
+			// Populate the 'u_mvp' uniform in the shader program.
+
+			glm::vec3 rotation = transform->GetRotation();
+			glm::fquat rot{rotation};
+
+			glm::mat4 modelMatrix = glm::mat4{1.0f};
+			modelMatrix = glm::translate(modelMatrix, transform->GetWorldPosition());
+			modelMatrix = glm::rotate(modelMatrix, glm::radians(rotation.x), glm::vec3{1.0f, 0.0f, 0.0f});
+			modelMatrix = glm::rotate(modelMatrix, glm::radians(rotation.y), glm::vec3{0.0f, 1.0f, 0.0f});
+			modelMatrix = glm::rotate(modelMatrix, glm::radians(rotation.z), glm::vec3{0.0f, 0.0f, 1.0f});
+			modelMatrix = glm::scale(modelMatrix, std::any_cast<glm::vec3>(boxColliderComponent->GetSize()));
+
+			glUniformMatrix4fv(uniformLocationMVP, 1, GL_FALSE, &(cameraMatrix * modelMatrix)[0][0]);
+
+			// Apply the texture we want to paint the mesh with.
+			assetManager.GetTexture((boxColliderComponent->IsTrigger()) ? RPG::Assets::Texture::Trigger : RPG::Assets::Texture::Collider).Bind();
+
+			// Bind the vertex and index buffers.
+			glBindBuffer(GL_ARRAY_BUFFER, mesh.GetVertexBufferId());
+			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.GetIndexBufferId());
+
+			// Configure the 'a_vertexPosition' attribute.
+			glVertexAttribPointer(
+					attributeLocationVertexPosition,
+					3,
+					GL_FLOAT,
+					GL_FALSE,
+					stride,
+					reinterpret_cast<const GLvoid*>(offsetPosition)
+			);
+
+			// Configure the 'a_texCoord' attribute.
+			glVertexAttribPointer(attributeLocationTexCoord,
+								  2,
+								  GL_FLOAT,
+								  GL_FALSE,
+								  stride,
+								  reinterpret_cast<const GLvoid*>(offsetTexCoord)
+			);
+
+			// Execute the draw command - with how many indices to iterate.
+			glDrawElements(
+					GL_TRIANGLES,
+					mesh.GetNumIndices(),
+					GL_UNSIGNED_INT,
+					reinterpret_cast<const GLvoid*>(0)
+			);
+
+			glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+		}
+
+		if (!canRenderMesh) {
+			return;
+		}
+
 		//Render Mesh
-		const RPG::OpenGLMesh& mesh = assetManager.GetStaticMesh((meshComponent != nullptr) ? meshComponent->GetMesh() : spriteComponent->GetMesh());
+		const RPG::OpenGLMesh &mesh = assetManager.GetStaticMesh(
+				(meshComponent != nullptr) ? meshComponent->GetMesh() : spriteComponent->GetMesh());
 
 		// Populate the 'u_mvp' uniform in the shader program.
 
-		glUniformMatrix4fv(uniformLocationMVP, 1, GL_FALSE, &(cameraMatrix * transform->GetTransformMatrix())[0][0]);
+		glUniformMatrix4fv(uniformLocationMVP, 1, GL_FALSE,
+						   &(cameraMatrix * transform->GetTransformMatrix())[0][0]);
 
 		// Apply the texture we want to paint the mesh with.
-		assetManager.GetTexture((meshComponent != nullptr) ? meshComponent->GetTexture() : spriteComponent->GetTexture()).Bind();
+		assetManager.GetTexture(
+				(meshComponent != nullptr) ? meshComponent->GetTexture() : spriteComponent->GetTexture()).Bind();
 
 		// Bind the vertex and index buffers.
 		glBindBuffer(GL_ARRAY_BUFFER, mesh.GetVertexBufferId());
@@ -230,7 +297,7 @@ struct OpenGLPipeline::Internal {
 				GL_FLOAT,
 				GL_FALSE,
 				stride,
-				reinterpret_cast<const GLvoid*>(offsetPosition)
+				reinterpret_cast<const GLvoid *>(offsetPosition)
 		);
 
 		// Configure the 'a_texCoord' attribute.
@@ -239,7 +306,7 @@ struct OpenGLPipeline::Internal {
 							  GL_FLOAT,
 							  GL_FALSE,
 							  stride,
-							  reinterpret_cast<const GLvoid*>(offsetTexCoord)
+							  reinterpret_cast<const GLvoid *>(offsetTexCoord)
 		);
 
 		// Execute the draw command - with how many indices to iterate.
@@ -247,7 +314,7 @@ struct OpenGLPipeline::Internal {
 				GL_TRIANGLES,
 				mesh.GetNumIndices(),
 				GL_UNSIGNED_INT,
-				reinterpret_cast<const GLvoid*>(0)
+				reinterpret_cast<const GLvoid *>(0)
 		);
 	}
 

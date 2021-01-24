@@ -20,6 +20,8 @@ std::string RPG::Assets::ResolveStaticMeshPath(const RPG::Assets::StaticMesh &st
 			return "assets/models/Quad.obj";
 		case RPG::Assets::StaticMesh::Crate:
 			return "assets/models/crate.obj";
+		case RPG::Assets::StaticMesh::Cube:
+			return "assets/models/1_Meter_Cube.obj";
 		default:
 			return "";
 	}
@@ -31,6 +33,12 @@ std::string RPG::Assets::ResolveTexturePath(const RPG::Assets::Texture &texture)
 			return "assets/textures/crate.png";
 		case RPG::Assets::Texture::Sprite:
 			return "assets/textures/Sprite.png";
+		case RPG::Assets::Texture::Default:
+			return "assets/textures/default.png";
+		case RPG::Assets::Texture::Collider:
+			return "assets/textures/collider.png";
+		case RPG::Assets::Texture::Trigger:
+			return "assets/textures/trigger.png";
 		default:
 			return "";
 	}

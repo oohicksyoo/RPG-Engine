@@ -9,6 +9,7 @@
 #include "../Guid.hpp"
 #include "../GameObject.hpp"
 #include "../SceneManager.hpp"
+#include "../input/InputManager.hpp"
 #include "MeshComponent.hpp"
 
 using RPG::LuaScriptComponent;
@@ -66,7 +67,7 @@ struct LuaScriptComponent::Internal {
 	}
 
 	void CreateBindingFunctions() {
-		//RPG::Log(string, string);
+
 		lua_pushcfunction(L, [](lua_State* L) -> int {
 			if (lua_gettop(L) != 1) return -1;
 			const char* value = lua_tostring(L, -1);
@@ -102,6 +103,27 @@ struct LuaScriptComponent::Internal {
 		});
 		lua_setglobal(L, "MoveGameObject");
 
+		//Get GameObject Position
+		lua_pushcfunction(L, [](lua_State* L) -> int {
+			if (lua_gettop(L) != 1) return -1;
+			auto gameObject = static_cast<std::shared_ptr<RPG::GameObject>*>(lua_touserdata(L, -1));
+			auto position = gameObject->get()->GetTransform()->GetPosition();
+
+			lua_newtable(L);
+			lua_pushstring(L, "x");
+			lua_pushnumber(L, position.x);
+			lua_settable(L, -3);
+			lua_pushstring(L, "y");
+			lua_pushnumber(L, position.y);
+			lua_settable(L, -3);
+			lua_pushstring(L, "z");
+			lua_pushnumber(L, position.z);
+			lua_settable(L, -3);
+
+			return 1;
+		});
+		lua_setglobal(L, "GetPosition");
+
 		//Math Lerp
 		lua_pushcfunction(L, [](lua_State* L) -> int {
 			if (lua_gettop(L) != 3) return -1;
@@ -115,13 +137,42 @@ struct LuaScriptComponent::Internal {
 		});
 		lua_setglobal(L, "Lerp");
 
+		//Input
+		lua_pushcfunction(L, [](lua_State* L) -> int {
+			if (lua_gettop(L) != 2) return -1;
+			int value = lua_tointeger(L, -1);
+			int controllerID = lua_tointeger(L, -2);
+			lua_pushboolean(L, RPG::InputManager::GetInstance().IsControllerButtonDown(controllerID, (RPG::Input::ControllerButton)value));
+			return 1;
+		});
+		lua_setglobal(L, "IsControllerButtonDown");
 
-	}
+		lua_pushcfunction(L, [](lua_State* L) -> int {
+			if (lua_gettop(L) != 2) return -1;
+			int value = lua_tointeger(L, -1);
+			int controllerID = lua_tointeger(L, -2);
+			lua_pushboolean(L, RPG::InputManager::GetInstance().IsControllerButtonPressed(controllerID, (RPG::Input::ControllerButton)value));
+			return 1;
+		});
+		lua_setglobal(L, "IsControllerButtonPressed");
 
-	int GetGameObject(lua_State* L) {
-		void* memory = lua_newuserdata(L, sizeof(std::shared_ptr<RPG::GameObject>));
-		new(memory) std::shared_ptr<RPG::GameObject>(myGameObject);
-		return 1;
+		lua_pushcfunction(L, [](lua_State* L) -> int {
+			if (lua_gettop(L) != 2) return -1;
+			int value = lua_tointeger(L, -1);
+			int controllerID = lua_tointeger(L, -2);
+			lua_pushboolean(L, RPG::InputManager::GetInstance().IsControllerButtonReleased(controllerID, (RPG::Input::ControllerButton)value));
+			return 1;
+		});
+		lua_setglobal(L, "IsControllerButtonReleased");
+
+		lua_pushcfunction(L, [](lua_State* L) -> int {
+			if (lua_gettop(L) != 2) return -1;
+			int value = lua_tointeger(L, -1);
+			int controllerID = lua_tointeger(L, -2);
+			lua_pushnumber(L, RPG::InputManager::GetInstance().GetControllerAxis(controllerID, (RPG::Input::ControllerAxis)value));
+			return 1;
+		});
+		lua_setglobal(L, "GetControllerAxis");
 	}
 };
 

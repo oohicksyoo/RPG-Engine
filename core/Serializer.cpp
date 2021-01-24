@@ -13,6 +13,7 @@
 #include "components/SpriteComponent.hpp"
 #include "components/CameraComponent.hpp"
 #include "components/LuaScriptComponent.hpp"
+#include "components/BoxColliderComponent.hpp"
 
 using RPG::Serializer;
 using RPG::Assets::Pipeline;
@@ -315,5 +316,13 @@ void Serializer::LoadDefaultLoadComponentTypes() {
 		component->SetIsMainCamera(j["Properties"][2]["Value"].get<bool>());
 
 		return component;
+	}});
+
+	AddComponentLoad({"BoxColliderComponent", [](nlohmann::json j, std::shared_ptr<RPG::GameObject> go) -> std::shared_ptr<RPG::IComponent> {
+		glm::vec3  vec = {j["Properties"][0]["Value"]["x"].get<float>(),
+						  j["Properties"][0]["Value"]["y"].get<float>(),
+						  j["Properties"][0]["Value"]["z"].get<float>()};
+
+		return std::make_unique<RPG::BoxColliderComponent>(vec, j["Properties"][1]["Value"].get<bool>(), j["Guid"].get<std::string>());
 	}});
 }

@@ -55,6 +55,14 @@ namespace RPG {
 			glm::vec2 GetMousePosition();
 			glm::vec2 GetMouseWheel();
 
+			//Controller
+			bool IsControllerButtonPressed(int controllerID, RPG::Input::ControllerButton controllerButton);
+			bool IsControllerButtonDown(int controllerID, RPG::Input::ControllerButton controllerButton);
+			bool IsControllerButtonReleased(int controllerID, RPG::Input::ControllerButton controllerButton);
+			uint64_t GetControllerButtonHeldTime(int controllerID, RPG::Input::ControllerButton controllerButton);
+			float GetControllerAxis(int controllerID, RPG::Input::ControllerAxis controllerAxis);
+			uint64_t GetControllerAxisHeldTime(int controllerID, RPG::Input::ControllerButton controllerAxis);
+
 			//Get Name Of
 			std::string GetNameOf(RPG::Input::Key key);
 			std::string GetNameOf(RPG::Input::MouseButton mouseButton);

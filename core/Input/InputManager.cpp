@@ -206,7 +206,10 @@ bool InputManager::IsKeyReleased(RPG::Input::Key key) {
 
 uint64_t InputManager::GetKeyHeldTime(RPG::Input::Key key) {
 	int i = (int)key;
-	return i > 0 && i < Input::MAX_KEYBOARD_KEYS && currentState.keyboard.timestamp[i];
+	if (i > 0 && i < Input::MAX_KEYBOARD_KEYS) {
+		return currentState.keyboard.timestamp[i];
+	}
+	return 0;
 }
 
 bool InputManager::IsMouseButtonDown(RPG::Input::MouseButton mouseButton) {
@@ -226,7 +229,10 @@ bool InputManager::IsMouseButtonReleased(RPG::Input::MouseButton mouseButton) {
 
 uint64_t InputManager::GetKeyHeldTime(RPG::Input::MouseButton mouseButton) {
 	int i = (int)mouseButton;
-	return i > 0 && i < Input::MAX_MOUSE_BUTTONS && currentState.mouse.timestamp[i];
+	if (i > 0 && i < Input::MAX_MOUSE_BUTTONS) {
+		return currentState.mouse.timestamp[i];
+	}
+	return 0;
 }
 
 glm::vec2 InputManager::GetMousePosition() {
@@ -235,6 +241,51 @@ glm::vec2 InputManager::GetMousePosition() {
 
 glm::vec2 InputManager::GetMouseWheel() {
 	return currentState.mouse.wheel;
+}
+
+bool InputManager::IsControllerButtonDown(int controllerID, RPG::Input::ControllerButton controllerButton) {
+	int i = (int)controllerButton;
+	bool controllerIDValid = controllerID >= 0 && controllerID < Input::MAX_CONTROLLERS;
+	return i >= 0 && i < Input::MAX_CONTROLLER_BUTTONS && controllerIDValid && currentState.controllers[controllerID].isConnected && currentState.controllers[controllerID].down[i];
+}
+
+bool InputManager::IsControllerButtonPressed(int controllerID, RPG::Input::ControllerButton controllerButton) {
+	int i = (int)controllerButton;
+	bool controllerIDValid = controllerID >= 0 && controllerID < Input::MAX_CONTROLLERS;
+	return i >= 0 && i < Input::MAX_CONTROLLER_BUTTONS && controllerIDValid && currentState.controllers[controllerID].isConnected && currentState.controllers[controllerID].pressed[i];
+}
+
+bool InputManager::IsControllerButtonReleased(int controllerID, RPG::Input::ControllerButton controllerButton) {
+	int i = (int)controllerButton;
+	bool controllerIDValid = controllerID >= 0 && controllerID < Input::MAX_CONTROLLERS;
+	return i >= 0 && i < Input::MAX_CONTROLLER_BUTTONS && controllerIDValid && currentState.controllers[controllerID].isConnected && currentState.controllers[controllerID].released[i];
+}
+
+uint64_t InputManager::GetControllerButtonHeldTime(int controllerID, RPG::Input::ControllerButton controllerButton) {
+	int i = (int)controllerButton;
+	bool controllerIDValid = controllerID >= 0 && controllerID < Input::MAX_CONTROLLERS;
+	if (i >= 0 && i < Input::MAX_CONTROLLER_BUTTONS && controllerIDValid && currentState.controllers[controllerID].isConnected) {
+		return currentState.controllers[controllerID].buttonTimestamp[i];
+	}
+	return 0;
+}
+
+float InputManager::GetControllerAxis(int controllerID, RPG::Input::ControllerAxis controllerAxis) {
+	int i = (int)controllerAxis;
+	bool controllerIDValid = controllerID >= 0 && controllerID < Input::MAX_CONTROLLERS;
+	if (i >= 0 && i < Input::MAX_CONTROLLER_AXIS && controllerIDValid && currentState.controllers[controllerID].isConnected) {
+		return currentState.controllers[controllerID].axis[i];
+	}
+	return 0;
+}
+
+uint64_t InputManager::GetControllerAxisHeldTime(int controllerID, RPG::Input::ControllerButton controllerAxis) {
+	int i = (int)controllerAxis;
+	bool controllerIDValid = controllerID >= 0 && controllerID < Input::MAX_CONTROLLERS;
+	if (i >= 0 && i < Input::MAX_CONTROLLER_AXIS && controllerIDValid && currentState.controllers[controllerID].isConnected) {
+		return currentState.controllers[controllerID].axisTimestamp[i];
+	}
+	return 0;
 }
 
 std::string InputManager::GetNameOf(RPG::Input::Key key) {

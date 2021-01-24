@@ -24,6 +24,7 @@ namespace RPG {
 			void SetGetParent(RPG::Action<>::Func<std::shared_ptr<RPG::TransformComponent>> getParentFunc);
 			void SetPosition(glm::vec3 position);
 			glm::vec3 GetPosition();
+			glm::vec3 GetWorldPosition();
 			void SetRotation(glm::vec3 rotation);
 			glm::vec3 GetRotation();
 			void SetScale(glm::vec3 scale);
