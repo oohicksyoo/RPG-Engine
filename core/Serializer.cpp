@@ -40,7 +40,7 @@ std::string Serializer::SaveScene(std::shared_ptr<RPG::IScene> scene, const std:
 		j["Hierarchy"].push_back(SaveGameObject(gameObject));
 	}
 
-	RPG::Log("Serializer - Save", j.dump());
+	//RPG::Log("Serializer - Save", j.dump());
 
 
 	RPG::Assets::SaveTextFile(j.dump(), path);
