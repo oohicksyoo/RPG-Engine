@@ -18,7 +18,6 @@ namespace RPG {
 		IScene() = default;
 		virtual ~IScene() = default;
 		virtual RPG::AssetManifest GetAssetManifest() = 0;
-		virtual void Prepare() = 0;
 		virtual void Awake() = 0;
 		virtual void Start() = 0;
 		virtual void Update(const float& delta) = 0;

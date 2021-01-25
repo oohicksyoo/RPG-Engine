@@ -54,15 +54,13 @@ struct Scene::Internal {
 		std::shared_ptr<RPG::Bitmap> bitmap = RPG::Content::GetInstance().Load<RPG::Bitmap>("assets/textures/default.png");
 		std::shared_ptr<RPG::Bitmap> bitmap2 = RPG::Content::GetInstance().Load<RPG::Bitmap>("assets/textures/default.png");
 
-		return RPG::AssetManifest{
+		hasLoaded = true;
+
+		return RPG::AssetManifest {
 				{{Pipeline::Default, Pipeline::SceneLines}},
 				{{StaticMesh::Quad, StaticMesh::Crate, StaticMesh::Cube}},
 				{{Texture::Crate, Texture::Sprite, Texture::Default, Texture::Collider, Texture::Trigger}}
 		};
-	}
-
-	void Prepare() {
-		hasLoaded = true;
 	}
 
 	void Awake() {
@@ -215,10 +213,6 @@ Scene::Scene(const RPG::WindowSize& size, std::string guid) : internal(RPG::Make
 
 RPG::AssetManifest Scene::GetAssetManifest() {
 	return internal->GetAssetManifest();
-}
-
-void Scene::Prepare() {
-	internal->Prepare();
 }
 
 void Scene::Awake() {

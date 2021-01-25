@@ -5,6 +5,7 @@
 #include "OpenGLAssetManager.hpp"
 #include "../../core/Assets.hpp"
 #include "../../core/Log.hpp"
+#include "../../core/Content.hpp"
 #include <unordered_map>
 
 using RPG::OpenGLAssetManager;
@@ -37,7 +38,17 @@ struct OpenGLAssetManager::Internal {
 	std::unordered_map<RPG::Assets::Texture, RPG::OpenGLTexture> textureCache;
 	RPG::OpenGLMesh lines;
 
-	Internal() : lines(::CreateSceneGridLines()) {}
+	Internal() : lines(::CreateSceneGridLines()) {
+		RPG::Content::GetInstance().OnLoadedAsset<RPG::Mesh>([this](std::string path, std::shared_ptr<RPG::Mesh> mesh) {
+			//TODO: Insert into opengl cache that this asset is loaded
+			RPG::Log("AssetManager", "On Asset Loaded Mesh");
+		});
+
+		RPG::Content::GetInstance().OnLoadedAsset<RPG::Bitmap>([this](std::string path, std::shared_ptr<RPG::Bitmap> bitmap) {
+			//TODO: Insert into opengl cache that this asset is loaded
+			RPG::Log("AssetManager", "On Asset Loaded Mesh");
+		});
+	}
 
 	void LoadPipelines(const std::vector<RPG::Assets::Pipeline>& pipelines) {
 		for (const auto& pipeline : pipelines) 	{

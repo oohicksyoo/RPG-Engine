@@ -22,7 +22,6 @@ struct VulkanApplication::Internal {
 		auto scene = RPG::SceneManager::GetInstance().GetCurrentScene();
 		if (!scene->HasLoaded()) {
 			context.LoadAssetManifest(scene->GetAssetManifest());
-			scene->Prepare();
 		}
 		return scene;
 	}

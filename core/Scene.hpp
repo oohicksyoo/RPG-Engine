@@ -14,7 +14,6 @@ namespace RPG {
 		public:
 			Scene(const RPG::WindowSize& frameSize, std::string guid = RPG::Guid::GenerateGuid());
 			RPG::AssetManifest GetAssetManifest() override;
-			void Prepare() override;
 			void Awake() override;
 			void Start() override;
 			void Update(const float& delta) override;

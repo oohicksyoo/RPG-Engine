@@ -220,7 +220,6 @@ struct OpenGLApplication::Internal {
 		auto scene = RPG::SceneManager::GetInstance().GetCurrentScene();
 		if (!scene->HasLoaded()) {
 			assetManager->LoadAssetManifest(scene->GetAssetManifest());
-			scene->Prepare();
 			#ifdef RPG_EDITOR
 				hasRanPreviewFrame = false;
 			#endif
