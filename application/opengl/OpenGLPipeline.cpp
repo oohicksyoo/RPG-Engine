@@ -211,67 +211,69 @@ struct OpenGLPipeline::Internal {
 			}
 		}
 
-		if (!isGameCamera) {
-			std::shared_ptr<RPG::BoxColliderComponent> boxColliderComponent = gameObject->GetComponent<std::shared_ptr<RPG::BoxColliderComponent>, RPG::BoxColliderComponent>(
-					std::make_unique<RPG::BoxColliderComponent>(glm::vec3{1, 1, 1}, false));
-			if (boxColliderComponent != nullptr) {
-				//Draw box
-				glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+		#ifdef RPG_EDITOR
+			if (!isGameCamera) {
+				std::shared_ptr<RPG::BoxColliderComponent> boxColliderComponent = gameObject->GetComponent<std::shared_ptr<RPG::BoxColliderComponent>, RPG::BoxColliderComponent>(
+						std::make_unique<RPG::BoxColliderComponent>(glm::vec3{1, 1, 1}, false));
+				if (boxColliderComponent != nullptr) {
+					//Draw box
+					glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
-				const RPG::OpenGLMesh &mesh = assetManager.GetStaticMesh(RPG::Assets::StaticMesh::Cube);
+					const RPG::OpenGLMesh &mesh = assetManager.GetStaticMesh(RPG::Assets::StaticMesh::Cube);
 
-				// Populate the 'u_mvp' uniform in the shader program.
+					// Populate the 'u_mvp' uniform in the shader program.
 
-				glm::vec3 rotation = transform->GetRotation();
-				glm::fquat rot{rotation};
+					glm::vec3 rotation = transform->GetRotation();
+					glm::fquat rot{rotation};
 
-				glm::mat4 modelMatrix = glm::mat4{1.0f};
-				modelMatrix = glm::translate(modelMatrix, transform->GetWorldPosition());
-				modelMatrix = glm::rotate(modelMatrix, glm::radians(rotation.x), glm::vec3{1.0f, 0.0f, 0.0f});
-				modelMatrix = glm::rotate(modelMatrix, glm::radians(rotation.y), glm::vec3{0.0f, 1.0f, 0.0f});
-				modelMatrix = glm::rotate(modelMatrix, glm::radians(rotation.z), glm::vec3{0.0f, 0.0f, 1.0f});
-				modelMatrix = glm::scale(modelMatrix, std::any_cast<glm::vec3>(boxColliderComponent->GetSize()));
+					glm::mat4 modelMatrix = glm::mat4{1.0f};
+					modelMatrix = glm::translate(modelMatrix, transform->GetWorldPosition());
+					modelMatrix = glm::rotate(modelMatrix, glm::radians(rotation.x), glm::vec3{1.0f, 0.0f, 0.0f});
+					modelMatrix = glm::rotate(modelMatrix, glm::radians(rotation.y), glm::vec3{0.0f, 1.0f, 0.0f});
+					modelMatrix = glm::rotate(modelMatrix, glm::radians(rotation.z), glm::vec3{0.0f, 0.0f, 1.0f});
+					modelMatrix = glm::scale(modelMatrix, std::any_cast<glm::vec3>(boxColliderComponent->GetSize()));
 
-				glUniformMatrix4fv(uniformLocationMVP, 1, GL_FALSE, &(cameraMatrix * modelMatrix)[0][0]);
+					glUniformMatrix4fv(uniformLocationMVP, 1, GL_FALSE, &(cameraMatrix * modelMatrix)[0][0]);
 
-				// Apply the texture we want to paint the mesh with.
-				assetManager.GetTexture((boxColliderComponent->IsTrigger()) ? RPG::Assets::Texture::Trigger
-																			: RPG::Assets::Texture::Collider).Bind();
+					// Apply the texture we want to paint the mesh with.
+					assetManager.GetTexture((boxColliderComponent->IsTrigger()) ? RPG::Assets::Texture::Trigger
+																				: RPG::Assets::Texture::Collider).Bind();
 
-				// Bind the vertex and index buffers.
-				glBindBuffer(GL_ARRAY_BUFFER, mesh.GetVertexBufferId());
-				glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.GetIndexBufferId());
+					// Bind the vertex and index buffers.
+					glBindBuffer(GL_ARRAY_BUFFER, mesh.GetVertexBufferId());
+					glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.GetIndexBufferId());
 
-				// Configure the 'a_vertexPosition' attribute.
-				glVertexAttribPointer(
-						attributeLocationVertexPosition,
-						3,
-						GL_FLOAT,
-						GL_FALSE,
-						stride,
-						reinterpret_cast<const GLvoid *>(offsetPosition)
-				);
+					// Configure the 'a_vertexPosition' attribute.
+					glVertexAttribPointer(
+							attributeLocationVertexPosition,
+							3,
+							GL_FLOAT,
+							GL_FALSE,
+							stride,
+							reinterpret_cast<const GLvoid *>(offsetPosition)
+					);
 
-				// Configure the 'a_texCoord' attribute.
-				glVertexAttribPointer(attributeLocationTexCoord,
-									  2,
-									  GL_FLOAT,
-									  GL_FALSE,
-									  stride,
-									  reinterpret_cast<const GLvoid *>(offsetTexCoord)
-				);
+					// Configure the 'a_texCoord' attribute.
+					glVertexAttribPointer(attributeLocationTexCoord,
+										2,
+										GL_FLOAT,
+										GL_FALSE,
+										stride,
+										reinterpret_cast<const GLvoid *>(offsetTexCoord)
+					);
 
-				// Execute the draw command - with how many indices to iterate.
-				glDrawElements(
-						GL_TRIANGLES,
-						mesh.GetNumIndices(),
-						GL_UNSIGNED_INT,
-						reinterpret_cast<const GLvoid *>(0)
-				);
+					// Execute the draw command - with how many indices to iterate.
+					glDrawElements(
+							GL_TRIANGLES,
+							mesh.GetNumIndices(),
+							GL_UNSIGNED_INT,
+							reinterpret_cast<const GLvoid *>(0)
+					);
 
-				glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+					glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+				}
 			}
-		}
+		#endif
 
 		if (!canRenderMesh) {
 			return;
