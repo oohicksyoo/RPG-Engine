@@ -17,12 +17,15 @@ namespace RPG {
 			std::shared_ptr<RPG::IScene> CreateNewScene();
 			std::shared_ptr<RPG::IScene> LoadScene(std::string path);
 			void SaveCurrentScene(std::string path);
+			void SaveCurrentScene();
 			void StoreCurrentScene();
 			void ReloadCurrentScene();
+			bool HasCurrentScenePath();
 
 		private:
 			std::shared_ptr<RPG::IScene> currentScene;
 			std::string currentSavedScene;
+			std::string currentScenePath;
 
 
 	};

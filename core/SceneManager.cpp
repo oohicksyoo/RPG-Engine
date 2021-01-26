@@ -14,6 +14,7 @@ using RPG::SceneManager;
 
 SceneManager::SceneManager() {
 	currentSavedScene = "";
+	currentScenePath = "";
 	LoadScene("assets/scenes/demo.scene"); //TODO: Move this to something project specific
 }
 
@@ -27,6 +28,7 @@ std::shared_ptr<RPG::IScene> SceneManager::CreateNewScene() {
 	}
 	glm::vec2 size = RPG::ApplicationStats::GetInstance().GetWindowSize();
 	currentScene = std::make_unique<RPG::Scene>(RPG::Scene({static_cast<uint32_t>(size.x), static_cast<uint32_t>(size.y)}));
+	currentScenePath = "";
 	return currentScene;
 }
 
@@ -36,12 +38,19 @@ std::shared_ptr<RPG::IScene> SceneManager::LoadScene(std::string path) {
 	}
 	glm::vec2 size = RPG::ApplicationStats::GetInstance().GetWindowSize();
 	currentScene = RPG::Serializer::GetInstance().LoadScene({static_cast<uint32_t>(size.x), static_cast<uint32_t>(size.y)}, path);
+	currentScenePath = path;
 	return currentScene;
 }
 
 void SceneManager::SaveCurrentScene(std::string path) {
 	if (currentScene != nullptr) {
 		RPG::Serializer::GetInstance().SaveScene(currentScene, path);
+	}
+}
+
+void SceneManager::SaveCurrentScene() {
+	if (currentScenePath != "") {
+		RPG::Serializer::GetInstance().SaveScene(currentScene, currentScenePath);
 	}
 }
 
@@ -58,4 +67,8 @@ void SceneManager::ReloadCurrentScene() {
 		currentScene = RPG::Serializer::GetInstance().LoadSceneData({static_cast<uint32_t>(size.x), static_cast<uint32_t>(size.y)}, currentSavedScene);
 		currentSavedScene = "";
 	}
+}
+
+bool SceneManager::HasCurrentScenePath() {
+	return currentScenePath != "";
 }
