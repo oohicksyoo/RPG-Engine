@@ -245,6 +245,17 @@ void Serializer::LoadDefaultSavePropertyTypes() {
 
 		return obj;
 	}});
+
+	AddPropertySave({"RPG::Resource::String", [](std::shared_ptr<RPG::Property> property) -> nlohmann::json {
+		std::any prop = property->GetProperty();
+		std::string v = std::any_cast<std::string>(prop);
+
+		json obj = json::object();
+
+		obj["Value"] = v;
+
+		return obj;
+	}});
 }
 
 void Serializer::LoadDefaultLoadComponentTypes() {

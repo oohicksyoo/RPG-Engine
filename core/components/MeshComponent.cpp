@@ -14,8 +14,8 @@ struct MeshComponent::Internal {
 
 	Internal(std::string mesh, std::string texture, std::string guid)
 	: guid(guid),
-	  mesh(std::make_unique<RPG::Property>(mesh, "Mesh", "std::string", true, "Model")),
-	  texture(std::make_unique<RPG::Property>(texture, "Texture", "std::string", true, "Texture")) {}
+	  mesh(std::make_unique<RPG::Property>(mesh, "Mesh", "RPG::Resource::String", true, "Model")),
+	  texture(std::make_unique<RPG::Property>(texture, "Texture", "RPG::Resource::String", true, "Texture")) {}
 };
 
 MeshComponent::MeshComponent(std::string mesh, std::string texture, std::string guid) : internal(MakeInternalPointer<Internal>(mesh, texture, guid)) {}
