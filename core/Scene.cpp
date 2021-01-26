@@ -7,6 +7,7 @@
 #include "Log.hpp"
 #include "Guid.hpp"
 #include "components/CameraComponent.hpp"
+#include <nlohmann/json.hpp>
 
 #ifdef RPG_EDITOR
 	#include "../../editor/EditorStats.hpp"
@@ -19,6 +20,7 @@
 
 using RPG::Scene;
 using RPG::Assets::Pipeline;
+using json = nlohmann::json;
 
 namespace {
 	std::shared_ptr<RPG::GameObject> CreateSceneCamera(const RPG::WindowSize& size) {
@@ -46,16 +48,14 @@ struct Scene::Internal {
 											oldMousePosition({0,0}) {}
 
 	RPG::AssetManifest GetAssetManifest() {
-		RPG::Content::GetInstance().Load<RPG::Mesh>("assets/models/1_Meter_Cube.obj");
-		RPG::Content::GetInstance().Load<RPG::Mesh>("assets/models/Quad.obj");
-		RPG::Content::GetInstance().Load<RPG::Mesh>("assets/models/crate.obj");
+		json j = json::parse(RPG::Assets::LoadTextFile("assets/project/resources.projectasset"));
+		for (auto [key, value] : j["Models"].items()) {
+			RPG::Content::GetInstance().Load<RPG::Mesh>(value.get<std::string>());
+		}
 
-		RPG::Content::GetInstance().Load<RPG::Texture>("assets/textures/crate.png");
-		RPG::Content::GetInstance().Load<RPG::Texture>("assets/textures/Sprite.png");
-		RPG::Content::GetInstance().Load<RPG::Texture>("assets/textures/default.png");
-		RPG::Content::GetInstance().Load<RPG::Texture>("assets/textures/collider.png");
-		RPG::Content::GetInstance().Load<RPG::Texture>("assets/textures/trigger.png");
-		RPG::Content::GetInstance().Load<RPG::Texture>("assets/textures/Water.png");
+		for (auto [key, value] : j["Textures"].items()) {
+			RPG::Content::GetInstance().Load<RPG::Texture>(value.get<std::string>());
+		}
 
 		hasLoaded = true;
 
