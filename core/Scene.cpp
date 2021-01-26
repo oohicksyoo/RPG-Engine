@@ -136,7 +136,7 @@ struct Scene::Internal {
 	}
 
 	void Render(RPG::IRenderer& renderer) {
-		renderer.Render(Pipeline::Default, hierarchy, GetSceneCameraMatrix());
+		renderer.Render(Pipeline::Default, hierarchy, GetGameCameraMatrix());
 	}
 
 	void RenderToFrameBuffer(RPG::IRenderer& renderer, std::shared_ptr<RPG::FrameBuffer>frameBuffer, glm::vec3 clearColor, bool isGameCamera = true) {
