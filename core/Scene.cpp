@@ -19,8 +19,6 @@
 
 using RPG::Scene;
 using RPG::Assets::Pipeline;
-using RPG::Assets::StaticMesh;
-using RPG::Assets::Texture;
 
 namespace {
 	std::shared_ptr<RPG::GameObject> CreateSceneCamera(const RPG::WindowSize& size) {
@@ -62,9 +60,7 @@ struct Scene::Internal {
 		hasLoaded = true;
 
 		return RPG::AssetManifest {
-				{{Pipeline::Default, Pipeline::SceneLines}},
-				{{StaticMesh::Quad, StaticMesh::Crate, StaticMesh::Cube}},
-				{{Texture::Crate, Texture::Sprite, Texture::Default, Texture::Collider, Texture::Trigger, Texture::Water}}
+				{{Pipeline::Default, Pipeline::SceneLines}}
 		};
 	}
 

@@ -10,7 +10,5 @@
 namespace RPG {
 	struct AssetManifest {
 		const std::vector<RPG::Assets::Pipeline> pipelines;
-		const std::vector<RPG::Assets::StaticMesh> staticMeshes;
-		const std::vector<RPG::Assets::Texture> textures;
 	};
 }

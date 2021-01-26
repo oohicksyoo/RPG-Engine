@@ -219,7 +219,8 @@ struct OpenGLPipeline::Internal {
 					//Draw box
 					glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
-					const RPG::OpenGLMesh &mesh = assetManager.GetStaticMesh(RPG::Assets::ResolveStaticMeshPath(RPG::Assets::StaticMesh::Cube));
+					//TODO: We cant garentee that that obj is there and should store a cube in code for it to reference
+					const RPG::OpenGLMesh &mesh = assetManager.GetStaticMesh("assets/models/1_Meter_Cube.obj");
 
 					// Populate the 'u_mvp' uniform in the shader program.
 
@@ -236,8 +237,8 @@ struct OpenGLPipeline::Internal {
 					glUniformMatrix4fv(uniformLocationMVP, 1, GL_FALSE, &(cameraMatrix * modelMatrix)[0][0]);
 
 					// Apply the texture we want to paint the mesh with.
-					RPG::Assets::Texture text = (boxColliderComponent->IsTrigger()) ? RPG::Assets::Texture::Trigger : RPG::Assets::Texture::Collider;
-					assetManager.GetTexture(RPG::Assets::ResolveTexturePath(text)).Bind();
+					std::string colliderText = (boxColliderComponent->IsTrigger()) ? "assets/textures/trigger.png" : "assets/textures/collider.png";
+					assetManager.GetTexture(colliderText).Bind();
 
 					// Bind the vertex and index buffers.
 					glBindBuffer(GL_ARRAY_BUFFER, mesh.GetVertexBufferId());

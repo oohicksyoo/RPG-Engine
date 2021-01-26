@@ -12,24 +12,7 @@ namespace RPG::Assets {
 		SceneLines
 	};
 
-	enum class StaticMesh {
-		Quad,
-		Crate,
-		Cube
-	};
-
-	enum class Texture {
-		Crate,
-		Sprite,
-		Default,
-		Collider,
-		Trigger,
-		Water
-	};
-
 	std::string ResolvePipelinePath(const RPG::Assets::Pipeline& pipeline);
-	std::string ResolveStaticMeshPath(const RPG::Assets::StaticMesh& staticMesh);
-	std::string ResolveTexturePath(const RPG::Assets::Texture& texture);
 }
 
 

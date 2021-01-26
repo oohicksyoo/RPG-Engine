@@ -17,8 +17,6 @@
 
 using RPG::Serializer;
 using RPG::Assets::Pipeline;
-using RPG::Assets::StaticMesh;
-using RPG::Assets::Texture;
 using json = nlohmann::json;
 
 //Saving
@@ -240,28 +238,6 @@ void Serializer::LoadDefaultSavePropertyTypes() {
 	AddPropertySave({"RPG::CameraType", [](std::shared_ptr<RPG::Property> property) -> nlohmann::json {
 		std::any prop = property->GetProperty();
 		RPG::CameraType v = std::any_cast<RPG::CameraType>(prop);
-
-		json obj = json::object();
-
-		obj["Value"] = static_cast<int>(v);
-
-		return obj;
-	}});
-
-	AddPropertySave({"RPG::Assets::StaticMesh", [](std::shared_ptr<RPG::Property> property) -> nlohmann::json {
-		std::any prop = property->GetProperty();
-		RPG::Assets::StaticMesh v = std::any_cast<RPG::Assets::StaticMesh>(prop);
-
-		json obj = json::object();
-
-		obj["Value"] = static_cast<int>(v);
-
-		return obj;
-	}});
-
-	AddPropertySave({"RPG::Assets::Texture", [](std::shared_ptr<RPG::Property> property) -> nlohmann::json {
-		std::any prop = property->GetProperty();
-		RPG::Assets::Texture v = std::any_cast<RPG::Assets::Texture>(prop);
 
 		json obj = json::object();
 
