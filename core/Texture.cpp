@@ -2,11 +2,11 @@
 // Created by Alex on 12/13/2020.
 //
 
-#include "Bitmap.hpp"
+#include "Texture.hpp"
 
-using RPG::Bitmap;
+using RPG::Texture;
 
-struct Bitmap::Internal {
+struct Texture::Internal {
 	SDL_Surface* surface;
 
 	Internal(SDL_Surface* surface) : surface(surface) {}
@@ -16,16 +16,16 @@ struct Bitmap::Internal {
 	}
 };
 
-Bitmap::Bitmap(SDL_Surface* surface) : internal(RPG::MakeInternalPointer<Internal>(surface)) {}
+Texture::Texture(SDL_Surface* surface) : internal(RPG::MakeInternalPointer<Internal>(surface)) {}
 
-uint16_t Bitmap::GetWidth() const {
+uint16_t Texture::GetWidth() const {
 	return static_cast<uint16_t>(internal->surface->w);
 }
 
-uint16_t Bitmap::GetHeight() const {
+uint16_t Texture::GetHeight() const {
 	return static_cast<uint16_t>(internal->surface->h);
 }
 
-void* Bitmap::GetPixelData() const {
+void* Texture::GetPixelData() const {
 	return internal->surface->pixels;
 }

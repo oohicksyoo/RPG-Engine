@@ -124,7 +124,7 @@ namespace {
 	RPG::VulkanImage CreateImage(const RPG::VulkanPhysicalDevice& physicalDevice,
 								 const RPG::VulkanDevice& device,
 								 const RPG::VulkanCommandPool& commandPool,
-								 std::shared_ptr<RPG::Bitmap> bitmap) {
+								 std::shared_ptr<RPG::Texture> bitmap) {
 		uint32_t imageWidth{ bitmap->GetWidth() };
 		uint32_t imageHeight{ bitmap->GetHeight() };
 		#undef max
@@ -236,7 +236,7 @@ struct VulkanTexture::Internal {
 			 const RPG::VulkanPhysicalDevice& physicalDevice,
 			 const RPG::VulkanDevice& device,
 			 const RPG::VulkanCommandPool& commandPool,
-			 std::shared_ptr<RPG::Bitmap> bitmap)
+			 std::shared_ptr<RPG::Texture> bitmap)
 			: textureId(textureId),
 			  image(::CreateImage(physicalDevice, device, commandPool, bitmap)),
 			  imageView(::CreateImageView(device, image)),
@@ -248,7 +248,7 @@ VulkanTexture::VulkanTexture(std::string textureId,
 							 const RPG::VulkanPhysicalDevice& physicalDevice,
 							 const RPG::VulkanDevice& device,
 							 const RPG::VulkanCommandPool& commandPool,
-							 std::shared_ptr<RPG::Bitmap> bitmap)
+							 std::shared_ptr<RPG::Texture> bitmap)
 		: internal(RPG::MakeInternalPointer<Internal>(textureId,
 													physicalDevice,
 													device,

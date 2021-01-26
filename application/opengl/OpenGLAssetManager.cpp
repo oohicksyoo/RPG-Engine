@@ -49,7 +49,7 @@ struct OpenGLAssetManager::Internal {
 			}
 		});
 
-		RPG::Content::GetInstance().OnLoadedAsset<RPG::Bitmap>([this](std::string path, std::shared_ptr<RPG::Bitmap> bitmap) {
+		RPG::Content::GetInstance().OnLoadedAsset<RPG::Texture>([this](std::string path, std::shared_ptr<RPG::Texture> bitmap) {
 			if (textureCache.count(path) == 0) {
 				RPG::Log("AssetManager", "Adding new bitmap to cache (" + path + ")");
 				textureCache.insert(std::make_pair(path, RPG::OpenGLTexture(bitmap)));

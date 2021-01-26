@@ -8,5 +8,5 @@ using RPG::Content;
 
 Content::Content() {
 	meshResourceCache = RPG::ResourceCache<RPG::Mesh>();
-	bitmapResourceCache = RPG::ResourceCache<RPG::Bitmap>();
+	bitmapResourceCache = RPG::ResourceCache<RPG::Texture>();
 }

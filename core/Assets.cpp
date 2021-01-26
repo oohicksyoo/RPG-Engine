@@ -77,7 +77,7 @@ RPG::Mesh RPG::Assets::LoadOBJFile(const std::string& path) {
 	return RPG::Mesh{vertices, indices};
 }
 
-RPG::Bitmap RPG::Assets::LoadBitmapFile(const std::string& path) {
+RPG::Texture RPG::Assets::LoadBitmapFile(const std::string& path) {
 	SDL_RWops* file{SDL_RWFromFile(path.c_str(), "rb")};
 	SDL_Surface* source{IMG_Load_RW(file, 1)};
 	SDL_Rect imageFrame{0, 0, source->w, source->h};
@@ -114,7 +114,7 @@ RPG::Bitmap RPG::Assets::LoadBitmapFile(const std::string& path) {
 
 	SDL_FreeSurface(source);
 
-	return RPG::Bitmap(target);
+	return RPG::Texture(target);
 }
 
 std::vector<char> RPG::Assets::LoadBinaryFile(const std::string& path) {

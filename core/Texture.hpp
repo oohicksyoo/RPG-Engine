@@ -8,9 +8,9 @@
 #include "SDLWrapper.hpp"
 
 namespace RPG {
-	struct Bitmap {
+	struct Texture {
 		public:
-			Bitmap(SDL_Surface* surface);
+			Texture(SDL_Surface* surface);
 			uint16_t GetWidth() const;
 			uint16_t GetHeight() const;
 			void* GetPixelData() const;

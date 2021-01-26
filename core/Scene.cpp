@@ -13,7 +13,7 @@
 	#include "input/InputManager.hpp"
 #endif
 
-#include "Bitmap.hpp"
+#include "Texture.hpp"
 #include "Mesh.hpp"
 #include "Content.hpp"
 
@@ -50,12 +50,12 @@ struct Scene::Internal {
 		RPG::Content::GetInstance().Load<RPG::Mesh>("assets/models/Quad.obj");
 		RPG::Content::GetInstance().Load<RPG::Mesh>("assets/models/crate.obj");
 
-		RPG::Content::GetInstance().Load<RPG::Bitmap>("assets/textures/crate.png");
-		RPG::Content::GetInstance().Load<RPG::Bitmap>("assets/textures/Sprite.png");
-		RPG::Content::GetInstance().Load<RPG::Bitmap>("assets/textures/default.png");
-		RPG::Content::GetInstance().Load<RPG::Bitmap>("assets/textures/collider.png");
-		RPG::Content::GetInstance().Load<RPG::Bitmap>("assets/textures/trigger.png");
-		RPG::Content::GetInstance().Load<RPG::Bitmap>("assets/textures/Water.png");
+		RPG::Content::GetInstance().Load<RPG::Texture>("assets/textures/crate.png");
+		RPG::Content::GetInstance().Load<RPG::Texture>("assets/textures/Sprite.png");
+		RPG::Content::GetInstance().Load<RPG::Texture>("assets/textures/default.png");
+		RPG::Content::GetInstance().Load<RPG::Texture>("assets/textures/collider.png");
+		RPG::Content::GetInstance().Load<RPG::Texture>("assets/textures/trigger.png");
+		RPG::Content::GetInstance().Load<RPG::Texture>("assets/textures/Water.png");
 
 		hasLoaded = true;
 

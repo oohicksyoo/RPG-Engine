@@ -8,7 +8,7 @@
 using RPG::OpenGLTexture;
 
 namespace {
-	GLuint CreateTexture(std::shared_ptr<RPG::Bitmap> bitmap) {
+	GLuint CreateTexture(std::shared_ptr<RPG::Texture> bitmap) {
 		GLuint textureId;
 
 		glGenTextures(1, &textureId);
@@ -34,14 +34,14 @@ namespace {
 struct OpenGLTexture::Internal {
 	const GLuint textureId;
 
-	Internal(std::shared_ptr<RPG::Bitmap> bitmap) : textureId(::CreateTexture(bitmap)) {}
+	Internal(std::shared_ptr<RPG::Texture> bitmap) : textureId(::CreateTexture(bitmap)) {}
 
 	~Internal() {
 		glDeleteTextures(1, &textureId);
 	}
 };
 
-OpenGLTexture::OpenGLTexture(std::shared_ptr<RPG::Bitmap> bitmap) : internal(RPG::MakeInternalPointer<Internal>(bitmap)) {}
+OpenGLTexture::OpenGLTexture(std::shared_ptr<RPG::Texture> bitmap) : internal(RPG::MakeInternalPointer<Internal>(bitmap)) {}
 
 void OpenGLTexture::Bind() const {
 	glBindTexture(GL_TEXTURE_2D, internal->textureId);

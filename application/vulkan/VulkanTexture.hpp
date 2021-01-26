@@ -5,7 +5,7 @@
 #pragma once
 
 #include "../../core/AssetInventory.hpp"
-#include "../../core/Bitmap.hpp"
+#include "../../core/Texture.hpp"
 #include "../../core/GraphicsWrapper.hpp"
 #include "../../core/InternalPointer.hpp"
 #include "VulkanCommandPool.hpp"
@@ -20,7 +20,7 @@ namespace RPG {
 						  const RPG::VulkanPhysicalDevice& physicalDevice,
 						  const RPG::VulkanDevice& device,
 						  const RPG::VulkanCommandPool& commandPool,
-						  std::shared_ptr<RPG::Bitmap> bitmap);
+						  std::shared_ptr<RPG::Texture> bitmap);
 			std::string GetTextureId() const;
 			const RPG::VulkanImageView& GetImageView() const;
 			const vk::Sampler& GetSampler() const;

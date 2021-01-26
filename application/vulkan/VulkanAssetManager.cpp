@@ -40,7 +40,7 @@ namespace {
 							   mesh);
 	}
 
-	RPG::VulkanTexture CreateTexture(std::shared_ptr<RPG::Bitmap> bitmap,
+	RPG::VulkanTexture CreateTexture(std::shared_ptr<RPG::Texture> bitmap,
 									 std::string bitmapPath,
 									 const RPG::VulkanPhysicalDevice& physicalDevice,
 									 const RPG::VulkanDevice& device,
@@ -81,7 +81,7 @@ struct VulkanAssetManager::Internal {
 			}
 		});
 
-		RPG::Content::GetInstance().OnLoadedAsset<RPG::Bitmap>([this](std::string path, std::shared_ptr<RPG::Bitmap> bitmap) {
+		RPG::Content::GetInstance().OnLoadedAsset<RPG::Texture>([this](std::string path, std::shared_ptr<RPG::Texture> bitmap) {
 			if (textureCache.count(path) == 0) {
 				RPG::Log("AssetManager", "Adding new bitmap to cache (" + path + ")");
 				textureCache.insert(std::make_pair(path, ::CreateTexture(bitmap, path, this->physicalDevice, this->device, this->commandPool, this->renderContext)));

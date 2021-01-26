@@ -7,7 +7,7 @@
 #include "Singleton.hpp"
 #include "ResourceCache.hpp"
 #include "Mesh.hpp"
-#include "Bitmap.hpp"
+#include "Texture.hpp"
 #include "Log.hpp"
 #include <string>
 #include <memory>
@@ -30,8 +30,8 @@ namespace RPG {
 		private:
 			ResourceCache<RPG::Mesh> meshResourceCache;
 			std::function<void(std::string path, std::shared_ptr<RPG::Mesh>)> meshOnLoadedCallback;
-			ResourceCache<RPG::Bitmap> bitmapResourceCache;
-			std::function<void(std::string path, std::shared_ptr<RPG::Bitmap>)> bitmapOnLoadedCallback;
+			ResourceCache<RPG::Texture> bitmapResourceCache;
+			std::function<void(std::string path, std::shared_ptr<RPG::Texture>)> bitmapOnLoadedCallback;
 
 	};
 
@@ -46,8 +46,8 @@ namespace RPG {
 	}
 
 	template<>
-	inline std::shared_ptr<RPG::Bitmap> Content::Load<RPG::Bitmap>(std::string path) {
-		RPG::Log("Content", "Loading Bitmap Asset " + path);
+	inline std::shared_ptr<RPG::Texture> Content::Load<RPG::Texture>(std::string path) {
+		RPG::Log("Content", "Loading Texture Asset " + path);
 		auto bitmap = bitmapResourceCache.Load(path);
 		if (bitmapOnLoadedCallback != nullptr) {
 			bitmapOnLoadedCallback(path, bitmap);
@@ -61,7 +61,7 @@ namespace RPG {
 	}
 
 	template<>
-	inline void Content::OnLoadedAsset<RPG::Bitmap>(std::function<void(std::string path, std::shared_ptr<RPG::Bitmap>)> callback) {
+	inline void Content::OnLoadedAsset<RPG::Texture>(std::function<void(std::string path, std::shared_ptr<RPG::Texture>)> callback) {
 		bitmapOnLoadedCallback = callback;
 	}
 }
