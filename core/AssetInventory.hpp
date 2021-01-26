@@ -23,7 +23,8 @@ namespace RPG::Assets {
 		Sprite,
 		Default,
 		Collider,
-		Trigger
+		Trigger,
+		Water
 	};
 
 	std::string ResolvePipelinePath(const RPG::Assets::Pipeline& pipeline);

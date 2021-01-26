@@ -59,7 +59,7 @@ struct Scene::Internal {
 		return RPG::AssetManifest {
 				{{Pipeline::Default, Pipeline::SceneLines}},
 				{{StaticMesh::Quad, StaticMesh::Crate, StaticMesh::Cube}},
-				{{Texture::Crate, Texture::Sprite, Texture::Default, Texture::Collider, Texture::Trigger}}
+				{{Texture::Crate, Texture::Sprite, Texture::Default, Texture::Collider, Texture::Trigger, Texture::Water}}
 		};
 	}
 

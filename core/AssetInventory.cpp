@@ -39,6 +39,8 @@ std::string RPG::Assets::ResolveTexturePath(const RPG::Assets::Texture &texture)
 			return "assets/textures/collider.png";
 		case RPG::Assets::Texture::Trigger:
 			return "assets/textures/trigger.png";
+		case RPG::Assets::Texture::Water:
+			return "assets/textures/Water.png";
 		default:
 			return "";
 	}
