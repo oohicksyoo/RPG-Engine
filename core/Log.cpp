@@ -15,12 +15,14 @@ void RPG::Log(const std::string &tag, const std::string &message) {
 		//std::cout << Blue << "[" << tag << "] " << White << message << std::endl;
 		std::cout << "[" << tag << "] " << message << std::endl;
 
-		RPG::LogFile log = RPG::LogFile();
-		log.type = RPG::LogFileType::NormalLog;
-		log.caller = tag;
-		log.message = message;
-		log.isLua = false;
-		RPG::EditorStats::GetInstance().AddLog(log);
+		#ifdef RPG_EDITOR 
+			RPG::LogFile log = RPG::LogFile();
+			log.type = RPG::LogFileType::NormalLog;
+			log.caller = tag;
+			log.message = message;
+			log.isLua = false;
+			RPG::EditorStats::GetInstance().AddLog(log);
+		#endif
 	#endif
 }
 
