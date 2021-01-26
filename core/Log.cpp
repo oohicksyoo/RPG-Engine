@@ -15,7 +15,7 @@ void RPG::Log(const std::string &tag, const std::string &message) {
 		//std::cout << Blue << "[" << tag << "] " << White << message << std::endl;
 		std::cout << "[" << tag << "] " << message << std::endl;
 
-		#ifdef RPG_EDITOR 
+		#ifdef RPG_EDITOR
 			RPG::LogFile log = RPG::LogFile();
 			log.type = RPG::LogFileType::NormalLog;
 			log.caller = tag;
