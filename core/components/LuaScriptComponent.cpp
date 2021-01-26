@@ -137,6 +137,47 @@ struct LuaScriptComponent::Internal {
 		});
 		lua_setglobal(L, "Lerp");
 
+		lua_pushcfunction(L, [](lua_State* L) -> int {
+			if (lua_gettop(L) != 2) return -1;
+
+			float x = (float)lua_tonumber(L, -2);
+			float y = (float)lua_tonumber(L, -1);
+
+			lua_newtable(L);
+			lua_pushstring(L, "x");
+			lua_pushnumber(L, x);
+			lua_settable(L, -3);
+			lua_pushstring(L, "y");
+			lua_pushnumber(L, y);
+			lua_settable(L, -3);
+
+			return 1;
+		});
+		lua_setglobal(L, "Vector2");
+
+		lua_pushcfunction(L, [](lua_State* L) -> int {
+			if (lua_gettop(L) != 3) return -1;
+
+			float x = (float)lua_tonumber(L, -3);
+			float y = (float)lua_tonumber(L, -2);
+			float z = (float)lua_tonumber(L, -1);
+
+			lua_newtable(L);
+			lua_pushstring(L, "x");
+			lua_pushnumber(L, x);
+			lua_settable(L, -3);
+			lua_pushstring(L, "y");
+			lua_pushnumber(L, y);
+			lua_settable(L, -3);
+			lua_pushstring(L, "z");
+			lua_pushnumber(L, z);
+			lua_settable(L, -3);
+
+			return 1;
+		});
+		lua_setglobal(L, "Vector3");
+
+
 		//Input
 		lua_pushcfunction(L, [](lua_State* L) -> int {
 			if (lua_gettop(L) != 2) return -1;
