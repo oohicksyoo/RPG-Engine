@@ -7,6 +7,7 @@
 #include "../../core/Log.hpp"
 #include "../../core/Content.hpp"
 #include <unordered_map>
+#include <memory>
 
 using RPG::OpenGLAssetManager;
 
@@ -28,25 +29,31 @@ namespace {
 
 		RPG::Log("Grid", "Lines: " + std::to_string(lines.size()));
 
-		return RPG::OpenGLMesh(RPG::Mesh(lines, {}));
+		return RPG::OpenGLMesh(std::make_unique<RPG::Mesh>(RPG::Mesh(lines, {})));
 	}
 }
 
 struct OpenGLAssetManager::Internal {
 	std::unordered_map<RPG::Assets::Pipeline, RPG::OpenGLPipeline> pipelineCache;
-	std::unordered_map<RPG::Assets::StaticMesh, RPG::OpenGLMesh> staticMeshCache;
-	std::unordered_map<RPG::Assets::Texture, RPG::OpenGLTexture> textureCache;
+
+	std::unordered_map<std::string, RPG::OpenGLMesh> meshCache;
+	std::unordered_map<std::string, RPG::OpenGLTexture> textureCache;
+
 	RPG::OpenGLMesh lines;
 
 	Internal() : lines(::CreateSceneGridLines()) {
 		RPG::Content::GetInstance().OnLoadedAsset<RPG::Mesh>([this](std::string path, std::shared_ptr<RPG::Mesh> mesh) {
-			//TODO: Insert into opengl cache that this asset is loaded
-			RPG::Log("AssetManager", "On Asset Loaded Mesh");
+			if (meshCache.count(path) == 0) {
+				RPG::Log("AssetManager", "Adding new mesh to cache (" + path + ")");
+				meshCache.insert(std::make_pair(path, RPG::OpenGLMesh(mesh)));
+			}
 		});
 
 		RPG::Content::GetInstance().OnLoadedAsset<RPG::Bitmap>([this](std::string path, std::shared_ptr<RPG::Bitmap> bitmap) {
-			//TODO: Insert into opengl cache that this asset is loaded
-			RPG::Log("AssetManager", "On Asset Loaded Mesh");
+			if (textureCache.count(path) == 0) {
+				RPG::Log("AssetManager", "Adding new bitmap to cache (" + path + ")");
+				textureCache.insert(std::make_pair(path, RPG::OpenGLTexture(bitmap)));
+			}
 		});
 	}
 
@@ -58,26 +65,8 @@ struct OpenGLAssetManager::Internal {
 		}
 	}
 
-	void LoadStaticMeshes(const std::vector<RPG::Assets::StaticMesh>& staticMeshes) {
-		for (const auto& staticMesh : staticMeshes) {
-			if (staticMeshCache.count(staticMesh) == 0) {
-				staticMeshCache.insert(std::make_pair(staticMesh, RPG::OpenGLMesh(RPG::Assets::LoadOBJFile(RPG::Assets::ResolveStaticMeshPath(staticMesh)))));
-			}
-		}
-	}
-
-	void LoadTextures(const std::vector<RPG::Assets::Texture>& textures) {
-		for (const auto& texture : textures) {
-			if (textureCache.count(texture) == 0) {
-				textureCache.insert(std::pair(texture, RPG::OpenGLTexture(RPG::Assets::LoadBitmapFile(RPG::Assets::ResolveTexturePath(texture)))));
-			}
-		}
-	}
-
 	void LoadAssetManifest(const RPG::AssetManifest& assetManifest) {
 		LoadPipelines(assetManifest.pipelines);
-		LoadStaticMeshes(assetManifest.staticMeshes);
-		LoadTextures(assetManifest.textures);
 	}
 };
 
@@ -91,12 +80,12 @@ const RPG::OpenGLPipeline& OpenGLAssetManager::GetPipeline(const RPG::Assets::Pi
 	return internal->pipelineCache.at(pipeline);
 }
 
-const RPG::OpenGLMesh& OpenGLAssetManager::GetStaticMesh(const RPG::Assets::StaticMesh& staticMesh) const {
-	return internal->staticMeshCache.at(staticMesh);
+const RPG::OpenGLMesh& OpenGLAssetManager::GetStaticMesh(std::string path) const {
+	return internal->meshCache.at(path);
 }
 
-const RPG::OpenGLTexture& OpenGLAssetManager::GetTexture(const RPG::Assets::Texture& texture) const {
-	return internal->textureCache.at(texture);
+const RPG::OpenGLTexture& OpenGLAssetManager::GetTexture(std::string path) const {
+	return internal->textureCache.at(path);
 }
 
 const RPG::OpenGLMesh& OpenGLAssetManager::GetSceneLines() const {

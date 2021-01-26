@@ -8,7 +8,7 @@
 using RPG::OpenGLTexture;
 
 namespace {
-	GLuint CreateTexture(const RPG::Bitmap& bitmap) {
+	GLuint CreateTexture(std::shared_ptr<RPG::Bitmap> bitmap) {
 		GLuint textureId;
 
 		glGenTextures(1, &textureId);
@@ -19,12 +19,12 @@ namespace {
 				GL_TEXTURE_2D,
 				0,
 				GL_RGBA,
-				bitmap.GetWidth(),
-				bitmap.GetHeight(),
+				bitmap->GetWidth(),
+				bitmap->GetHeight(),
 				0,
 				GL_RGBA,
 				GL_UNSIGNED_BYTE,
-				bitmap.GetPixelData());
+				bitmap->GetPixelData());
 		glGenerateMipmap(GL_TEXTURE_2D);
 
 		return textureId;
@@ -34,14 +34,14 @@ namespace {
 struct OpenGLTexture::Internal {
 	const GLuint textureId;
 
-	Internal(const RPG::Bitmap& bitmap) : textureId(::CreateTexture(bitmap)) {}
+	Internal(std::shared_ptr<RPG::Bitmap> bitmap) : textureId(::CreateTexture(bitmap)) {}
 
 	~Internal() {
 		glDeleteTextures(1, &textureId);
 	}
 };
 
-OpenGLTexture::OpenGLTexture(const RPG::Bitmap& bitmap) : internal(RPG::MakeInternalPointer<Internal>(bitmap)) {}
+OpenGLTexture::OpenGLTexture(std::shared_ptr<RPG::Bitmap> bitmap) : internal(RPG::MakeInternalPointer<Internal>(bitmap)) {}
 
 void OpenGLTexture::Bind() const {
 	glBindTexture(GL_TEXTURE_2D, internal->textureId);

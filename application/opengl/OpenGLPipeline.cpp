@@ -219,7 +219,7 @@ struct OpenGLPipeline::Internal {
 					//Draw box
 					glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
-					const RPG::OpenGLMesh &mesh = assetManager.GetStaticMesh(RPG::Assets::StaticMesh::Cube);
+					const RPG::OpenGLMesh &mesh = assetManager.GetStaticMesh(RPG::Assets::ResolveStaticMeshPath(RPG::Assets::StaticMesh::Cube));
 
 					// Populate the 'u_mvp' uniform in the shader program.
 
@@ -236,8 +236,8 @@ struct OpenGLPipeline::Internal {
 					glUniformMatrix4fv(uniformLocationMVP, 1, GL_FALSE, &(cameraMatrix * modelMatrix)[0][0]);
 
 					// Apply the texture we want to paint the mesh with.
-					assetManager.GetTexture((boxColliderComponent->IsTrigger()) ? RPG::Assets::Texture::Trigger
-																				: RPG::Assets::Texture::Collider).Bind();
+					RPG::Assets::Texture text = (boxColliderComponent->IsTrigger()) ? RPG::Assets::Texture::Trigger : RPG::Assets::Texture::Collider;
+					assetManager.GetTexture(RPG::Assets::ResolveTexturePath(text)).Bind();
 
 					// Bind the vertex and index buffers.
 					glBindBuffer(GL_ARRAY_BUFFER, mesh.GetVertexBufferId());
@@ -280,8 +280,9 @@ struct OpenGLPipeline::Internal {
 		}
 
 		//Render Mesh
-		const RPG::OpenGLMesh &mesh = assetManager.GetStaticMesh(
-				(meshComponent != nullptr) ? meshComponent->GetMesh() : spriteComponent->GetMesh());
+		const RPG::OpenGLMesh &mesh = assetManager.GetStaticMesh(RPG::Assets::ResolveStaticMeshPath(
+				(meshComponent != nullptr) ? meshComponent->GetMesh() : spriteComponent->GetMesh()
+				));
 
 		// Populate the 'u_mvp' uniform in the shader program.
 
@@ -289,8 +290,8 @@ struct OpenGLPipeline::Internal {
 						   &(cameraMatrix * transform->GetTransformMatrix())[0][0]);
 
 		// Apply the texture we want to paint the mesh with.
-		assetManager.GetTexture(
-				(meshComponent != nullptr) ? meshComponent->GetTexture() : spriteComponent->GetTexture()).Bind();
+		RPG::Assets::Texture text = (meshComponent != nullptr) ? meshComponent->GetTexture() : spriteComponent->GetTexture();
+		assetManager.GetTexture(RPG::Assets::ResolveTexturePath(text)).Bind();
 
 		// Bind the vertex and index buffers.
 		glBindBuffer(GL_ARRAY_BUFFER, mesh.GetVertexBufferId());

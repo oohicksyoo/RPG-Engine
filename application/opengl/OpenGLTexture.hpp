@@ -6,10 +6,11 @@
 
 #include "../../core/Bitmap.hpp"
 #include "../../core/InternalPointer.hpp"
+#include <memory>
 
 namespace RPG {
 	struct OpenGLTexture {
-			OpenGLTexture(const RPG::Bitmap& bitmap);
+			OpenGLTexture(std::shared_ptr<RPG::Bitmap> bitmap);
 			void Bind() const;
 
 		private:

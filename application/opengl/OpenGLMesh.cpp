@@ -8,10 +8,10 @@
 using RPG::OpenGLMesh;
 
 namespace {
-	GLuint CreateVertexBuffer(const RPG::Mesh& mesh) {
+	GLuint CreateVertexBuffer(std::shared_ptr<RPG::Mesh> mesh) {
 		std::vector<float> bufferData;
 
-		for (const auto& vertex : mesh.GetVertices()) {
+		for (const auto& vertex : mesh->GetVertices()) {
 			// Position
 			bufferData.push_back(vertex.position.x);
 			bufferData.push_back(vertex.position.y);
@@ -30,11 +30,11 @@ namespace {
 		return bufferId;
 	}
 
-	GLuint CreateIndexBuffer(const RPG::Mesh& mesh) {
+	GLuint CreateIndexBuffer(std::shared_ptr<RPG::Mesh> mesh) {
 		GLuint bufferId;
 		glGenBuffers(1, &bufferId);
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferId);
-		glBufferData(GL_ELEMENT_ARRAY_BUFFER, mesh.GetIndices().size() * sizeof(uint32_t), mesh.GetIndices().data(), GL_STATIC_DRAW);
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, mesh->GetIndices().size() * sizeof(uint32_t), mesh->GetIndices().data(), GL_STATIC_DRAW);
 
 		return bufferId;
 	}
@@ -45,9 +45,9 @@ struct OpenGLMesh::Internal {
 	const GLuint bufferIdIndices;
 	const uint32_t numIndices;
 
-	Internal(const RPG::Mesh& mesh) : bufferIdVertices(::CreateVertexBuffer(mesh)),
+	Internal(std::shared_ptr<RPG::Mesh> mesh) : bufferIdVertices(::CreateVertexBuffer(mesh)),
 									  bufferIdIndices(::CreateIndexBuffer(mesh)),
-									  numIndices(static_cast<uint32_t>(mesh.GetIndices().size())) {}
+									  numIndices(static_cast<uint32_t>(mesh->GetIndices().size())) {}
 
 	~Internal() {
 		glDeleteBuffers(1, &bufferIdVertices);
@@ -55,7 +55,7 @@ struct OpenGLMesh::Internal {
 	}
 };
 
-OpenGLMesh::OpenGLMesh(const RPG::Mesh& mesh) : internal(RPG::MakeInternalPointer<Internal>(mesh)) {}
+OpenGLMesh::OpenGLMesh(std::shared_ptr<RPG::Mesh> mesh) : internal(RPG::MakeInternalPointer<Internal>(mesh)) {}
 
 const GLuint& OpenGLMesh::GetVertexBufferId() const {
 	return internal->bufferIdVertices;

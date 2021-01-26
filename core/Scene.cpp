@@ -48,11 +48,16 @@ struct Scene::Internal {
 											oldMousePosition({0,0}) {}
 
 	RPG::AssetManifest GetAssetManifest() {
-		std::shared_ptr<RPG::Mesh> mesh = RPG::Content::GetInstance().Load<RPG::Mesh>("assets/models/1_Meter_Cube.obj");
-		std::shared_ptr<RPG::Mesh> mesh2 = RPG::Content::GetInstance().Load<RPG::Mesh>("assets/models/1_Meter_Cube.obj");
+		RPG::Content::GetInstance().Load<RPG::Mesh>("assets/models/1_Meter_Cube.obj");
+		RPG::Content::GetInstance().Load<RPG::Mesh>("assets/models/Quad.obj");
+		RPG::Content::GetInstance().Load<RPG::Mesh>("assets/models/crate.obj");
 
-		std::shared_ptr<RPG::Bitmap> bitmap = RPG::Content::GetInstance().Load<RPG::Bitmap>("assets/textures/default.png");
-		std::shared_ptr<RPG::Bitmap> bitmap2 = RPG::Content::GetInstance().Load<RPG::Bitmap>("assets/textures/default.png");
+		RPG::Content::GetInstance().Load<RPG::Bitmap>("assets/textures/crate.png");
+		RPG::Content::GetInstance().Load<RPG::Bitmap>("assets/textures/Sprite.png");
+		RPG::Content::GetInstance().Load<RPG::Bitmap>("assets/textures/default.png");
+		RPG::Content::GetInstance().Load<RPG::Bitmap>("assets/textures/collider.png");
+		RPG::Content::GetInstance().Load<RPG::Bitmap>("assets/textures/trigger.png");
+		RPG::Content::GetInstance().Load<RPG::Bitmap>("assets/textures/Water.png");
 
 		hasLoaded = true;
 
