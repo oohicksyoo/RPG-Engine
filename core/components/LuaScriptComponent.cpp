@@ -22,7 +22,7 @@ struct LuaScriptComponent::Internal {
 	bool isRunnable = false;
 
 	Internal(std::string path, std::shared_ptr<RPG::GameObject> gameObject, std::string guid)  : guid(guid),
-								  path(std::make_unique<RPG::Property>(path, "Path", "std::string")),
+								  path(std::make_unique<RPG::Property>(path, "Path", "std::string", true, "Lua")),
 								  myGameObject(gameObject),
 								  L(luaL_newstate()) {}
 

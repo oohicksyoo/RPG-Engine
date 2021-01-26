@@ -15,7 +15,7 @@ struct SpriteComponent::Internal {
 	Internal(std::string mesh, std::string texture, std::string guid)
 			: guid(guid),
 			  mesh(std::make_unique<RPG::Property>(mesh, "Mesh", "std::string")),
-			  texture(std::make_unique<RPG::Property>(texture, "Texture", "std::string")) {}
+			  texture(std::make_unique<RPG::Property>(texture, "Texture", "std::string", true, "Texture")) {}
 };
 
 SpriteComponent::SpriteComponent(std::string texture, std::string guid) : internal(MakeInternalPointer<Internal>("assets/models/Quad.obj", texture, guid)) {}
