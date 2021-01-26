@@ -101,7 +101,7 @@ struct LuaScriptComponent::Internal {
 			gameObject->get()->GetTransform()->SetPosition({posX, posY, posZ});
 			return 0;
 		});
-		lua_setglobal(L, "MoveGameObject");
+		lua_setglobal(L, "SetPosition");
 
 		//Get GameObject Position
 		lua_pushcfunction(L, [](lua_State* L) -> int {
