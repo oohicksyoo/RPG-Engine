@@ -108,7 +108,7 @@ struct VulkanContext::Internal {
 				 device(RPG::VulkanDevice(physicalDevice, surface)),
 				 commandPool(RPG::VulkanCommandPool(device)),
 				 renderContext(RPG::VulkanRenderContext(window, physicalDevice, device, surface, commandPool)),
-				 assetManager(RPG::VulkanAssetManager()){
+				 assetManager(RPG::VulkanAssetManager(physicalDevice, device, renderContext, commandPool)){
 		RPG::Log("RPG::VulkanContext", "Initialized Vulkan context successfully.");
 	}
 

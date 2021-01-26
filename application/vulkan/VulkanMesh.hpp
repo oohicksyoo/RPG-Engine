@@ -10,6 +10,7 @@
 #include "VulkanCommandPool.hpp"
 #include "VulkanDevice.hpp"
 #include "VulkanPhysicalDevice.hpp"
+#include <memory>
 
 namespace RPG {
 	struct VulkanMesh {
@@ -17,7 +18,7 @@ namespace RPG {
 			VulkanMesh(const RPG::VulkanPhysicalDevice& physicalDevice,
 					   const RPG::VulkanDevice& device,
 					   const RPG::VulkanCommandPool& commandPool,
-					   const RPG::Mesh& mesh);
+					   std::shared_ptr<RPG::Mesh> mesh);
 			const vk::Buffer& GetVertexBuffer() const;
 			const vk::Buffer& GetIndexBuffer() const;
 			const uint32_t& GetNumIndices() const;

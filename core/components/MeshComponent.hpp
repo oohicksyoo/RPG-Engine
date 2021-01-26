@@ -7,11 +7,12 @@
 #include "../IComponent.hpp"
 #include "../InternalPointer.hpp"
 #include "../AssetInventory.hpp"
+#include <string>
 
 namespace RPG {
 	struct MeshComponent : public IComponent {
 		public:
-			MeshComponent(RPG::Assets::StaticMesh mesh, RPG::Assets::Texture texture, std::string guid = RPG::Guid::GenerateGuid());
+			MeshComponent(std::string mesh, std::string texture, std::string guid = RPG::Guid::GenerateGuid());
 			void Awake() override;
 			void Start() override;
 			void Update(const float &delta) override;
@@ -19,8 +20,8 @@ namespace RPG {
 			std::vector<std::shared_ptr<RPG::Property>> GetProperties() override;
 			std::string Guid() override;
 			bool AllowMultiple() { return false; };
-			RPG::Assets::StaticMesh GetMesh();
-			RPG::Assets::Texture GetTexture();
+			std::string GetMesh();
+			std::string GetTexture();
 
 		private:
 			struct Internal;

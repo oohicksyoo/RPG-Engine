@@ -16,12 +16,12 @@
 namespace RPG {
 	struct VulkanTexture {
 		public:
-			VulkanTexture(const RPG::Assets::Texture& textureId,
+			VulkanTexture(std::string textureId,
 						  const RPG::VulkanPhysicalDevice& physicalDevice,
 						  const RPG::VulkanDevice& device,
 						  const RPG::VulkanCommandPool& commandPool,
-						  const RPG::Bitmap& bitmap);
-			const RPG::Assets::Texture& GetTextureId() const;
+						  std::shared_ptr<RPG::Bitmap> bitmap);
+			std::string GetTextureId() const;
 			const RPG::VulkanImageView& GetImageView() const;
 			const vk::Sampler& GetSampler() const;
 

@@ -11,7 +11,7 @@
 namespace RPG {
 	struct SpriteComponent : public IComponent {
 		public:
-			SpriteComponent(RPG::Assets::Texture texture, std::string guid = RPG::Guid::GenerateGuid());
+			SpriteComponent(std::string texture, std::string guid = RPG::Guid::GenerateGuid());
 			void Awake() override;
 			void Start() override;
 			void Update(const float &delta) override;
@@ -19,8 +19,8 @@ namespace RPG {
 			std::vector<std::shared_ptr<RPG::Property>> GetProperties() override;
 			std::string Guid() override;
 			bool AllowMultiple() { return false; };
-			RPG::Assets::StaticMesh GetMesh();
-			RPG::Assets::Texture GetTexture();
+			std::string GetMesh();
+			std::string GetTexture();
 
 		private:
 			struct Internal;

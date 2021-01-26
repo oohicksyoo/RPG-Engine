@@ -124,9 +124,9 @@ namespace {
 	RPG::VulkanImage CreateImage(const RPG::VulkanPhysicalDevice& physicalDevice,
 								 const RPG::VulkanDevice& device,
 								 const RPG::VulkanCommandPool& commandPool,
-								 const RPG::Bitmap& bitmap) {
-		uint32_t imageWidth{ bitmap.GetWidth() };
-		uint32_t imageHeight{ bitmap.GetHeight() };
+								 std::shared_ptr<RPG::Bitmap> bitmap) {
+		uint32_t imageWidth{ bitmap->GetWidth() };
+		uint32_t imageHeight{ bitmap->GetHeight() };
 		#undef max
 		uint32_t mipLevels{ static_cast<uint32_t>(std::floor(std::log2(std::max(imageWidth, imageHeight)))) + 1 };
 		vk::DeviceSize bufferSize{ imageWidth * imageHeight * 4 };
@@ -137,7 +137,7 @@ namespace {
 				bufferSize,
 				vk::BufferUsageFlagBits::eTransferSrc,
 				vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent,
-				bitmap.GetPixelData()
+				bitmap->GetPixelData()
 		};
 
 		RPG::VulkanImage image{
@@ -227,16 +227,16 @@ namespace {
 }
 
 struct VulkanTexture::Internal {
-	const RPG::Assets::Texture textureId;
+	std::string textureId;
 	const RPG::VulkanImage image;
 	const RPG::VulkanImageView imageView;
 	const vk::UniqueSampler sampler;
 
-	Internal(const RPG::Assets::Texture& textureId,
+	Internal(std::string textureId,
 			 const RPG::VulkanPhysicalDevice& physicalDevice,
 			 const RPG::VulkanDevice& device,
 			 const RPG::VulkanCommandPool& commandPool,
-			 const RPG::Bitmap& bitmap)
+			 std::shared_ptr<RPG::Bitmap> bitmap)
 			: textureId(textureId),
 			  image(::CreateImage(physicalDevice, device, commandPool, bitmap)),
 			  imageView(::CreateImageView(device, image)),
@@ -244,11 +244,11 @@ struct VulkanTexture::Internal {
 	}
 };
 
-VulkanTexture::VulkanTexture(const RPG::Assets::Texture& textureId,
+VulkanTexture::VulkanTexture(std::string textureId,
 							 const RPG::VulkanPhysicalDevice& physicalDevice,
 							 const RPG::VulkanDevice& device,
 							 const RPG::VulkanCommandPool& commandPool,
-							 const RPG::Bitmap& bitmap)
+							 std::shared_ptr<RPG::Bitmap> bitmap)
 		: internal(RPG::MakeInternalPointer<Internal>(textureId,
 													physicalDevice,
 													device,
@@ -256,7 +256,7 @@ VulkanTexture::VulkanTexture(const RPG::Assets::Texture& textureId,
 													bitmap)) {
 }
 
-const RPG::Assets::Texture& VulkanTexture::GetTextureId() const {
+std::string VulkanTexture::GetTextureId() const {
 	return internal->textureId;
 }
 

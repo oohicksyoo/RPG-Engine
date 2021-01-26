@@ -76,7 +76,7 @@ struct LuaScriptComponent::Internal {
 		});
 		lua_setglobal(L, "Log");
 
-		//Creates a GameObject for the lua script
+		/*//Creates a GameObject for the lua script
 		lua_pushcfunction(L, [](lua_State* L) -> int {
 			void* memory = lua_newuserdata(L, sizeof(std::shared_ptr<RPG::GameObject>));
 			auto gameObject = std::make_shared<RPG::GameObject>();
@@ -88,7 +88,7 @@ struct LuaScriptComponent::Internal {
 
 			return 1;
 		});
-		lua_setglobal(L, "CreateGameObject");
+		lua_setglobal(L, "CreateGameObject");*/
 
 		//Move GameObject to location
 		lua_pushcfunction(L, [](lua_State* L) -> int {

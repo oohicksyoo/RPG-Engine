@@ -202,10 +202,10 @@ struct OpenGLPipeline::Internal {
 
 		bool canRenderMesh = true;
 		auto transform = gameObject->GetTransform();
-		auto meshComponent = gameObject->GetComponent<std::shared_ptr<RPG::MeshComponent>, RPG::MeshComponent>(std::make_unique<RPG::MeshComponent>(RPG::Assets::StaticMesh::Crate, RPG::Assets::Texture::Crate));
+		auto meshComponent = gameObject->GetComponent<std::shared_ptr<RPG::MeshComponent>, RPG::MeshComponent>(std::make_unique<RPG::MeshComponent>("", ""));
 		std::shared_ptr<RPG::SpriteComponent> spriteComponent;
 		if (meshComponent == nullptr) {
-			spriteComponent = gameObject->GetComponent<std::shared_ptr<RPG::SpriteComponent>, RPG::SpriteComponent>(std::make_unique<RPG::SpriteComponent>(RPG::Assets::Texture::Crate));
+			spriteComponent = gameObject->GetComponent<std::shared_ptr<RPG::SpriteComponent>, RPG::SpriteComponent>(std::make_unique<RPG::SpriteComponent>(""));
 			if (spriteComponent == nullptr)  {
 				canRenderMesh = false;
 			}
@@ -280,9 +280,9 @@ struct OpenGLPipeline::Internal {
 		}
 
 		//Render Mesh
-		const RPG::OpenGLMesh &mesh = assetManager.GetStaticMesh(RPG::Assets::ResolveStaticMeshPath(
-				(meshComponent != nullptr) ? meshComponent->GetMesh() : spriteComponent->GetMesh()
-				));
+		std::string meshString = (meshComponent != nullptr) ? meshComponent->GetMesh() : spriteComponent->GetMesh();
+		if (meshString == "") return;
+		const RPG::OpenGLMesh &mesh = assetManager.GetStaticMesh(meshString);
 
 		// Populate the 'u_mvp' uniform in the shader program.
 
@@ -290,8 +290,9 @@ struct OpenGLPipeline::Internal {
 						   &(cameraMatrix * transform->GetTransformMatrix())[0][0]);
 
 		// Apply the texture we want to paint the mesh with.
-		RPG::Assets::Texture text = (meshComponent != nullptr) ? meshComponent->GetTexture() : spriteComponent->GetTexture();
-		assetManager.GetTexture(RPG::Assets::ResolveTexturePath(text)).Bind();
+		std::string textureString = (meshComponent != nullptr) ? meshComponent->GetTexture() : spriteComponent->GetTexture();
+		if (textureString == "") return;
+		assetManager.GetTexture(textureString).Bind();
 
 		// Bind the vertex and index buffers.
 		glBindBuffer(GL_ARRAY_BUFFER, mesh.GetVertexBufferId());

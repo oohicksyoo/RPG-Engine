@@ -295,13 +295,13 @@ void Serializer::LoadDefaultLoadComponentTypes() {
 	}});
 
 	AddComponentLoad({"MeshComponent", [](nlohmann::json j, std::shared_ptr<RPG::GameObject> go) -> std::shared_ptr<RPG::IComponent> {
-		RPG::Assets::StaticMesh mesh = static_cast<RPG::Assets::StaticMesh>(j["Properties"][0]["Value"].get<int>());
-		RPG::Assets::Texture texture = static_cast<RPG::Assets::Texture>(j["Properties"][1]["Value"].get<int>());
+		std::string mesh = j["Properties"][0]["Value"].get<std::string>();
+		std::string texture = j["Properties"][1]["Value"].get<std::string>();
 		return std::make_unique<RPG::MeshComponent>(mesh, texture, j["Guid"].get<std::string>());
 	}});
 
 	AddComponentLoad({"SpriteComponent", [](nlohmann::json j, std::shared_ptr<RPG::GameObject> go) -> std::shared_ptr<RPG::IComponent> {
-		RPG::Assets::Texture texture = static_cast<RPG::Assets::Texture>(j["Properties"][0]["Value"].get<int>());
+		std::string texture = j["Properties"][0]["Value"].get<std::string>();
 		return std::make_unique<RPG::SpriteComponent>(texture, j["Guid"].get<std::string>());
 	}});
 

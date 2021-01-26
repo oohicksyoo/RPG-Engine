@@ -298,7 +298,7 @@ struct VulkanPipeline::Internal {
 	const vk::UniquePipelineLayout pipelineLayout;
 	const vk::UniquePipeline pipeline;
 	const vk::UniqueDescriptorPool descriptorPool;
-	std::unordered_map<RPG::Assets::Texture, vk::UniqueDescriptorSet> textureSamplerDescriptorSets;
+	std::unordered_map<std::string, vk::UniqueDescriptorSet> textureSamplerDescriptorSets;
 
 	Internal(const RPG::VulkanPhysicalDevice& physicalDevice,
 			 const RPG::VulkanDevice& device,
@@ -372,10 +372,10 @@ struct VulkanPipeline::Internal {
 		}
 
 		auto t = gameObject->GetTransform();
-		auto meshComponent = gameObject->GetComponent<std::shared_ptr<RPG::MeshComponent>, RPG::MeshComponent>(std::make_unique<RPG::MeshComponent>(RPG::Assets::StaticMesh::Crate, RPG::Assets::Texture::Crate));
+		auto meshComponent = gameObject->GetComponent<std::shared_ptr<RPG::MeshComponent>, RPG::MeshComponent>(std::make_unique<RPG::MeshComponent>("", ""));
 		std::shared_ptr<RPG::SpriteComponent> spriteComponent;
 		if (meshComponent == nullptr) {
-			spriteComponent = gameObject->GetComponent<std::shared_ptr<RPG::SpriteComponent>, RPG::SpriteComponent>(std::make_unique<RPG::SpriteComponent>(RPG::Assets::Texture::Crate));
+			spriteComponent = gameObject->GetComponent<std::shared_ptr<RPG::SpriteComponent>, RPG::SpriteComponent>(std::make_unique<RPG::SpriteComponent>(""));
 			if (spriteComponent == nullptr)  {
 				return;
 			}

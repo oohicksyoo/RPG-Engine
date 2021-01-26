@@ -12,13 +12,13 @@ struct SpriteComponent::Internal {
 	std::shared_ptr<RPG::Property> mesh;
 	std::shared_ptr<RPG::Property> texture;
 
-	Internal(RPG::Assets::StaticMesh mesh, RPG::Assets::Texture texture, std::string guid)
+	Internal(std::string mesh, std::string texture, std::string guid)
 			: guid(guid),
-			  mesh(std::make_unique<RPG::Property>(mesh, "Mesh", "RPG::Assets::StaticMesh")),
-			  texture(std::make_unique<RPG::Property>(texture, "Texture", "RPG::Assets::Texture")) {}
+			  mesh(std::make_unique<RPG::Property>(mesh, "Mesh", "std::string")),
+			  texture(std::make_unique<RPG::Property>(texture, "Texture", "std::string")) {}
 };
 
-SpriteComponent::SpriteComponent(RPG::Assets::Texture texture, std::string guid) : internal(MakeInternalPointer<Internal>(RPG::Assets::StaticMesh::Quad, texture, guid)) {}
+SpriteComponent::SpriteComponent(std::string texture, std::string guid) : internal(MakeInternalPointer<Internal>("assets/models/Quad.obj", texture, guid)) {}
 
 void SpriteComponent::Awake() {
 
@@ -36,12 +36,12 @@ std::string SpriteComponent::Guid() {
 	return internal->guid;
 }
 
-RPG::Assets::StaticMesh SpriteComponent::GetMesh() {
-	return std::any_cast<RPG::Assets::StaticMesh>(internal->mesh->GetProperty());
+std::string SpriteComponent::GetMesh() {
+	return std::any_cast<std::string>(internal->mesh->GetProperty());
 }
 
-RPG::Assets::Texture SpriteComponent::GetTexture() {
-	return std::any_cast<RPG::Assets::Texture>(internal->texture->GetProperty());
+std::string SpriteComponent::GetTexture() {
+	return std::any_cast<std::string>(internal->texture->GetProperty());
 }
 
 std::vector<std::shared_ptr<RPG::Property>> SpriteComponent::GetProperties() {

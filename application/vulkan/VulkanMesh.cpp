@@ -11,25 +11,25 @@ namespace {
 	RPG::VulkanBuffer CreateVertexBuffer(const RPG::VulkanPhysicalDevice& physicalDevice,
 										 const RPG::VulkanDevice& device,
 										 const RPG::VulkanCommandPool& commandPool,
-										 const RPG::Mesh& mesh) {
+										 std::shared_ptr<RPG::Mesh> mesh) {
 		return RPG::VulkanBuffer::CreateDeviceLocalBuffer(physicalDevice,
 														  device,
 														  commandPool,
-														  sizeof(RPG::Vertex) * mesh.GetNumVertices(),
+														  sizeof(RPG::Vertex) * mesh->GetNumVertices(),
 														  vk::BufferUsageFlagBits::eVertexBuffer,
-														  mesh.GetVertices().data());
+														  mesh->GetVertices().data());
 	}
 
 	RPG::VulkanBuffer CreateIndexBuffer(const RPG::VulkanPhysicalDevice& physicalDevice,
 										const RPG::VulkanDevice& device,
 										const RPG::VulkanCommandPool& commandPool,
-										const RPG::Mesh& mesh) {
+										std::shared_ptr<RPG::Mesh> mesh) {
 		return RPG::VulkanBuffer::CreateDeviceLocalBuffer(physicalDevice,
 														  device,
 														  commandPool,
-														  sizeof(uint32_t) * mesh.GetNumIndices(),
+														  sizeof(uint32_t) * mesh->GetNumIndices(),
 														  vk::BufferUsageFlagBits::eIndexBuffer,
-														  mesh.GetIndices().data());
+														  mesh->GetIndices().data());
 	}
 }
 
@@ -41,17 +41,17 @@ struct VulkanMesh::Internal {
 	Internal(const RPG::VulkanPhysicalDevice& physicalDevice,
 			 const RPG::VulkanDevice& device,
 			 const RPG::VulkanCommandPool& commandPool,
-			 const RPG::Mesh& mesh)
+			 std::shared_ptr<RPG::Mesh> mesh)
 			: vertexBuffer(::CreateVertexBuffer(physicalDevice, device, commandPool, mesh)),
 			  indexBuffer(::CreateIndexBuffer(physicalDevice, device, commandPool, mesh)),
-			  numIndices(mesh.GetNumIndices()) {
+			  numIndices(mesh->GetNumIndices()) {
 	}
 };
 
 VulkanMesh::VulkanMesh(const RPG::VulkanPhysicalDevice& physicalDevice,
 					   const RPG::VulkanDevice& device,
 					   const RPG::VulkanCommandPool& commandPool,
-					   const RPG::Mesh& mesh)
+					   std::shared_ptr<RPG::Mesh> mesh)
 		: internal(RPG::MakeInternalPointer<Internal>(physicalDevice, device, commandPool, mesh)) {
 }
 
