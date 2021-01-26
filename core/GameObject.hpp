@@ -22,6 +22,7 @@ namespace RPG {
 			void Update(const float& delta);
 
 			std::shared_ptr<RPG::IComponent> AddComponent(std::shared_ptr<RPG::IComponent> component);
+			void RemoveComponent(std::string guid);
 			std::vector<std::shared_ptr<RPG::IComponent>> GetComponents();
 			std::string GetGuid();
 			std::string GetName();

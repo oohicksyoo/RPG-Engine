@@ -51,6 +51,19 @@ struct GameObject::Internal {
 		components.push_back(component);
 		return true;
 	}
+
+	void RemoveComponent(std::string guid) {
+		int index = -1;
+		for (int i = 0; i < components.size(); ++i) {
+			if (components[i]->Guid() == guid) {
+				index = i;
+			}
+		}
+
+		if (index >= 0) {
+			components.erase(components.begin() + index);
+		}
+	}
 };
 
 GameObject::GameObject(std::string name, std::string guid) : internal(RPG::MakeInternalPointer<Internal>(name, guid)) {}
@@ -87,6 +100,10 @@ void GameObject::Update(const float &delta) {
 
 std::shared_ptr<RPG::IComponent> GameObject::AddComponent(std::shared_ptr<RPG::IComponent> component) {
 	return internal->AddComponent(component) ? component : nullptr;
+}
+
+void GameObject::RemoveComponent(std::string guid) {
+	return internal->RemoveComponent(guid);
 }
 
 std::vector<std::shared_ptr<RPG::IComponent>> GameObject::GetComponents() {

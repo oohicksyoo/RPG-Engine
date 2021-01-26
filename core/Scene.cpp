@@ -165,6 +165,10 @@ struct Scene::Internal {
 	}
 
 	glm::mat4 GetGameCameraMatrix() {
+		if (gameCamera != nullptr && GetGameCameraComponent() == nullptr) {
+			gameCamera = nullptr;
+		}
+
 		if (gameCamera == nullptr) {
 			//Attempt to find a camera component in the scene to use
 			auto gc = GetGameCameraInScene();
