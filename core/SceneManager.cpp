@@ -45,6 +45,7 @@ std::shared_ptr<RPG::IScene> SceneManager::LoadScene(std::string path) {
 void SceneManager::SaveCurrentScene(std::string path) {
 	if (currentScene != nullptr) {
 		RPG::Serializer::GetInstance().SaveScene(currentScene, path);
+		currentScenePath = path;
 	}
 }
 
