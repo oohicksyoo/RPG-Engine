@@ -31,11 +31,12 @@ struct LuaScriptComponent::Internal {
 	}
 
 	void Awake() {
+		std::string luaScript = std::any_cast<std::string>(path->GetProperty());
+		if (luaScript == "") return;
 
 		luaL_openlibs(L);
 		CreateBindingFunctions();
 
-		std::string luaScript = std::any_cast<std::string>(path->GetProperty());
 		int result = luaL_dostring(L, RPG::Assets::LoadTextFile(luaScript).c_str());
 		if (result != LUA_OK) {
 			RPG::Log("Lua", lua_tostring(L, -1));
@@ -45,6 +46,8 @@ struct LuaScriptComponent::Internal {
 	}
 
 	void Start() {
+		if (!isRunnable) return;
+
 		lua_getglobal(L, "Class");
 		lua_getfield(L, -1, "OnStart");
 		void* memory = lua_newuserdata(L, sizeof(std::shared_ptr<RPG::GameObject>));
