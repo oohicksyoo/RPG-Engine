@@ -22,37 +22,39 @@ namespace RPG {
 			Content();
 
 			template <typename T>
-			std::shared_ptr<T> Load(std::string path);
+			void Load(std::string path);
 
 			template <typename T>
 			void OnLoadedAsset(std::function<void(std::string path, std::shared_ptr<T>)> callback);
+
+			void OnGetTextureID(std::function<uint32_t(std::string path)> getTextureIDFunc);
+			uint32_t GetTextureID(std::string path);
 
 		private:
 			ResourceCache<RPG::Mesh> meshResourceCache;
 			std::function<void(std::string path, std::shared_ptr<RPG::Mesh>)> meshOnLoadedCallback;
 			ResourceCache<RPG::Texture> bitmapResourceCache;
 			std::function<void(std::string path, std::shared_ptr<RPG::Texture>)> bitmapOnLoadedCallback;
+			std::function<int(std::string path)> textureIDFunc;
 
 	};
 
 	template<>
-	inline std::shared_ptr<RPG::Mesh> Content::Load<RPG::Mesh>(std::string path) {
+	inline void Content::Load<RPG::Mesh>(std::string path) {
 		RPG::Log("Content", "Loading Mesh Asset " + path);
 		auto mesh = meshResourceCache.Load(path);
 		if (meshOnLoadedCallback != nullptr) {
 			meshOnLoadedCallback(path, mesh);
 		}
-		return mesh;
 	}
 
 	template<>
-	inline std::shared_ptr<RPG::Texture> Content::Load<RPG::Texture>(std::string path) {
+	inline void Content::Load<RPG::Texture>(std::string path) {
 		RPG::Log("Content", "Loading Texture Asset " + path);
 		auto bitmap = bitmapResourceCache.Load(path);
 		if (bitmapOnLoadedCallback != nullptr) {
 			bitmapOnLoadedCallback(path, bitmap);
 		}
-		return bitmap;
 	}
 
 	template<>

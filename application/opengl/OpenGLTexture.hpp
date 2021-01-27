@@ -12,6 +12,7 @@ namespace RPG {
 	struct OpenGLTexture {
 			OpenGLTexture(std::shared_ptr<RPG::Texture> bitmap);
 			void Bind() const;
+			uint32_t TextureID() const;
 
 		private:
 			struct Internal;

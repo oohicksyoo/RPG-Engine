@@ -55,6 +55,13 @@ struct OpenGLAssetManager::Internal {
 				textureCache.insert(std::make_pair(path, RPG::OpenGLTexture(bitmap)));
 			}
 		});
+
+		RPG::Content::GetInstance().OnGetTextureID([this](std::string path) -> uint32_t {
+			if (textureCache.count(path) != 0) {
+				return textureCache.at(path).TextureID();
+			}
+			return -1;
+		});
 	}
 
 	void LoadPipelines(const std::vector<RPG::Assets::Pipeline>& pipelines) {
