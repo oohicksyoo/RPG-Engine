@@ -87,44 +87,47 @@ struct Scene::Internal {
 	void UpdateEditorScene(const float& delta) {
 		#ifdef RPG_EDITOR
 			auto cameraComponent = GetSceneCameraComponent();
+			auto mousePosition = InputManager::GetInstance().GetMousePosition();
 
-			if (InputManager::GetInstance().IsKeyPressed(RPG::Input::Key::Q)) {
-				RPG::EditorStats::GetInstance().SetGizmoTool(-1);
-			}
-
-			if (InputManager::GetInstance().IsKeyPressed(RPG::Input::Key::W)) {
-				RPG::EditorStats::GetInstance().SetGizmoTool(0);//ImGuizmo::OPERATION::TRANSLATE;
-			}
-
-			if (InputManager::GetInstance().IsKeyPressed(RPG::Input::Key::E)) {
-				RPG::EditorStats::GetInstance().SetGizmoTool(1);//ImGuizmo::OPERATION::ROTATE;
-			}
-
-			if (InputManager::GetInstance().IsKeyPressed(RPG::Input::Key::R)) {
-				RPG::EditorStats::GetInstance().SetGizmoTool(2);//ImGuizmo::OPERATION::SCALE;
-			}
-
-			if (InputManager::GetInstance().IsKeyDown(RPG::Input::Key::LeftControl)) {
-				glm::vec2 mousePosition = InputManager::GetInstance().GetMousePosition();
-				glm::vec2 mouseDelta = (mousePosition - oldMousePosition) * 0.003f;
-				oldMousePosition = mousePosition;
-
-				if (InputManager::GetInstance().IsMouseButtonDown(RPG::Input::MouseButton::Middle)) {
-					cameraComponent->Pan(mouseDelta);
-				} else if (InputManager::GetInstance().IsMouseButtonDown(RPG::Input::MouseButton::Left)) {
-					cameraComponent->Rotate(mouseDelta);
-				} else if (InputManager::GetInstance().IsMouseButtonDown(RPG::Input::MouseButton::Right)) {
-					cameraComponent->Zoom(mouseDelta.y);
+			if (RPG::EditorStats::GetInstance().IsMouseInSceneScreen(mousePosition)) {
+				if (InputManager::GetInstance().IsKeyPressed(RPG::Input::Key::Q)) {
+					RPG::EditorStats::GetInstance().SetGizmoTool(-1);
 				}
 
-				auto mouseWheel = InputManager::GetInstance().GetMouseWheel();
-				if (mouseWheel != glm::vec2{0, 0}) {
-					if (mouseWheel.y > 1) {
-						mouseWheel.y = 1;
-					} else if (mouseWheel.y < -1) {
-						mouseWheel.y = -1;
+				if (InputManager::GetInstance().IsKeyPressed(RPG::Input::Key::W)) {
+					RPG::EditorStats::GetInstance().SetGizmoTool(0);//ImGuizmo::OPERATION::TRANSLATE;
+				}
+
+				if (InputManager::GetInstance().IsKeyPressed(RPG::Input::Key::E)) {
+					RPG::EditorStats::GetInstance().SetGizmoTool(1);//ImGuizmo::OPERATION::ROTATE;
+				}
+
+				if (InputManager::GetInstance().IsKeyPressed(RPG::Input::Key::R)) {
+					RPG::EditorStats::GetInstance().SetGizmoTool(2);//ImGuizmo::OPERATION::SCALE;
+				}
+
+				if (InputManager::GetInstance().IsKeyDown(RPG::Input::Key::LeftControl)) {
+					glm::vec2 mousePosition = InputManager::GetInstance().GetMousePosition();
+					glm::vec2 mouseDelta = (mousePosition - oldMousePosition) * 0.003f;
+					oldMousePosition = mousePosition;
+
+					if (InputManager::GetInstance().IsMouseButtonDown(RPG::Input::MouseButton::Middle)) {
+						cameraComponent->Pan(mouseDelta);
+					} else if (InputManager::GetInstance().IsMouseButtonDown(RPG::Input::MouseButton::Left)) {
+						cameraComponent->Rotate(mouseDelta);
+					} else if (InputManager::GetInstance().IsMouseButtonDown(RPG::Input::MouseButton::Right)) {
+						cameraComponent->Zoom(mouseDelta.y);
 					}
-					cameraComponent->Zoom(mouseWheel.y * 0.5f);
+
+					auto mouseWheel = InputManager::GetInstance().GetMouseWheel();
+					if (mouseWheel != glm::vec2{0, 0}) {
+						if (mouseWheel.y > 1) {
+							mouseWheel.y = 1;
+						} else if (mouseWheel.y < -1) {
+							mouseWheel.y = -1;
+						}
+						cameraComponent->Zoom(mouseWheel.y * 0.5f);
+					}
 				}
 			}
 
