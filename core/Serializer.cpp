@@ -14,6 +14,7 @@
 #include "components/CameraComponent.hpp"
 #include "components/LuaScriptComponent.hpp"
 #include "components/BoxColliderComponent.hpp"
+#include "components/PhysicsComponent.hpp"
 
 using RPG::Serializer;
 using RPG::Assets::Pipeline;
@@ -246,6 +247,17 @@ void Serializer::LoadDefaultSavePropertyTypes() {
 		return obj;
 	}});
 
+	AddPropertySave({"RPG::PhysicsShape", [](std::shared_ptr<RPG::Property> property) -> nlohmann::json {
+		std::any prop = property->GetProperty();
+		RPG::PhysicsShape v = std::any_cast<RPG::PhysicsShape>(prop);
+
+		json obj = json::object();
+
+		obj["Value"] = static_cast<int>(v);
+
+		return obj;
+	}});
+
 	AddPropertySave({"RPG::Resource::String", [](std::shared_ptr<RPG::Property> property) -> nlohmann::json {
 		std::any prop = property->GetProperty();
 		std::string v = std::any_cast<std::string>(prop);
@@ -304,6 +316,17 @@ void Serializer::LoadDefaultLoadComponentTypes() {
 		component->SetIsMainCamera(j["Properties"][2]["Value"].get<bool>());
 		component->SetYaw(j["Properties"][3]["Value"].get<float>());
 		component->SetPitch(j["Properties"][4]["Value"].get<float>());
+
+		return component;
+	}});
+
+	AddComponentLoad({"PhysicsComponent", [](nlohmann::json j, std::shared_ptr<RPG::GameObject> go) -> std::shared_ptr<RPG::IComponent> {
+		auto component = std::make_unique<RPG::PhysicsComponent>(go->GetTransform(), j["Guid"].get<std::string>());
+		component->SetIsStatic(j["Properties"][0]["Value"].get<bool>());
+		component->SetIsTrigger(j["Properties"][1]["Value"].get<bool>());
+		component->SetMass(j["Properties"][2]["Value"].get<float>());
+		component->SetPhysicsShape((RPG::PhysicsShape)j["Properties"][3]["Value"].get<int>());
+		component->SetDiameter(j["Properties"][4]["Value"].get<float>());
 
 		return component;
 	}});

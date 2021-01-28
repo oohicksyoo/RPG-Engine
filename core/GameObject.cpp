@@ -5,6 +5,8 @@
 #include "GameObject.hpp"
 #include "Log.hpp"
 #include "Guid.hpp"
+#include "components/PhysicsComponent.hpp"
+#include "PhysicsSystem.hpp"
 #include <vector>
 #include <string>
 #include <memory>
@@ -75,6 +77,12 @@ void GameObject::Awake() {
 
 	for (auto component : internal->components) {
 		component->Awake();
+	}
+
+
+	auto pc = GetComponent<std::shared_ptr<RPG::PhysicsComponent>, RPG::PhysicsComponent>("PhysicsComponent");
+	if (pc != nullptr) {
+		RPG::PhysicsSystem::GetInstance().RegisterPhysicsComponent(pc);
 	}
 }
 

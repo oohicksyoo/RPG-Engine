@@ -9,6 +9,7 @@
 #include "Scene.hpp"
 #include "GLMWrapper.hpp"
 #include "Assets.hpp"
+#include "PhysicsSystem.hpp"
 
 using RPG::SceneManager;
 
@@ -59,6 +60,7 @@ void SceneManager::StoreCurrentScene() {
 	if (currentScene != nullptr) {
 		currentSavedScene = RPG::Serializer::GetInstance().SaveScene(currentScene, "assets/scenes/__Temp__");
 		RPG::Assets::RemoveFile("assets/scenes/__Temp__");
+		RPG::PhysicsSystem::GetInstance().Cleanup();
 	}
 }
 

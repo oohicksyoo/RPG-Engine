@@ -10,6 +10,8 @@
 #include "../core/Time.hpp"
 #include "../core/input/InputManager.hpp"
 #include "../core/Log.hpp"
+#include "../core/Singleton.hpp"
+#include "../core/PhysicsSystem.hpp"
 
 using RPG::Application;
 
@@ -211,6 +213,9 @@ bool Application::RunMainLoop() {
 
 	//Update the Input States
 	InputManager::GetInstance().BeginFrame();
+
+	//Update Physics
+	RPG::PhysicsSystem::GetInstance().Update(internal->TimeStep());
 
 	//Update this frame
 	Update(internal->TimeStep());

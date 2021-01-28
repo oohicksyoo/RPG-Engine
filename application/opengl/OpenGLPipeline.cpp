@@ -12,6 +12,7 @@
 #include "../../core/components/MeshComponent.hpp"
 #include "../../core/components/SpriteComponent.hpp"
 #include "../../core/components/BoxColliderComponent.hpp"
+#include "../../core/components/PhysicsComponent.hpp"
 
 using RPG::OpenGLPipeline;
 
@@ -219,7 +220,7 @@ struct OpenGLPipeline::Internal {
 					//Draw box
 					glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
-					//TODO: We cant garentee that that obj is there and should store a cube in code for it to reference
+					//TODO: We cant guarantee that that obj is there and should store a cube in code for it to reference
 					const RPG::OpenGLMesh &mesh = assetManager.GetStaticMesh("assets/models/1_Meter_Cube.obj");
 
 					// Populate the 'u_mvp' uniform in the shader program.
@@ -261,6 +262,69 @@ struct OpenGLPipeline::Internal {
 										GL_FALSE,
 										stride,
 										reinterpret_cast<const GLvoid *>(offsetTexCoord)
+					);
+
+					// Execute the draw command - with how many indices to iterate.
+					glDrawElements(
+							GL_TRIANGLES,
+							mesh.GetNumIndices(),
+							GL_UNSIGNED_INT,
+							reinterpret_cast<const GLvoid *>(0)
+					);
+
+					glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+				}
+
+				std::shared_ptr<RPG::PhysicsComponent> physicsComponent = gameObject->GetComponent<std::shared_ptr<RPG::PhysicsComponent>, RPG::PhysicsComponent>("PhysicsComponent");
+
+				if (physicsComponent != nullptr) {
+					//Draw box
+					glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+
+					//TODO: We cant guarantee that that obj is there and should store a cube in code for it to reference
+					const RPG::OpenGLMesh &mesh = assetManager.GetStaticMesh("assets/models/1_Meter_Circle.obj");
+
+					// Populate the 'u_mvp' uniform in the shader program.
+
+					glm::vec3 rotation = transform->GetRotation();
+					glm::fquat rot{rotation};
+					float diameter = physicsComponent->GetDiameter();
+					glm::vec3 scale{diameter, 1, diameter};
+
+					glm::mat4 modelMatrix = glm::mat4{1.0f};
+					modelMatrix = glm::translate(modelMatrix, transform->GetWorldPosition());
+					modelMatrix = glm::rotate(modelMatrix, glm::radians(rotation.x), glm::vec3{1.0f, 0.0f, 0.0f});
+					modelMatrix = glm::rotate(modelMatrix, glm::radians(rotation.y), glm::vec3{0.0f, 1.0f, 0.0f});
+					modelMatrix = glm::rotate(modelMatrix, glm::radians(rotation.z), glm::vec3{0.0f, 0.0f, 1.0f});
+					modelMatrix = glm::scale(modelMatrix, scale);
+
+					glUniformMatrix4fv(uniformLocationMVP, 1, GL_FALSE, &(cameraMatrix * modelMatrix)[0][0]);
+
+					// Apply the texture we want to paint the mesh with.
+					std::string colliderText = (physicsComponent->IsTrigger()) ? "assets/textures/trigger.png" : "assets/textures/collider.png";
+					assetManager.GetTexture(colliderText).Bind();
+
+					// Bind the vertex and index buffers.
+					glBindBuffer(GL_ARRAY_BUFFER, mesh.GetVertexBufferId());
+					glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.GetIndexBufferId());
+
+					// Configure the 'a_vertexPosition' attribute.
+					glVertexAttribPointer(
+							attributeLocationVertexPosition,
+							3,
+							GL_FLOAT,
+							GL_FALSE,
+							stride,
+							reinterpret_cast<const GLvoid *>(offsetPosition)
+					);
+
+					// Configure the 'a_texCoord' attribute.
+					glVertexAttribPointer(attributeLocationTexCoord,
+										  2,
+										  GL_FLOAT,
+										  GL_FALSE,
+										  stride,
+										  reinterpret_cast<const GLvoid *>(offsetTexCoord)
 					);
 
 					// Execute the draw command - with how many indices to iterate.

@@ -11,6 +11,7 @@
 #include "../SceneManager.hpp"
 #include "../input/InputManager.hpp"
 #include "MeshComponent.hpp"
+#include "PhysicsComponent.hpp"
 
 using RPG::LuaScriptComponent;
 
@@ -93,6 +94,24 @@ struct LuaScriptComponent::Internal {
 		});
 		lua_setglobal(L, "CreateGameObject");*/
 
+		//Get Component - std::shared_prt<RPG::IComponent>
+		lua_pushcfunction(L, ([](lua_State* L) -> int {
+			if (lua_gettop(L) != 2) return -1;
+			auto gameObject = static_cast<std::shared_ptr<RPG::GameObject>*>(lua_touserdata(L, -2))->get();
+			std::string componentName = lua_tostring(L, -1);
+
+			if (componentName == "PhysicsComponent") {
+				auto c = gameObject->GetComponent<std::shared_ptr<RPG::PhysicsComponent>, RPG::PhysicsComponent>("PhysicsComponent");
+				if (c == nullptr) return 0;
+				void* memory = lua_newuserdata(L, sizeof(std::shared_ptr<RPG::PhysicsComponent>));
+				new(memory) std::shared_ptr<RPG::PhysicsComponent>(c);
+				return 1;
+			}
+
+			return 0;
+		}));
+		lua_setglobal(L, "GetComponent");
+
 		//Move GameObject to location
 		lua_pushcfunction(L, [](lua_State* L) -> int {
 			if (lua_gettop(L) != 4) return -1;
@@ -126,6 +145,37 @@ struct LuaScriptComponent::Internal {
 			return 1;
 		});
 		lua_setglobal(L, "GetPosition");
+
+		//Physics Component
+		//Get Physics Velocity
+		lua_pushcfunction(L, [](lua_State* L) -> int {
+			if (lua_gettop(L) != 1) return -1;
+			auto pc = static_cast<std::shared_ptr<RPG::PhysicsComponent>*>(lua_touserdata(L, -1))->get();
+			auto velocity = pc->GetVelocity();
+
+			lua_newtable(L);
+			lua_pushstring(L, "x");
+			lua_pushnumber(L, velocity.x);
+			lua_settable(L, -3);
+			lua_pushstring(L, "y");
+			lua_pushnumber(L, velocity.y);
+			lua_settable(L, -3);
+
+			return 1;
+		});
+		lua_setglobal(L, "PhysicsGetVelocity");
+
+		//Move GameObject to location
+		lua_pushcfunction(L, [](lua_State* L) -> int {
+			if (lua_gettop(L) != 3) return -1;
+			auto pc = static_cast<std::shared_ptr<RPG::PhysicsComponent>*>(lua_touserdata(L, -3))->get();
+
+			float posX = (float)lua_tonumber(L, -2);
+			float posY = (float)lua_tonumber(L, -1);
+			pc->SetVelocity({posX, posY});
+			return 0;
+		});
+		lua_setglobal(L, "PhysicsSetVelocity");
 
 		//Math Lerp
 		lua_pushcfunction(L, [](lua_State* L) -> int {

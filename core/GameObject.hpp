@@ -8,6 +8,7 @@
 #include "IComponent.hpp"
 #include "GLMWrapper.hpp"
 #include "components/TransformComponent.hpp"
+#include "Log.hpp"
 #include <string>
 #include <memory>
 #include <vector>
@@ -36,6 +37,9 @@ namespace RPG {
 			std::shared_ptr<RPG::TransformComponent> GetTransform();
 
 			template<typename T, typename U>
+			T GetComponent(std::string name);
+
+			template<typename T, typename U>
 			T GetComponent(std::shared_ptr<RPG::IComponent> component);
 
 		private:
@@ -48,6 +52,17 @@ namespace RPG {
 		//TODO: Garbage way of grabbing this, replace with a better method of comparing based on generics
 		for (std::shared_ptr<RPG::IComponent> c : GetComponents()) {
 			if (component->Name() == c->Name()) {
+				return std::dynamic_pointer_cast<U>(c);
+			}
+		}
+
+		return nullptr;
+	}
+
+	template<typename T, typename U>
+	T GameObject::GetComponent(std::string name) {
+		for (std::shared_ptr<RPG::IComponent> c : GetComponents()) {
+			if (name == c->Name()) {
 				return std::dynamic_pointer_cast<U>(c);
 			}
 		}
