@@ -279,7 +279,7 @@ float InputManager::GetControllerAxis(int controllerID, RPG::Input::ControllerAx
 	return 0;
 }
 
-uint64_t InputManager::GetControllerAxisHeldTime(int controllerID, RPG::Input::ControllerButton controllerAxis) {
+uint64_t InputManager::GetControllerAxisHeldTime(int controllerID, RPG::Input::ControllerAxis controllerAxis) {
 	int i = (int)controllerAxis;
 	bool controllerIDValid = controllerID >= 0 && controllerID < Input::MAX_CONTROLLERS;
 	if (i >= 0 && i < Input::MAX_CONTROLLER_AXIS && controllerIDValid && currentState.controllers[controllerID].isConnected) {
