@@ -267,6 +267,15 @@ struct LuaScriptComponent::Internal {
 			return 1;
 		});
 		lua_setglobal(L, "GetControllerAxis");
+
+		lua_pushcfunction(L, [](lua_State* L) -> int {
+			if (lua_gettop(L) != 2) return -1;
+			int value = lua_tointeger(L, -1);
+			int controllerID = lua_tointeger(L, -2);
+			lua_pushnumber(L, RPG::InputManager::GetInstance().GetControllerAxisHeldTime(controllerID, (RPG::Input::ControllerAxis)value));
+			return 1;
+		});
+		lua_setglobal(L, "GetControllerAxisHeldTime");
 	}
 };
 
