@@ -65,7 +65,61 @@ void PhysicsSystem::Update(float delta) {
 
 		//Check circles against Edges/Capsules
 		for (auto edgeComponent : edgeComponents) {
+			auto cPosition = component->GetPosition();
+			auto cRadius = component->GetDiameter() * 0.5f;
+			auto cMass = component->GetMass();
+			auto cVelocity = component->GetVelocity();
 
+			auto globalPosition = edgeComponent->GetWorldPosition();
+			auto startPosition = globalPosition + edgeComponent->GetStartPosition();
+			auto endPosition = globalPosition + edgeComponent->GetEndPosition();
+			auto eRadius = edgeComponent->GetDiameter() * 0.5f;
+
+
+			//Check that line formed by the velocity vector, intersects with line segment
+			auto line1 = endPosition - startPosition;
+			auto line2 = cPosition - startPosition;
+
+			float edgeLength = line1.x * line1.x + line1.y * line1.y;
+
+			// This is nifty - It uses the DP of the line segment vs the line to the object, to work out
+			// how much of the segment is in the "shadow" of the object vector. The min and max clamp
+			// this to lie between 0 and the line segment length, which is then normalised. We can
+			// use this to calculate the closest point on the line segment
+			float t = std::max(0.0f, std::min(edgeLength, (line1.x * line2.x + line1.y * line2.y))) / edgeLength;
+
+			//Closest Point
+			glm::vec2 closestPoint{
+				startPosition.x + t * line1.x,
+				startPosition.y + t * line1.y
+			};
+
+			//Now that we know the closest point we can check if the circle has collided
+			float distance = std::sqrt((cPosition.x - closestPoint.x) * (cPosition.x - closestPoint.x) +
+											   (cPosition.y - closestPoint.y) * (cPosition.y - closestPoint.y));
+
+			//Check Collision
+			if (distance <= (cRadius + eRadius)) {
+				RPG::Log("Physics", "Collision");
+				auto data = edgeComponent->GetCollisionData();
+				data.mass = cMass * 0.8f;
+				data.position = closestPoint;
+				data.velocity = -cVelocity;
+
+				collisionPairs.push_back(std::make_pair(component->GetCollisionData(), data));
+
+				//Calculate displacement Required
+				float overlap = 1.0f * (distance - cRadius - data.radius);
+
+				//Displace circle away from collision
+				cPosition -= glm::vec2{
+					overlap * (cPosition.x - closestPoint.x) / distance,
+					overlap * (cPosition.y - closestPoint.y) / distance
+				};
+
+				//Set Positions
+				component->SetPosition(cPosition);
+			}
 		}
 
 		//Check against other balls
@@ -197,7 +251,12 @@ void PhysicsSystem::Cleanup() {
 }
 
 void PhysicsSystem::RegisterPhysicsComponent(std::shared_ptr<RPG::PhysicsComponent> component) {
-	components.push_back(component);
+	if (component->GetShape() == RPG::PhysicsShape::Circle) {
+		components.push_back(component);
+	} else {
+		edgeComponents.push_back(component);
+	}
+
 }
 
 void PhysicsSystem::RemovePhysicsComponent(std::string guid) {
@@ -208,8 +267,19 @@ void PhysicsSystem::RemovePhysicsComponent(std::string guid) {
 		}
 	}
 
+	int edgeIndex = -1;
+	for (int i = 0; i < edgeComponents.size(); ++i) {
+		if (edgeComponents[i]->Guid() == guid) {
+			edgeIndex = i;
+		}
+	}
+
 	if (index != -1) {
 		components.erase(components.begin() + index);
+	}
+
+	if (edgeIndex != -1) {
+		edgeComponents.erase(edgeComponents.begin() + edgeIndex);
 	}
 }
 

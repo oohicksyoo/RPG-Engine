@@ -38,6 +38,7 @@ namespace RPG {
 			glm::vec2 GetVelocity();
 			glm::vec2 GetAcceleration();
 			glm::vec2 GetPosition();
+			glm::vec2 GetWorldPosition();
 			RPG::PhysicsCollision GetCollisionData();
 			glm::vec2 GetStartPosition();
 			glm::vec2 GetEndPosition();

@@ -56,6 +56,10 @@ bool PhysicsComponent::IsStatic() {
 	return std::any_cast<bool>(internal->isStatic->GetProperty());
 }
 
+RPG::PhysicsShape PhysicsComponent::GetShape() {
+	return std::any_cast<RPG::PhysicsShape>(internal->shape->GetProperty());
+}
+
 float PhysicsComponent::GetDiameter() {
 	return std::any_cast<float>(internal->diameter->GetProperty());
 }
@@ -71,6 +75,10 @@ bool PhysicsComponent::IsTrigger() {
 glm::vec2 PhysicsComponent::GetPosition() {
 	auto position = internal->transform->GetPosition();
 	return glm::vec2{position.x, position.z};
+}
+
+glm::vec2 PhysicsComponent::GetWorldPosition() {
+	return internal->transform->GetWorldPosition();
 }
 
 glm::vec2 PhysicsComponent::GetVelocity() {
