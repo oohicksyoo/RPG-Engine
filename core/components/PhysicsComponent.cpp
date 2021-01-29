@@ -15,6 +15,8 @@ struct PhysicsComponent::Internal {
 	std::shared_ptr<RPG::Property> mass;
 	std::shared_ptr<RPG::Property> shape;
 	std::shared_ptr<RPG::Property> diameter;
+	std::shared_ptr<RPG::Property> startPosition;
+	std::shared_ptr<RPG::Property> endPosition;
 	glm::vec2 velocity;
 	glm::vec2 acceleration;
 
@@ -26,6 +28,8 @@ struct PhysicsComponent::Internal {
 			  mass(std::make_unique<RPG::Property>(1.0f, "Mass", "float")),
 			  shape(std::make_unique<RPG::Property>(RPG::PhysicsShape::Circle, "Physics Shape", "RPG::PhysicsShape")),
 			  diameter(std::make_unique<RPG::Property>(1.0f, "Diameter", "float")),
+			  startPosition(std::make_unique<RPG::Property>(glm::vec2{0, 0}, "Start Position (Capsule)", "glm::vec2")),
+			  endPosition(std::make_unique<RPG::Property>(glm::vec2{0, 0}, "End Position (Capsule)", "glm::vec2")),
 			  velocity(glm::vec2{0, 0}),
 			  acceleration(glm::vec2{0, 0}) {}
 };
@@ -77,6 +81,14 @@ glm::vec2 PhysicsComponent::GetAcceleration() {
 	return internal->acceleration;
 }
 
+glm::vec2 PhysicsComponent::GetStartPosition() {
+	return std::any_cast<glm::vec2>(internal->startPosition->GetProperty());
+}
+
+glm::vec2 PhysicsComponent::GetEndPosition() {
+	return std::any_cast<glm::vec2>(internal->endPosition->GetProperty());
+}
+
 RPG::PhysicsCollision PhysicsComponent::GetCollisionData() {
 	RPG::PhysicsCollision c = RPG::PhysicsCollision();
 	c.velocity = internal->velocity;
@@ -123,6 +135,14 @@ void PhysicsComponent::SetAcceleration(glm::vec2 value) {
 	internal->acceleration = value;
 }
 
+void PhysicsComponent::SetStartPosition(glm::vec2 value) {
+	internal->startPosition->SetProperty(value);
+}
+
+void PhysicsComponent::SetEndPosition(glm::vec2 value) {
+	internal->endPosition->SetProperty(value);
+}
+
 std::vector<std::shared_ptr<RPG::Property>> PhysicsComponent::GetProperties() {
 	std::vector<std::shared_ptr<RPG::Property>> list = {};
 	list.push_back(internal->isStatic);
@@ -130,6 +150,8 @@ std::vector<std::shared_ptr<RPG::Property>> PhysicsComponent::GetProperties() {
 	list.push_back(internal->mass);
 	list.push_back(internal->shape);
 	list.push_back(internal->diameter);
+	list.push_back(internal->startPosition);
+	list.push_back(internal->endPosition);
 
 	return list;
 }

@@ -39,6 +39,8 @@ namespace RPG {
 			glm::vec2 GetAcceleration();
 			glm::vec2 GetPosition();
 			RPG::PhysicsCollision GetCollisionData();
+			glm::vec2 GetStartPosition();
+			glm::vec2 GetEndPosition();
 			void SetIsStatic(bool value);
 			void SetIsTrigger(bool value);
 			void SetMass(float value);
@@ -47,6 +49,9 @@ namespace RPG {
 			void SetPosition(glm::vec2 position);
 			void SetVelocity(glm::vec2 value);
 			void SetAcceleration(glm::vec2 value);
+			void SetStartPosition(glm::vec2 value);
+			void SetEndPosition(glm::vec2 value);
+
 
 		private:
 			struct Internal;

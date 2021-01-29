@@ -327,6 +327,14 @@ void Serializer::LoadDefaultLoadComponentTypes() {
 		component->SetMass(j["Properties"][2]["Value"].get<float>());
 		component->SetPhysicsShape((RPG::PhysicsShape)j["Properties"][3]["Value"].get<int>());
 		component->SetDiameter(j["Properties"][4]["Value"].get<float>());
+		component->SetStartPosition({
+		j["Properties"][5]["Value"]["x"].get<float>(),
+		j["Properties"][5]["Value"]["y"].get<float>()
+		});
+		component->SetEndPosition({
+		j["Properties"][6]["Value"]["x"].get<float>(),
+		j["Properties"][6]["Value"]["y"].get<float>()
+		});
 
 		return component;
 	}});
