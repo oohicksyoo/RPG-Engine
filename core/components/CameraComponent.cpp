@@ -34,7 +34,7 @@ struct CameraComponent::Internal {
 				 isMainCamera(std::make_unique<RPG::Property>(false, "Is Main Camera", "bool")),
 				 pitch(std::make_unique<RPG::Property>(0.0f, "Pitch (Vertical)", "float")),
 				 yaw(std::make_unique<RPG::Property>(0.0f, "Yaw (Horizontal)", "float")),
-				 projectionMatrix(glm::perspective(glm::radians(60.0f), width / height, 0.01f, 100.0f)) {
+				 projectionMatrix(glm::perspective(glm::radians(60.0f), width / height, 0.01f, 1000.0f)) {
 		UpdateViewMatrix();
 	}
 
