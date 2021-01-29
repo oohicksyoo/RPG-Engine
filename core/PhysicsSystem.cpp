@@ -135,7 +135,59 @@ void PhysicsSystem::Update(float delta) {
 
 	//Work out dynamic Collisions
 	for (auto pair : collisionPairs) {
+		auto first = pair.first;
+		auto second = pair.second;
 
+		//Distance between centers
+		float distance = std::sqrt(
+				(first.position.x - second.position.x) * (first.position.x - second.position.x) +
+				(first.position.y - second.position.y) * (first.position.y - second.position.y));
+
+		//Normal
+		glm::vec2 normal{
+				(second.position.x - first.position.x) / distance,
+				(second.position.y - first.position.y) / distance
+		};
+
+		//Tangent
+		glm::vec2 tangent{-normal.y, normal.x};
+
+		//Dot Product Tangent
+		glm::vec2 dotProductTangent{
+			first.velocity.x * tangent.x + first.velocity.y * tangent.y,
+			second.velocity.x * tangent.x + second.velocity.y * tangent.y
+		};
+
+		//Dot Product Normal
+		glm::vec2 dotProductNormal{
+				first.velocity.x * normal.x + first.velocity.y * normal.y,
+				second.velocity.x * normal.x + second.velocity.y * normal.y
+		};
+
+		//Conservation of Momentum
+		glm::vec2 momentum{
+				(dotProductNormal.x * (first.mass - second.mass) + 2.0f * second.mass * dotProductNormal.y) / (first.mass + second.mass),
+				(dotProductNormal.y * (second.mass - first.mass) + 2.0f * first.mass * dotProductNormal.x) / (first.mass + second.mass)
+ 		};
+
+		//Update circle velocities
+		if (!first.isStatic) {
+			first.SetVelocity(glm::vec2{
+				tangent.x * dotProductTangent.x + normal.x * momentum.x,
+				tangent.y * dotProductTangent.x + normal.y * momentum.x
+			});
+		} else {
+			first.SetVelocity(glm::vec2{0, 0});
+		}
+
+		if (!second.isStatic) {
+			second.SetVelocity(glm::vec2{
+					tangent.x * dotProductTangent.y + normal.x * momentum.y,
+					tangent.y * dotProductTangent.y + normal.y * momentum.y
+			});
+		} else {
+			second.SetVelocity(glm::vec2{0, 0});
+		}
 	}
 }
 

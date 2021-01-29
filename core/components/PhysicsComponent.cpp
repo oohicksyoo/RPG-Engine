@@ -25,7 +25,9 @@ struct PhysicsComponent::Internal {
 			  isTrigger(std::make_unique<RPG::Property>(false, "Is Trigger", "bool")),
 			  mass(std::make_unique<RPG::Property>(1.0f, "Mass", "float")),
 			  shape(std::make_unique<RPG::Property>(RPG::PhysicsShape::Circle, "Physics Shape", "RPG::PhysicsShape")),
-			  diameter(std::make_unique<RPG::Property>(1.0f, "Diameter", "float")) {}
+			  diameter(std::make_unique<RPG::Property>(1.0f, "Diameter", "float")),
+			  velocity(glm::vec2{0, 0}),
+			  acceleration(glm::vec2{0, 0}) {}
 };
 
 PhysicsComponent::PhysicsComponent(std::shared_ptr<RPG::TransformComponent> transform, std::string guid) : internal(MakeInternalPointer<Internal>(transform, guid)) {}
@@ -82,6 +84,9 @@ RPG::PhysicsCollision PhysicsComponent::GetCollisionData() {
 	c.mass = GetMass();
 	c.radius = GetDiameter() * 0.5f;
 	c.isStatic = IsStatic();
+	c.SetVelocity = [this](glm::vec2 velocity) {
+		SetVelocity(velocity);
+	};
 	return c;
 }
 

@@ -4,6 +4,7 @@
 
 #pragma once
 #include "GLMWrapper.hpp"
+#include <functional>
 
 namespace RPG {
 	struct PhysicsCollision {
@@ -13,5 +14,6 @@ namespace RPG {
 			glm::vec2 position;
 			glm::vec2 velocity;
 			bool isStatic;
+			std::function<void(glm::vec2)> SetVelocity;
 	};
 }
