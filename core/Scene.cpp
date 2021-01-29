@@ -25,7 +25,10 @@ using json = nlohmann::json;
 namespace {
 	std::shared_ptr<RPG::GameObject> CreateSceneCamera(const RPG::WindowSize& size) {
 		std::shared_ptr<RPG::GameObject> go = std::make_unique<RPG::GameObject>();
-		go->AddComponent(std::make_unique<RPG::CameraComponent>(static_cast<float>(size.width), static_cast<float>(size.height), go->GetTransform()));
+		std::shared_ptr<RPG::CameraComponent> cc = std::make_unique<RPG::CameraComponent>(static_cast<float>(size.width), static_cast<float>(size.height), go->GetTransform());
+		cc->SetPitch(55);
+
+		go->AddComponent(cc);
 		return go;
 	}
 }
