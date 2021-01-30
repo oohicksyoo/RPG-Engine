@@ -30,6 +30,9 @@ namespace RPG {
 			glm::vec3 GetRotation();
 			void SetScale(glm::vec3 scale);
 			glm::vec3 GetScale();
+			glm::vec3 GetRight();
+			glm::vec3 GetUp();
+			glm::vec3 GetForward();
 
 		private:
 			struct Internal;

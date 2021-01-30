@@ -112,7 +112,7 @@ struct LuaScriptComponent::Internal {
 		}));
 		lua_setglobal(L, "GetComponent");
 
-		//Move GameObject to location
+		//SetPosition for Gameobject
 		lua_pushcfunction(L, [](lua_State* L) -> int {
 			if (lua_gettop(L) != 4) return -1;
 			auto gameObject = static_cast<std::shared_ptr<RPG::GameObject>*>(lua_touserdata(L, -4));
@@ -124,6 +124,82 @@ struct LuaScriptComponent::Internal {
 			return 0;
 		});
 		lua_setglobal(L, "SetPosition");
+
+		//Set rotation for Gameobject
+		lua_pushcfunction(L, [](lua_State* L) -> int {
+			if (lua_gettop(L) != 4) return -1;
+			auto gameObject = static_cast<std::shared_ptr<RPG::GameObject>*>(lua_touserdata(L, -4));
+
+			float rotX = (float)lua_tonumber(L, -3);
+			float rotY = (float)lua_tonumber(L, -2);
+			float rotZ = (float)lua_tonumber(L, -1);
+			gameObject->get()->GetTransform()->SetRotation({rotX, rotY, rotZ});
+			return 0;
+		});
+		lua_setglobal(L, "SetRotation");
+
+		//Get GameObject Forward
+		lua_pushcfunction(L, [](lua_State* L) -> int {
+			if (lua_gettop(L) != 1) return -1;
+			auto gameObject = static_cast<std::shared_ptr<RPG::GameObject>*>(lua_touserdata(L, -1));
+			auto position = gameObject->get()->GetTransform()->GetForward();
+
+			lua_newtable(L);
+			lua_pushstring(L, "x");
+			lua_pushnumber(L, position.x);
+			lua_settable(L, -3);
+			lua_pushstring(L, "y");
+			lua_pushnumber(L, position.y);
+			lua_settable(L, -3);
+			lua_pushstring(L, "z");
+			lua_pushnumber(L, position.z);
+			lua_settable(L, -3);
+
+			return 1;
+		});
+		lua_setglobal(L, "GetForward");
+
+		//Get GameObject Up
+		lua_pushcfunction(L, [](lua_State* L) -> int {
+			if (lua_gettop(L) != 1) return -1;
+			auto gameObject = static_cast<std::shared_ptr<RPG::GameObject>*>(lua_touserdata(L, -1));
+			auto position = gameObject->get()->GetTransform()->GetUp();
+
+			lua_newtable(L);
+			lua_pushstring(L, "x");
+			lua_pushnumber(L, position.x);
+			lua_settable(L, -3);
+			lua_pushstring(L, "y");
+			lua_pushnumber(L, position.y);
+			lua_settable(L, -3);
+			lua_pushstring(L, "z");
+			lua_pushnumber(L, position.z);
+			lua_settable(L, -3);
+
+			return 1;
+		});
+		lua_setglobal(L, "GetUp");
+
+		//Get GameObject Right
+		lua_pushcfunction(L, [](lua_State* L) -> int {
+			if (lua_gettop(L) != 1) return -1;
+			auto gameObject = static_cast<std::shared_ptr<RPG::GameObject>*>(lua_touserdata(L, -1));
+			auto position = gameObject->get()->GetTransform()->GetRight();
+
+			lua_newtable(L);
+			lua_pushstring(L, "x");
+			lua_pushnumber(L, position.x);
+			lua_settable(L, -3);
+			lua_pushstring(L, "y");
+			lua_pushnumber(L, position.y);
+			lua_settable(L, -3);
+			lua_pushstring(L, "z");
+			lua_pushnumber(L, position.z);
+			lua_settable(L, -3);
+
+			return 1;
+		});
+		lua_setglobal(L, "GetRight");
 
 		//Get GameObject Position
 		lua_pushcfunction(L, [](lua_State* L) -> int {
@@ -145,6 +221,27 @@ struct LuaScriptComponent::Internal {
 			return 1;
 		});
 		lua_setglobal(L, "GetPosition");
+
+		//Get GameObject Rotation
+		lua_pushcfunction(L, [](lua_State* L) -> int {
+			if (lua_gettop(L) != 1) return -1;
+			auto gameObject = static_cast<std::shared_ptr<RPG::GameObject>*>(lua_touserdata(L, -1));
+			auto rotation = gameObject->get()->GetTransform()->GetRotation();
+
+			lua_newtable(L);
+			lua_pushstring(L, "x");
+			lua_pushnumber(L, rotation.x);
+			lua_settable(L, -3);
+			lua_pushstring(L, "y");
+			lua_pushnumber(L, rotation.y);
+			lua_settable(L, -3);
+			lua_pushstring(L, "z");
+			lua_pushnumber(L, rotation.z);
+			lua_settable(L, -3);
+
+			return 1;
+		});
+		lua_setglobal(L, "GetRotation");
 
 		//Physics Component
 		//Get Physics Velocity

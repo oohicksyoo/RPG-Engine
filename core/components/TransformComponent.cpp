@@ -116,3 +116,18 @@ void TransformComponent::SetScale(glm::vec3 scale) {
 glm::vec3 TransformComponent::GetScale() {
 	return std::any_cast<glm::vec3>(internal->scale->GetProperty());
 }
+
+glm::vec3 TransformComponent::GetRight() {
+	auto mat = GetTransformMatrix();
+	return glm::normalize(-glm::vec3(mat[0]));
+}
+
+glm::vec3 TransformComponent::GetUp() {
+	auto mat = GetTransformMatrix();
+	return glm::normalize(-glm::vec3(mat[1]));
+}
+
+glm::vec3 TransformComponent::GetForward() {
+	auto mat = glm::inverse(GetTransformMatrix());
+	return glm::normalize(-glm::vec3(mat[2]));
+}
