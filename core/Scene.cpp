@@ -113,7 +113,7 @@ struct Scene::Internal {
 					auto go = RPG::EditorStats::GetInstance().GetSelectedGameObject();
 					if (go != nullptr) {
 						auto t = sceneCamera->GetTransform();
-						t->SetPosition(go->GetTransform()->GetPosition());
+						t->SetPosition(go->GetTransform()->GetWorldPosition());
 					}
 				}
 

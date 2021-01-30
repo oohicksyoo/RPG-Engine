@@ -100,7 +100,6 @@ void PhysicsSystem::Update(float delta) {
 
 			//Check Collision
 			if (distance <= (cRadius + eRadius)) {
-				RPG::Log("Physics", "Collision");
 				auto data = edgeComponent->GetCollisionData();
 				data.mass = cMass * 0.8f;
 				data.position = closestPoint;
