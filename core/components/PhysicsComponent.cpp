@@ -78,7 +78,8 @@ glm::vec2 PhysicsComponent::GetPosition() {
 }
 
 glm::vec2 PhysicsComponent::GetWorldPosition() {
-	return internal->transform->GetWorldPosition();
+	auto pos = internal->transform->GetWorldPosition();
+	return glm::vec2{pos.x, pos.z};
 }
 
 glm::vec2 PhysicsComponent::GetVelocity() {
@@ -133,6 +134,11 @@ void PhysicsComponent::SetPhysicsShape(RPG::PhysicsShape shape) {
 void PhysicsComponent::SetPosition(glm::vec2 position) {
 	auto p = internal->transform->GetPosition();
 	internal->transform->SetPosition(glm::vec3{position.x, p.y, position.y});
+}
+
+void PhysicsComponent::SetWorldPosition(glm::vec2 position) {
+	auto pos = internal->transform->GetWorldPosition();
+	internal->transform->SetWorldPosition(glm::vec3{position.x, pos.y, position.y});
 }
 
 void PhysicsComponent::SetVelocity(glm::vec2 value) {

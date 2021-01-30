@@ -48,6 +48,7 @@ namespace RPG {
 			void SetDiameter(float value);
 			void SetPhysicsShape(RPG::PhysicsShape shape);
 			void SetPosition(glm::vec2 position);
+			void SetWorldPosition(glm::vec2 position);
 			void SetVelocity(glm::vec2 value);
 			void SetAcceleration(glm::vec2 value);
 			void SetStartPosition(glm::vec2 value);

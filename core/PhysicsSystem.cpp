@@ -29,7 +29,7 @@ void PhysicsSystem::Update(float delta) {
 	for (auto component : components) {
 		if (component->IsStatic() || component->IsTrigger()) continue;
 
-		auto position = component->GetPosition();
+		auto position = component->GetWorldPosition();
 		auto velocity = component->GetVelocity();
 		auto acceleration = component->GetAcceleration();
 
@@ -54,7 +54,7 @@ void PhysicsSystem::Update(float delta) {
 			acceleration.y = 0;
 		}
 
-		component->SetPosition(position);
+		component->SetWorldPosition(position);
 		component->SetAcceleration(acceleration);
 		component->SetVelocity(velocity);
 	}
@@ -65,7 +65,7 @@ void PhysicsSystem::Update(float delta) {
 
 		//Check circles against Edges/Capsules
 		for (auto edgeComponent : edgeComponents) {
-			auto cPosition = component->GetPosition();
+			auto cPosition = component->GetWorldPosition();
 			auto cRadius = component->GetDiameter() * 0.5f;
 			auto cMass = component->GetMass();
 			auto cVelocity = component->GetVelocity();
@@ -117,7 +117,7 @@ void PhysicsSystem::Update(float delta) {
 				};
 
 				//Set Positions
-				component->SetPosition(cPosition);
+				component->SetWorldPosition(cPosition);
 			}
 		}
 
@@ -125,9 +125,9 @@ void PhysicsSystem::Update(float delta) {
 		for (auto otherComponent : components) {
 			if (component->Guid() == otherComponent->Guid()) continue;
 
-			auto cPosition = component->GetPosition();
+			auto cPosition = component->GetWorldPosition();
 			auto cRadius = component->GetDiameter() * 0.5f;
-			auto oPosition = otherComponent->GetPosition();
+			auto oPosition = otherComponent->GetWorldPosition();
 			auto oRadius = otherComponent->GetDiameter() * 0.5f;
 			auto oStatic = otherComponent->IsStatic();
 			auto oTrigger = otherComponent->IsTrigger();
@@ -165,8 +165,8 @@ void PhysicsSystem::Update(float delta) {
 					oPosition += offset;
 
 					//Set Positions
-					component->SetPosition(cPosition);
-					otherComponent->SetPosition(oPosition);
+					component->SetWorldPosition(cPosition);
+					otherComponent->SetWorldPosition(oPosition);
 				} else {
 					//Calculate displacement required
 					float overlap = 1.0f * (distance - cRadius - oRadius);
@@ -180,7 +180,7 @@ void PhysicsSystem::Update(float delta) {
 					cPosition -= offset;
 
 					//Set Positions
-					component->SetPosition(cPosition);
+					component->SetWorldPosition(cPosition);
 				}
 			}
 		}
