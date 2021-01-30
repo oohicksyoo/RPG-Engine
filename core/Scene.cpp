@@ -109,6 +109,14 @@ struct Scene::Internal {
 					RPG::EditorStats::GetInstance().SetGizmoTool(2);//ImGuizmo::OPERATION::SCALE;
 				}
 
+				if (InputManager::GetInstance().IsKeyPressed(RPG::Input::Key::F)) {
+					auto go = RPG::EditorStats::GetInstance().GetSelectedGameObject();
+					if (go != nullptr) {
+						auto t = sceneCamera->GetTransform();
+						t->SetPosition(go->GetTransform()->GetPosition());
+					}
+				}
+
 				if (InputManager::GetInstance().IsKeyDown(RPG::Input::Key::LeftControl)) {
 					glm::vec2 mousePosition = InputManager::GetInstance().GetMousePosition();
 					glm::vec2 mouseDelta = (mousePosition - oldMousePosition) * 0.003f;
