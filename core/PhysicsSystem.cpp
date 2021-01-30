@@ -38,7 +38,7 @@ void PhysicsSystem::Update(float delta) {
 
 		//Update Velocity
 		velocity += acceleration * delta;
-		position += velocity;
+		position += glm::vec2{velocity.x, -velocity.y};
 
 		//Clamp Velocity
 		if (std::abs(velocity.x * velocity.x + velocity.y * velocity.y) < 0.001f) {
