@@ -26,7 +26,7 @@ namespace RPG {
 			std::string Guid() override;
 			bool AllowMultiple() { return false; };
 			glm::mat4 GetProjectionMatrix() const;
-			glm::mat4 GetViewMatrix(glm::vec3 position) const;
+			glm::mat4 GetViewMatrix() const;
 			void Pan(glm::vec2 delta);
 			void Rotate(glm::vec2 delta);
 			void Zoom(float delta);

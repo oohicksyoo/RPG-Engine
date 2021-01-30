@@ -175,7 +175,7 @@ struct Scene::Internal {
 
 	glm::mat4 GetSceneCameraMatrix() {
 		auto cameraComponent = GetSceneCameraComponent();
-		return {cameraComponent->GetProjectionMatrix() * cameraComponent->GetViewMatrix(sceneCamera->GetTransform()->GetPosition())};
+		return {cameraComponent->GetProjectionMatrix() * cameraComponent->GetViewMatrix()};
 	}
 
 	glm::mat4 GetGameCameraMatrix() {
@@ -193,7 +193,7 @@ struct Scene::Internal {
 		}
 
 		auto cameraComponent = GetGameCameraComponent();
-		return {cameraComponent->GetProjectionMatrix() * cameraComponent->GetViewMatrix(gameCamera->GetTransform()->GetPosition())};
+		return {cameraComponent->GetProjectionMatrix() * cameraComponent->GetViewMatrix()};
 	}
 
 	std::shared_ptr<RPG::GameObject> GetGameCameraInScene() {

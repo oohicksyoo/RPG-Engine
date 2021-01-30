@@ -163,7 +163,8 @@ glm::mat4 CameraComponent::GetProjectionMatrix() const {
 	return internal->projectionMatrix;
 }
 
-glm::mat4 CameraComponent::GetViewMatrix(glm::vec3 position) const {
+glm::mat4 CameraComponent::GetViewMatrix() const {
+	internal->UpdateViewMatrix();
 	return internal->viewMatrix;
 }
 
