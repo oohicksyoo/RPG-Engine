@@ -450,6 +450,62 @@ struct OpenGLPipeline::Internal {
 									reinterpret_cast<const GLvoid *>(0)
 							);
 						}
+
+						//Lines
+						{
+							std::vector<RPG::Vertex> lines;
+							auto radius = physicsComponent->GetDiameter() * 0.5f;
+							auto worldPosition = transform->GetWorldPosition();
+							auto startPosition = physicsComponent->GetStartPosition();
+							auto endPosition = physicsComponent->GetEndPosition();
+							auto sp = glm::vec3{startPosition.x, 0, startPosition.y};
+							auto ep = glm::vec3{endPosition.x, 0, endPosition.y};
+							float distance = glm::distance(sp, ep);
+							glm::vec3 direction = glm::normalize(ep - sp);
+							glm::vec3 right = glm::cross(direction, glm::vec3{0,1,0}) * radius;
+							glm::vec3 left = -right;
+
+							lines.push_back(RPG::Vertex{{transform->GetWorldPosition() + sp + right}, {0, 0}});
+							lines.push_back(RPG::Vertex{{transform->GetWorldPosition() + sp + right + direction * distance}, {0, 0}});
+							lines.push_back(RPG::Vertex{{transform->GetWorldPosition() + sp + left}, {0, 0}});
+							lines.push_back(RPG::Vertex{{transform->GetWorldPosition() + sp + left + direction * distance}, {0, 0}});
+
+							//Render Mesh
+							const RPG::OpenGLMesh& mesh = RPG::OpenGLMesh(std::make_unique<RPG::Mesh>(RPG::Mesh(lines, {})));
+
+							// Populate the 'u_mvp' uniform in the shader program.
+
+							glUniformMatrix4fv(uniformLocationMVP, 1, GL_FALSE, &(cameraMatrix)[0][0]);
+
+							// Apply the texture we want to paint the mesh with.
+							//assetManager.GetTexture((meshComponent != nullptr) ? meshComponent->GetTexture() : spriteComponent->GetTexture()).Bind();
+
+							// Bind the vertex and index buffers.
+							glBindBuffer(GL_ARRAY_BUFFER, mesh.GetVertexBufferId());
+							glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.GetIndexBufferId());
+
+							// Configure the 'a_vertexPosition' attribute.
+							glVertexAttribPointer(
+									attributeLocationVertexPosition,
+									3,
+									GL_FLOAT,
+									GL_FALSE,
+									stride,
+									reinterpret_cast<const GLvoid*>(offsetPosition)
+							);
+
+							// Configure the 'a_texCoord' attribute.
+							glVertexAttribPointer(attributeLocationTexCoord,
+												  2,
+												  GL_FLOAT,
+												  GL_FALSE,
+												  stride,
+												  reinterpret_cast<const GLvoid*>(offsetTexCoord)
+							);
+
+							// Execute the draw command - with how many indices to iterate.
+							glDrawArrays(GL_LINES, 0, 4);
+						}
 					};
 
 					glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
