@@ -60,12 +60,13 @@ void SceneManager::StoreCurrentScene() {
 	if (currentScene != nullptr) {
 		currentSavedScene = RPG::Serializer::GetInstance().SaveScene(currentScene, "assets/scenes/__Temp__");
 		RPG::Assets::RemoveFile("assets/scenes/__Temp__");
-		RPG::PhysicsSystem::GetInstance().Cleanup();
 	}
 }
 
 void SceneManager::ReloadCurrentScene() {
 	if (currentSavedScene != "") {
+		RPG::PhysicsSystem::GetInstance().Cleanup();
+
 		glm::vec2 size = RPG::ApplicationStats::GetInstance().GetWindowSize();
 		currentScene = RPG::Serializer::GetInstance().LoadSceneData({static_cast<uint32_t>(size.x), static_cast<uint32_t>(size.y)}, currentSavedScene);
 		currentSavedScene = "";
