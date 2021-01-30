@@ -187,3 +187,7 @@ bool GameObject::HasParent() {
 std::shared_ptr<RPG::TransformComponent> GameObject::GetTransform() {
 	return internal->transform;
 }
+
+std::shared_ptr<RPG::GameObject> GameObject::GetParent() {
+	return internal->parent;
+}

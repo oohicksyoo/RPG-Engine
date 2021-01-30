@@ -116,27 +116,33 @@ std::unique_ptr<RPG::IScene> Serializer::LoadSceneData(const RPG::WindowSize &fr
 	return scene;
 }
 
-std::shared_ptr<RPG::GameObject> Serializer::LoadGameObject(nlohmann::json j) {
-	RPG::Log("Serializer", j["Name"].get<std::string>() + "|" + j["Guid"].get<std::string>());
-	std::shared_ptr<RPG::GameObject> go = std::make_unique<RPG::GameObject>(RPG::GameObject(j["Name"].get<std::string>(), j["Guid"].get<std::string>()));
+std::shared_ptr<RPG::GameObject> Serializer::LoadGameObject(nlohmann::json j, bool randomGuid) {
+	//RPG::Log("Serializer", j["Name"].get<std::string>() + "|" + j["Guid"].get<std::string>());
+	std::shared_ptr<RPG::GameObject> go;
+	if (randomGuid) {
+		go = std::make_unique<RPG::GameObject>(RPG::GameObject(j["Name"].get<std::string>()));
+	} else {
+		go = std::make_unique<RPG::GameObject>(RPG::GameObject(j["Name"].get<std::string>(), j["Guid"].get<std::string>()));
+	}
+
 
 	for (auto [key, gameObject] : j["Components"].items()) {
 		go->AddComponent(LoadComponent(gameObject, go));
 	}
 
 	for (auto [key, gameObject] : j["Children"].items()) {
-		auto g = LoadGameObject(gameObject);
+		auto g = LoadGameObject(gameObject, randomGuid);
 		g->SetParent(g, go);
 	}
 
 	return go;
 }
 
-std::shared_ptr<RPG::IComponent> Serializer::LoadComponent(nlohmann::json j, std::shared_ptr<RPG::GameObject> go) {
+std::shared_ptr<RPG::IComponent> Serializer::LoadComponent(nlohmann::json j, std::shared_ptr<RPG::GameObject> go, bool randomGuid) {
 	std::string componentName = j["Name"].get<std::string>();
 	for (auto const& [key, value] : jsonTypesToComponent) {
 		if (key == componentName) {
-			return value(j, go);
+			return value(j, go, randomGuid);
 		}
 	}
 }
@@ -157,7 +163,7 @@ void Serializer::AddPropertySave(std::pair<std::string, std::function<nlohmann::
 }
 
 void Serializer::AddComponentLoad(
-		std::pair<std::string, std::function<std::shared_ptr<RPG::IComponent>(nlohmann::json, std::shared_ptr<RPG::GameObject> go)>> pair) {
+		std::pair<std::string, std::function<std::shared_ptr<RPG::IComponent>(nlohmann::json, std::shared_ptr<RPG::GameObject> go, bool randomGuid)>> pair) {
 	jsonTypesToComponent.insert(pair);
 }
 
@@ -271,8 +277,13 @@ void Serializer::LoadDefaultSavePropertyTypes() {
 }
 
 void Serializer::LoadDefaultLoadComponentTypes() {
-	AddComponentLoad({"TransformComponent", [](nlohmann::json j, std::shared_ptr<RPG::GameObject> go) -> std::shared_ptr<RPG::IComponent> {
-		std::shared_ptr<RPG::TransformComponent> component = std::make_unique<RPG::TransformComponent>(j["Guid"].get<std::string>());
+	AddComponentLoad({"TransformComponent", [](nlohmann::json j, std::shared_ptr<RPG::GameObject> go, bool randomGuid) -> std::shared_ptr<RPG::IComponent> {
+		std::shared_ptr<RPG::TransformComponent> component;
+		if (randomGuid) {
+			component = std::make_unique<RPG::TransformComponent>();
+		} else {
+			component = std::make_unique<RPG::TransformComponent>(j["Guid"].get<std::string>());
+		}
 
 		go->GetTransform()->SetPosition( {
 			j["Properties"][0]["Value"]["x"].get<float>(),
@@ -293,25 +304,49 @@ void Serializer::LoadDefaultLoadComponentTypes() {
 		return component; //This wont be added to the gameobject anyways because we dont allow multiples
 	}});
 
-	AddComponentLoad({"MeshComponent", [](nlohmann::json j, std::shared_ptr<RPG::GameObject> go) -> std::shared_ptr<RPG::IComponent> {
+	AddComponentLoad({"MeshComponent", [](nlohmann::json j, std::shared_ptr<RPG::GameObject> go, bool randomGuid) -> std::shared_ptr<RPG::IComponent> {
 		std::string mesh = j["Properties"][0]["Value"].get<std::string>();
 		std::string texture = j["Properties"][1]["Value"].get<std::string>();
-		return std::make_unique<RPG::MeshComponent>(mesh, texture, j["Guid"].get<std::string>());
+
+		std::shared_ptr<RPG::MeshComponent> m;
+		if (randomGuid) {
+			m = std::make_unique<RPG::MeshComponent>(mesh, texture);
+		} else {
+			m = std::make_unique<RPG::MeshComponent>(mesh, texture, j["Guid"].get<std::string>());
+		}
+
+		return m;
 	}});
 
-	AddComponentLoad({"SpriteComponent", [](nlohmann::json j, std::shared_ptr<RPG::GameObject> go) -> std::shared_ptr<RPG::IComponent> {
+	AddComponentLoad({"SpriteComponent", [](nlohmann::json j, std::shared_ptr<RPG::GameObject> go, bool randomGuid) -> std::shared_ptr<RPG::IComponent> {
 		std::string texture = j["Properties"][0]["Value"].get<std::string>();
-		return std::make_unique<RPG::SpriteComponent>(texture, j["Guid"].get<std::string>());
+
+		std::shared_ptr<RPG::SpriteComponent> s;
+		if (randomGuid) {
+			s = std::make_unique<RPG::SpriteComponent>(texture);
+		} else {
+			s = std::make_unique<RPG::SpriteComponent>(texture, j["Guid"].get<std::string>());
+		}
+
+		return s;
 	}});
 
-	AddComponentLoad({"LuaScriptComponent", [](nlohmann::json j, std::shared_ptr<RPG::GameObject> go) -> std::shared_ptr<RPG::IComponent> {
-		return std::make_unique<RPG::LuaScriptComponent>(j["Properties"][0]["Value"].get<std::string>(), go, j["Guid"].get<std::string>());
+	AddComponentLoad({"LuaScriptComponent", [](nlohmann::json j, std::shared_ptr<RPG::GameObject> go, bool randomGuid) -> std::shared_ptr<RPG::IComponent> {
+		std::string s = j["Properties"][0]["Value"].get<std::string>();
+		std::shared_ptr<RPG::LuaScriptComponent> l;
+		if (randomGuid) {
+			l = std::make_unique<RPG::LuaScriptComponent>(s, go);
+		} else {
+			l = std::make_unique<RPG::LuaScriptComponent>(s, go, j["Guid"].get<std::string>());
+		}
+
+		return l;
 	}});
 
-	AddComponentLoad({"CameraComponent", [](nlohmann::json j, std::shared_ptr<RPG::GameObject> go) -> std::shared_ptr<RPG::IComponent> {
+	AddComponentLoad({"CameraComponent", [](nlohmann::json j, std::shared_ptr<RPG::GameObject> go, bool randomGuid) -> std::shared_ptr<RPG::IComponent> {
 		//TODO: Fix this to camera properties
 		auto size = RPG::ApplicationStats::GetInstance().GetWindowSize();
-		auto component = std::make_unique<RPG::CameraComponent>(size.x, size.y, go->GetTransform(), j["Guid"].get<std::string>());
+		auto component = (randomGuid) ? std::make_unique<RPG::CameraComponent>(size.x, size.y, go->GetTransform()) : std::make_unique<RPG::CameraComponent>(size.x, size.y, go->GetTransform(), j["Guid"].get<std::string>());
 		component->SetDistance(j["Properties"][1]["Value"].get<float>());
 		component->SetIsMainCamera(j["Properties"][2]["Value"].get<bool>());
 		component->SetYaw(j["Properties"][3]["Value"].get<float>());
@@ -320,8 +355,8 @@ void Serializer::LoadDefaultLoadComponentTypes() {
 		return component;
 	}});
 
-	AddComponentLoad({"PhysicsComponent", [](nlohmann::json j, std::shared_ptr<RPG::GameObject> go) -> std::shared_ptr<RPG::IComponent> {
-		auto component = std::make_unique<RPG::PhysicsComponent>(go->GetTransform(), j["Guid"].get<std::string>());
+	AddComponentLoad({"PhysicsComponent", [](nlohmann::json j, std::shared_ptr<RPG::GameObject> go, bool randomGuid) -> std::shared_ptr<RPG::IComponent> {
+		auto component = (randomGuid) ? std::make_unique<RPG::PhysicsComponent>(go->GetTransform()) : std::make_unique<RPG::PhysicsComponent>(go->GetTransform(), j["Guid"].get<std::string>());
 		component->SetIsStatic(j["Properties"][0]["Value"].get<bool>());
 		component->SetIsTrigger(j["Properties"][1]["Value"].get<bool>());
 		component->SetMass(j["Properties"][2]["Value"].get<float>());
@@ -339,11 +374,11 @@ void Serializer::LoadDefaultLoadComponentTypes() {
 		return component;
 	}});
 
-	AddComponentLoad({"BoxColliderComponent", [](nlohmann::json j, std::shared_ptr<RPG::GameObject> go) -> std::shared_ptr<RPG::IComponent> {
+	AddComponentLoad({"BoxColliderComponent", [](nlohmann::json j, std::shared_ptr<RPG::GameObject> go, bool randomGuid) -> std::shared_ptr<RPG::IComponent> {
 		glm::vec3  vec = {j["Properties"][0]["Value"]["x"].get<float>(),
 						  j["Properties"][0]["Value"]["y"].get<float>(),
 						  j["Properties"][0]["Value"]["z"].get<float>()};
 
-		return std::make_unique<RPG::BoxColliderComponent>(vec, j["Properties"][1]["Value"].get<bool>(), j["Guid"].get<std::string>());
+		return (randomGuid) ? std::make_unique<RPG::BoxColliderComponent>(vec, j["Properties"][1]["Value"].get<bool>()) : std::make_unique<RPG::BoxColliderComponent>(vec, j["Properties"][1]["Value"].get<bool>(), j["Guid"].get<std::string>());
 	}});
 }

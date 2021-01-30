@@ -34,6 +34,7 @@ namespace RPG {
 			bool RemoveChild(std::shared_ptr<RPG::GameObject> gameObject);
 			void SetParent(std::shared_ptr<RPG::GameObject> gameObject, std::shared_ptr<RPG::GameObject> parent);
 			bool HasParent();
+			std::shared_ptr<RPG::GameObject> GetParent();
 			std::shared_ptr<RPG::TransformComponent> GetTransform();
 
 			template<typename T, typename U>
