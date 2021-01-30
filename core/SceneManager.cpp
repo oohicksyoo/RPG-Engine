@@ -16,7 +16,7 @@ using RPG::SceneManager;
 SceneManager::SceneManager() {
 	currentSavedScene = "";
 	currentScenePath = "";
-	LoadScene("assets/scenes/demo.scene"); //TODO: Move this to something project specific
+	LoadScene("assets/scenes/level1.scene"); //TODO: Move this to something project specific
 }
 
 std::shared_ptr<RPG::IScene> SceneManager::GetCurrentScene() {
