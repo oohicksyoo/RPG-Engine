@@ -112,6 +112,40 @@ struct LuaScriptComponent::Internal {
 		}));
 		lua_setglobal(L, "GetComponent");
 
+		//Add Component - gameobject, string, optional
+		lua_pushcfunction(L, ([](lua_State* L) -> int {
+			int stackSize = lua_gettop(L);
+			if (stackSize < 2) return -1;
+			auto gameObject = static_cast<std::shared_ptr<RPG::GameObject>*>(lua_touserdata(L, -stackSize))->get();
+			std::string componentName = lua_tostring(L, -stackSize + 1);
+
+			if (componentName == "MeshComponent") {
+				auto mc = std::make_shared<RPG::MeshComponent>(RPG::MeshComponent(lua_tostring(L, -stackSize + 2), lua_tostring(L, -stackSize + 3)));
+				auto c = gameObject->AddComponent(mc);
+				if (c == nullptr) return 0;
+				void* memory = lua_newuserdata(L, sizeof(std::shared_ptr<RPG::MeshComponent>));
+				new(memory) std::shared_ptr<RPG::MeshComponent>(mc);
+				return 1;
+			}
+
+			if (componentName == "LuaScriptComponent") {
+				auto ls = std::make_shared<RPG::LuaScriptComponent>(RPG::LuaScriptComponent(lua_tostring(L, -stackSize + 2),
+																							static_cast<std::shared_ptr<RPG::GameObject>>(gameObject)));
+				auto c = gameObject->AddComponent(ls);
+				if (c == nullptr) return 0;
+				//Safe to start scripting calls
+				ls->Awake();
+				ls->Start();
+
+				void* memory = lua_newuserdata(L, sizeof(std::shared_ptr<RPG::LuaScriptComponent>));
+				new(memory) std::shared_ptr<RPG::LuaScriptComponent>(ls);
+				return 1;
+			}
+
+			return 0;
+		}));
+		lua_setglobal(L, "AddComponent");
+
 		//SetPosition for Gameobject
 		lua_pushcfunction(L, [](lua_State* L) -> int {
 			if (lua_gettop(L) != 4) return -1;
@@ -137,6 +171,19 @@ struct LuaScriptComponent::Internal {
 			return 0;
 		});
 		lua_setglobal(L, "SetRotation");
+
+		//Set Scale for Gameobject
+		lua_pushcfunction(L, [](lua_State* L) -> int {
+			if (lua_gettop(L) != 4) return -1;
+			auto gameObject = static_cast<std::shared_ptr<RPG::GameObject>*>(lua_touserdata(L, -4));
+
+			float sX = (float)lua_tonumber(L, -3);
+			float sY = (float)lua_tonumber(L, -2);
+			float sZ = (float)lua_tonumber(L, -1);
+			gameObject->get()->GetTransform()->SetScale({sX, sY, sZ});
+			return 0;
+		});
+		lua_setglobal(L, "SetScale");
 
 		//Get GameObject Forward
 		lua_pushcfunction(L, [](lua_State* L) -> int {
@@ -242,6 +289,27 @@ struct LuaScriptComponent::Internal {
 			return 1;
 		});
 		lua_setglobal(L, "GetRotation");
+
+		//Get GameObject Scale
+		lua_pushcfunction(L, [](lua_State* L) -> int {
+			if (lua_gettop(L) != 1) return -1;
+			auto gameObject = static_cast<std::shared_ptr<RPG::GameObject>*>(lua_touserdata(L, -1));
+			auto scale = gameObject->get()->GetTransform()->GetScale();
+
+			lua_newtable(L);
+			lua_pushstring(L, "x");
+			lua_pushnumber(L, scale.x);
+			lua_settable(L, -3);
+			lua_pushstring(L, "y");
+			lua_pushnumber(L, scale.y);
+			lua_settable(L, -3);
+			lua_pushstring(L, "z");
+			lua_pushnumber(L, scale.z);
+			lua_settable(L, -3);
+
+			return 1;
+		});
+		lua_setglobal(L, "GetScale");
 
 		//Physics Component
 		//Get Physics Velocity
@@ -373,6 +441,20 @@ struct LuaScriptComponent::Internal {
 			return 1;
 		});
 		lua_setglobal(L, "GetControllerAxisHeldTime");
+
+		//Jam Game Special Bindings
+		//Creates a GameObject: String Name, Optional Parent
+		lua_pushcfunction(L, [](lua_State* L) -> int {
+			if (lua_gettop(L) != 1) return -1;
+			std::string name = lua_tostring(L, -1);
+			void* memory = lua_newuserdata(L, sizeof(std::shared_ptr<RPG::GameObject>));
+			auto gameObject = std::make_shared<RPG::GameObject>(name);
+			new(memory) std::shared_ptr<RPG::GameObject>(gameObject);
+
+			RPG::SceneManager::GetInstance().GetCurrentScene()->GetHierarchy()->Add(gameObject);
+			return 1;
+		});
+		lua_setglobal(L, "CreateGameObject");
 	}
 };
 
