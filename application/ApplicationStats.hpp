@@ -17,9 +17,12 @@ namespace RPG {
 			glm::vec2 GetWindowSize();
 			void SetWindowSize(glm::vec2 size);
 			glm::vec2 GetRenderingSize();
+			void SetFPS(float delta);
+			float GetFPS();
 
 		private:
 			glm::vec2 windowSize;
+			float fps;
 	};
 }
 

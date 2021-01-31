@@ -12,6 +12,7 @@
 #include "../core/Log.hpp"
 #include "../core/Singleton.hpp"
 #include "../core/PhysicsSystem.hpp"
+#include "../application/ApplicationStats.hpp"
 
 using RPG::Application;
 
@@ -213,6 +214,9 @@ bool Application::RunMainLoop() {
 
 	//Update the Input States
 	InputManager::GetInstance().BeginFrame();
+
+	//Update FPS
+	RPG::ApplicationStats::GetInstance().SetFPS(internal->TimeStep());
 
 	//Update Physics
 	RPG::PhysicsSystem::GetInstance().Update(internal->TimeStep());

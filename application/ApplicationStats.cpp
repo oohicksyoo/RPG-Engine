@@ -25,3 +25,11 @@ void ApplicationStats::SetWindowSize(glm::vec2 size) {
 glm::vec2 ApplicationStats::GetRenderingSize() {
 	return glm::vec2{1280, 720};
 }
+
+void ApplicationStats::SetFPS(float delta) {
+	fps = 1.0f / delta;
+}
+
+float ApplicationStats::GetFPS() {
+	return fps;
+}
