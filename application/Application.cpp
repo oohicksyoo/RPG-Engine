@@ -59,6 +59,7 @@ bool Application::RunMainLoop() {
 	SDL_Event event;
 	RPG::Input::MouseButton mouseButton;
 	Sint32 index;
+	float delta = internal->TimeStep();
 
 	//Update the Mouse Data
 	{
@@ -216,13 +217,13 @@ bool Application::RunMainLoop() {
 	InputManager::GetInstance().BeginFrame();
 
 	//Update FPS
-	RPG::ApplicationStats::GetInstance().SetFPS(internal->TimeStep());
+	RPG::ApplicationStats::GetInstance().SetFPS(delta);
 
 	//Update Physics
-	RPG::PhysicsSystem::GetInstance().Update(internal->TimeStep());
+	RPG::PhysicsSystem::GetInstance().Update(delta);
 
 	//Update this frame
-	Update(internal->TimeStep());
+	Update(delta);
 
 	//Render this frame
 	Render();
