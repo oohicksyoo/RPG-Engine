@@ -445,13 +445,24 @@ struct LuaScriptComponent::Internal {
 		//Jam Game Special Bindings
 		//Creates a GameObject: String Name, Optional Parent
 		lua_pushcfunction(L, [](lua_State* L) -> int {
-			if (lua_gettop(L) != 1) return -1;
-			std::string name = lua_tostring(L, -1);
-			void* memory = lua_newuserdata(L, sizeof(std::shared_ptr<RPG::GameObject>));
-			auto gameObject = std::make_shared<RPG::GameObject>(name);
-			new(memory) std::shared_ptr<RPG::GameObject>(gameObject);
+			int stackSize = lua_gettop(L);
+			if (stackSize < 1) return -1;
+			std::string name = lua_tostring(L, -stackSize);
+			if (stackSize == 2) {
+				auto parent = static_cast<std::shared_ptr<RPG::GameObject>*>(lua_touserdata(L, -stackSize + 1))->get();
+				//Needs to happen after otherwise we grabbing it from the stack again
+				void* memory = lua_newuserdata(L, sizeof(std::shared_ptr<RPG::GameObject>));
+				auto gameObject = std::make_shared<RPG::GameObject>(name);
+				new(memory) std::shared_ptr<RPG::GameObject>(gameObject);
+				gameObject->SetParent(gameObject, static_cast<std::shared_ptr<RPG::GameObject>>(parent));
+			} else {
+				void* memory = lua_newuserdata(L, sizeof(std::shared_ptr<RPG::GameObject>));
+				auto gameObject = std::make_shared<RPG::GameObject>(name);
+				new(memory) std::shared_ptr<RPG::GameObject>(gameObject);
 
-			RPG::SceneManager::GetInstance().GetCurrentScene()->GetHierarchy()->Add(gameObject);
+				RPG::SceneManager::GetInstance().GetCurrentScene()->GetHierarchy()->Add(gameObject);
+			}
+
 			return 1;
 		});
 		lua_setglobal(L, "CreateGameObject");
