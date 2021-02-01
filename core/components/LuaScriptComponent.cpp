@@ -10,6 +10,8 @@
 #include "../GameObject.hpp"
 #include "../SceneManager.hpp"
 #include "../input/InputManager.hpp"
+#include "../../application/ApplicationStats.hpp"
+#include "../PhysicsSystem.hpp"
 #include "MeshComponent.hpp"
 #include "PhysicsComponent.hpp"
 
@@ -142,9 +144,57 @@ struct LuaScriptComponent::Internal {
 				return 1;
 			}
 
+			//TODO: Only handles Circle shape for now
+			if (componentName == "PhysicsComponent") {
+				std::shared_ptr<RPG::PhysicsComponent> pc = std::make_shared<RPG::PhysicsComponent>(RPG::PhysicsComponent(gameObject->GetTransform()));
+				pc->SetIsStatic(lua_toboolean(L, -stackSize + 2));
+				pc->SetIsTrigger(lua_toboolean(L, -stackSize + 3));
+				pc->SetMass((float)lua_tonumber(L, -stackSize + 4));
+				pc->SetPhysicsShape(RPG::PhysicsShape::Circle);
+				pc->SetDiameter((float)lua_tonumber(L, -stackSize + 5));
+				RPG::PhysicsSystem::GetInstance().RegisterPhysicsComponent(pc);
+
+				auto c = gameObject->AddComponent(pc);
+				if (c == nullptr) return 0;
+				void* memory = lua_newuserdata(L, sizeof(std::shared_ptr<RPG::PhysicsComponent>));
+				new(memory) std::shared_ptr<RPG::PhysicsComponent>(pc);
+				return 1;
+			}
+
+			if (componentName == "CameraComponent") {
+				auto size = RPG::ApplicationStats::GetInstance().GetWindowSize();
+				std::shared_ptr<RPG::CameraComponent> cc = std::make_shared<RPG::CameraComponent>(RPG::CameraComponent(size.x, size.y, gameObject->GetTransform()));
+				cc->SetDistance((float)lua_tonumber(L, -stackSize + 2));
+				cc->SetIsMainCamera(lua_toboolean(L, -stackSize + 3));
+				cc->SetYaw((float)lua_tonumber(L, -stackSize + 4));
+				cc->SetPitch((float)lua_tonumber(L, -stackSize + 5));
+
+				auto c = gameObject->AddComponent(cc);
+				if (c == nullptr) return 0;
+				void* memory = lua_newuserdata(L, sizeof(std::shared_ptr<RPG::CameraComponent>));
+				new(memory) std::shared_ptr<RPG::CameraComponent>(cc);
+				return 1;
+			}
+
 			return 0;
 		}));
 		lua_setglobal(L, "AddComponent");
+
+		//Get Child of a GameObject
+		lua_pushcfunction(L, [](lua_State* L) -> int {
+			int stackSize = lua_gettop(L);
+			if (stackSize != 2) return -1;
+			auto gameObject = static_cast<std::shared_ptr<RPG::GameObject>*>(lua_touserdata(L, -stackSize))->get();
+
+			if (gameObject->HasChildren()) {
+				auto child = gameObject->GetChildren()[(int)lua_tonumber(L, -stackSize + 1)];
+				void* memory = lua_newuserdata(L, sizeof(std::shared_ptr<RPG::GameObject>));
+				new(memory) std::shared_ptr<RPG::GameObject>(child);
+				return 1;
+			}
+			return 0;
+		});
+		lua_setglobal(L, "GetChild");
 
 		//SetPosition for Gameobject
 		lua_pushcfunction(L, [](lua_State* L) -> int {
