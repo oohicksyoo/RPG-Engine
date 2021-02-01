@@ -54,6 +54,7 @@ void PhysicsSystem::Update(float delta) {
 			acceleration.y = 0;
 		}
 
+		//TODO: Setting World Position is not correct causing pinging between two locations
 		component->SetWorldPosition(position);
 		component->SetAcceleration(acceleration);
 		component->SetVelocity(velocity);
