@@ -448,6 +448,30 @@ struct LuaScriptComponent::Internal {
 
 		//Input
 		lua_pushcfunction(L, [](lua_State* L) -> int {
+			if (lua_gettop(L) != 1) return -1;
+			int value = lua_tointeger(L, -1);
+			lua_pushboolean(L, RPG::InputManager::GetInstance().IsKeyDown((RPG::Input::Key)value));
+			return 1;
+		});
+		lua_setglobal(L, "IsKeyDown");
+
+		lua_pushcfunction(L, [](lua_State* L) -> int {
+			if (lua_gettop(L) != 1) return -1;
+			int value = lua_tointeger(L, -1);
+			lua_pushboolean(L, RPG::InputManager::GetInstance().IsKeyPressed((RPG::Input::Key)value));
+			return 1;
+		});
+		lua_setglobal(L, "IsKeyPressed");
+
+		lua_pushcfunction(L, [](lua_State* L) -> int {
+			if (lua_gettop(L) != 1) return -1;
+			int value = lua_tointeger(L, -1);
+			lua_pushboolean(L, RPG::InputManager::GetInstance().IsKeyReleased((RPG::Input::Key)value));
+			return 1;
+		});
+		lua_setglobal(L, "IsKeyReleased");
+
+		lua_pushcfunction(L, [](lua_State* L) -> int {
 			if (lua_gettop(L) != 2) return -1;
 			int value = lua_tointeger(L, -1);
 			int controllerID = lua_tointeger(L, -2);
