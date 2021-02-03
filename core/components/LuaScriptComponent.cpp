@@ -405,6 +405,45 @@ struct LuaScriptComponent::Internal {
 		lua_setglobal(L, "Lerp");
 
 		lua_pushcfunction(L, [](lua_State* L) -> int {
+			int stackSize = lua_gettop(L);
+			if (stackSize != 6) return -1;
+			float x1 = (float)lua_tonumber(L, -stackSize);
+			float y1= (float)lua_tonumber(L, -stackSize + 1);
+			float z1 = (float)lua_tonumber(L, -stackSize + 2);
+			float x2 = (float)lua_tonumber(L, -stackSize + 3);
+			float y2= (float)lua_tonumber(L, -stackSize + 4);
+			float z2 = (float)lua_tonumber(L, -stackSize + 5);
+
+			lua_pushnumber(L, glm::distance(glm::vec3{x1, y1, z1}, glm::vec3{x2, y2, z2}));
+
+			return 1;
+		});
+		lua_setglobal(L, "Distance");
+
+		lua_pushcfunction(L, [](lua_State* L) -> int {
+			int stackSize = lua_gettop(L);
+			if (stackSize != 4) return -1;
+			float x = (float)lua_tonumber(L, -stackSize);
+			float y= (float)lua_tonumber(L, -stackSize + 1);
+			float z = (float)lua_tonumber(L, -stackSize + 2);
+			float mult = (float)lua_tonumber(L, -stackSize + 3);
+
+			lua_newtable(L);
+			lua_pushstring(L, "x");
+			lua_pushnumber(L, x * mult);
+			lua_settable(L, -3);
+			lua_pushstring(L, "y");
+			lua_pushnumber(L, y * mult);
+			lua_settable(L, -3);
+			lua_pushstring(L, "z");
+			lua_pushnumber(L, z * mult);
+			lua_settable(L, -3);
+
+			return 1;
+		});
+		lua_setglobal(L, "Vector3Multiply");
+
+		lua_pushcfunction(L, [](lua_State* L) -> int {
 			if (lua_gettop(L) != 2) return -1;
 
 			float x = (float)lua_tonumber(L, -2);
@@ -539,6 +578,32 @@ struct LuaScriptComponent::Internal {
 			return 1;
 		});
 		lua_setglobal(L, "CreateGameObject");
+
+		//TODO: Somehow changing from Parent 1 to Parent 2 causes Parent 1 to be remove from memory even though it has other children and is in hierarchy
+		lua_pushcfunction(L, [](lua_State* L) -> int {
+			int stackSize = lua_gettop(L);
+			if (stackSize < 1) return -1;
+
+			auto gameObject = static_cast<std::shared_ptr<RPG::GameObject>*>(lua_touserdata(L, -stackSize))->get();
+
+			if (stackSize == 2) {
+				auto parent = static_cast<std::shared_ptr<RPG::GameObject>*>(lua_touserdata(L, -stackSize + 1))->get();
+				if (!gameObject->HasParent()) {
+					RPG::SceneManager::GetInstance().GetCurrentScene()->GetHierarchy()->Remove(static_cast<std::shared_ptr<RPG::GameObject>>(gameObject));
+				} else {
+					parent->RemoveChild(static_cast<std::shared_ptr<RPG::GameObject>>(gameObject));
+				}
+
+				gameObject->SetParent(static_cast<std::shared_ptr<RPG::GameObject>>(gameObject), static_cast<std::shared_ptr<RPG::GameObject>>(parent));
+			} else {
+				if (gameObject->HasParent()) {
+					gameObject->SetParent(static_cast<std::shared_ptr<RPG::GameObject>>(gameObject), nullptr);
+				}
+				RPG::SceneManager::GetInstance().GetCurrentScene()->GetHierarchy()->Add(static_cast<std::shared_ptr<RPG::GameObject>>(gameObject));
+			}
+			return 0;
+		});
+		lua_setglobal(L, "SetParent");
 	}
 
 	void OnTriggerEnter() {
