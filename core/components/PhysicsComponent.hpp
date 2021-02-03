@@ -10,8 +10,11 @@
 #include "../Guid.hpp"
 #include "TransformComponent.hpp"
 #include "../PhysicsCollision.hpp"
+#include "LuaScriptComponent.hpp"
 #include <string>
 #include <memory>
+#include <vector>
+#include <functional>
 
 namespace RPG {
 
@@ -22,7 +25,7 @@ namespace RPG {
 
 	struct PhysicsComponent : public IComponent {
 		public:
-			PhysicsComponent(std::shared_ptr<RPG::TransformComponent> transform, std::string guid = RPG::Guid::GenerateGuid());
+			PhysicsComponent(std::shared_ptr<RPG::TransformComponent> transform, std::function<std::vector<std::shared_ptr<RPG::IComponent>>()> getLuaScripts, std::string guid = RPG::Guid::GenerateGuid());
 			void Awake() override;
 			void Start() override;
 			void Update(const float &delta) override;
@@ -53,6 +56,9 @@ namespace RPG {
 			void SetAcceleration(glm::vec2 value);
 			void SetStartPosition(glm::vec2 value);
 			void SetEndPosition(glm::vec2 value);
+			void OnTriggerEnter();
+			void OnTriggerStay(float delta);
+			void OnTriggerExit();
 
 
 		private:

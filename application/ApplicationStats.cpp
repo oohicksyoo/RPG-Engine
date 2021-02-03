@@ -28,8 +28,12 @@ glm::vec2 ApplicationStats::GetRenderingSize() {
 
 void ApplicationStats::SetFPS(float delta) {
 	fps = 1.0f / delta;
+	delta = delta;
 }
 
 float ApplicationStats::GetFPS() {
 	return fps;
+}
+float ApplicationStats::GetDelta() {
+	return delta;
 }

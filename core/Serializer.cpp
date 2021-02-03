@@ -356,7 +356,19 @@ void Serializer::LoadDefaultLoadComponentTypes() {
 	}});
 
 	AddComponentLoad({"PhysicsComponent", [](nlohmann::json j, std::shared_ptr<RPG::GameObject> go, bool randomGuid) -> std::shared_ptr<RPG::IComponent> {
-		auto component = (randomGuid) ? std::make_unique<RPG::PhysicsComponent>(go->GetTransform()) : std::make_unique<RPG::PhysicsComponent>(go->GetTransform(), j["Guid"].get<std::string>());
+		std::shared_ptr<RPG::PhysicsComponent> component;
+
+		if (randomGuid) {
+			component = std::make_unique<RPG::PhysicsComponent>(go->GetTransform(), [go]() -> std::vector<std::shared_ptr<RPG::IComponent>> {
+				return go->GetLuaScripts();
+			});
+		} else {
+			component = std::make_unique<RPG::PhysicsComponent>(go->GetTransform(), [go]() -> std::vector<std::shared_ptr<RPG::IComponent>> {
+				return go->GetLuaScripts();
+			}, j["Guid"].get<std::string>());
+		}
+
+
 		component->SetIsStatic(j["Properties"][0]["Value"].get<bool>());
 		component->SetIsTrigger(j["Properties"][1]["Value"].get<bool>());
 		component->SetMass(j["Properties"][2]["Value"].get<float>());

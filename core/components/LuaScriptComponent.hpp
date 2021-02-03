@@ -19,6 +19,9 @@ namespace RPG {
 			std::vector<std::shared_ptr<RPG::Property>> GetProperties() override;
 			std::string Guid() override;
 			bool AllowMultiple() { return true; };
+			void OnTriggerEnter();
+			void OnTriggerStay(float delta);
+			void OnTriggerExit();
 
 		private:
 			struct Internal;

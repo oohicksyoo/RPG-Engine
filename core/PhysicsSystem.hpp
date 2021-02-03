@@ -30,6 +30,7 @@ namespace RPG {
 			std::vector<std::shared_ptr<RPG::PhysicsComponent>> components;
 			std::vector<std::shared_ptr<RPG::PhysicsComponent>> edgeComponents;
 			std::vector<std::pair<RPG::PhysicsCollision, RPG::PhysicsCollision>> collisionPairs;
+			std::vector<std::pair<std::shared_ptr<RPG::PhysicsComponent>, std::shared_ptr<RPG::PhysicsComponent>>> triggerPairs;
 			bool DoCirclesOverlap(float x1, float y1, float r1, float x2, float y2, float r2);
 			bool IsPointInCircle(float x1, float y1, float r1, float px, float py);
 	};

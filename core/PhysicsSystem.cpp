@@ -3,6 +3,7 @@
 //
 
 #include "PhysicsSystem.hpp"
+#include "../application/ApplicationStats.hpp"
 #include "Log.hpp"
 
 using RPG::PhysicsSystem;
@@ -59,6 +60,28 @@ void PhysicsSystem::Update(float delta) {
 		component->SetAcceleration(acceleration);
 		component->SetVelocity(velocity);
 	}
+
+	//Check if Triggers still exist
+	//TODO: If need to erase trigger call OnTriggerExit
+	//Else OnTriggerStay
+	std::vector<std::pair<std::shared_ptr<RPG::PhysicsComponent>, std::shared_ptr<RPG::PhysicsComponent>>> tPairs;
+	for (auto pair : triggerPairs) {
+		auto first = pair.first;
+		auto second = pair.second;
+
+		auto cPosition = first->GetWorldPosition();
+		auto cRadius = first->GetDiameter() * 0.5f;
+		auto oPosition = second->GetWorldPosition();
+		auto oRadius = second->GetDiameter() * 0.5f;
+
+		if (DoCirclesOverlap(cPosition.x, cPosition.y, cRadius, oPosition.x, oPosition.y, oRadius)) {
+			first->OnTriggerStay(RPG::ApplicationStats::GetInstance().GetDelta());
+			tPairs.push_back(pair);
+		} else {
+			first->OnTriggerExit();
+		}
+	}
+	triggerPairs = tPairs;
 
 	//Static Collisions
 	for (auto component : components) {
@@ -145,6 +168,14 @@ void PhysicsSystem::Update(float delta) {
 					collisionPairs.push_back(std::make_pair(component->GetCollisionData(), cd));
 				} else if (oTrigger) {
 					//Hand Trigger for this if it hasnt been fired before
+					//Add to a trigger list
+					auto pair = std::make_pair(component, otherComponent);
+
+					if (std::find(triggerPairs.begin(), triggerPairs.end(), pair) == triggerPairs.end()) {
+						component->OnTriggerEnter();
+						triggerPairs.push_back(pair);
+					}
+					continue;
 				}
 
 				//Distance between ball centers

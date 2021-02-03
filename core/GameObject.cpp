@@ -191,3 +191,15 @@ std::shared_ptr<RPG::TransformComponent> GameObject::GetTransform() {
 std::shared_ptr<RPG::GameObject> GameObject::GetParent() {
 	return internal->parent;
 }
+
+std::vector<std::shared_ptr<RPG::IComponent>> GameObject::GetLuaScripts() {
+	std::vector<std::shared_ptr<RPG::IComponent>> list;
+
+	for (auto c : internal->components) {
+		if (c->Name() == "LuaScriptComponent") {
+			list.push_back(c);
+		}
+	}
+
+	return list;
+}

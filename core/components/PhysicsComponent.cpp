@@ -19,10 +19,12 @@ struct PhysicsComponent::Internal {
 	std::shared_ptr<RPG::Property> endPosition;
 	glm::vec2 velocity;
 	glm::vec2 acceleration;
+	std::function<std::vector<std::shared_ptr<RPG::IComponent>>()> getLuaScripts;
 
-	Internal(std::shared_ptr<RPG::TransformComponent> transform, std::string guid)
+	Internal(std::shared_ptr<RPG::TransformComponent> transform, std::function<std::vector<std::shared_ptr<RPG::IComponent>>()> getLuaScripts, std::string guid)
 			: guid(guid),
 			  transform(transform),
+			  getLuaScripts(getLuaScripts),
 			  isStatic(std::make_unique<RPG::Property>(false, "Is Static", "bool")),
 			  isTrigger(std::make_unique<RPG::Property>(false, "Is Trigger", "bool")),
 			  mass(std::make_unique<RPG::Property>(1.0f, "Mass", "float")),
@@ -34,7 +36,7 @@ struct PhysicsComponent::Internal {
 			  acceleration(glm::vec2{0, 0}) {}
 };
 
-PhysicsComponent::PhysicsComponent(std::shared_ptr<RPG::TransformComponent> transform, std::string guid) : internal(MakeInternalPointer<Internal>(transform, guid)) {}
+PhysicsComponent::PhysicsComponent(std::shared_ptr<RPG::TransformComponent> transform, std::function<std::vector<std::shared_ptr<RPG::IComponent>>()> getLuaScripts, std::string guid) : internal(MakeInternalPointer<Internal>(transform, getLuaScripts, guid)) {}
 
 void PhysicsComponent::Awake() {
 
@@ -155,6 +157,27 @@ void PhysicsComponent::SetStartPosition(glm::vec2 value) {
 
 void PhysicsComponent::SetEndPosition(glm::vec2 value) {
 	internal->endPosition->SetProperty(value);
+}
+
+void PhysicsComponent::OnTriggerEnter() {
+	for (auto c : internal->getLuaScripts()) {
+		std::shared_ptr<RPG::LuaScriptComponent> lsc = std::dynamic_pointer_cast<RPG::LuaScriptComponent>(c);
+		lsc->OnTriggerEnter();
+	}
+}
+
+void PhysicsComponent::OnTriggerStay(float delta) {
+	for (auto c : internal->getLuaScripts()) {
+		std::shared_ptr<RPG::LuaScriptComponent> lsc = std::dynamic_pointer_cast<RPG::LuaScriptComponent>(c);
+		lsc->OnTriggerStay(delta);
+	}
+}
+
+void PhysicsComponent::OnTriggerExit() {
+	for (auto c : internal->getLuaScripts()) {
+		std::shared_ptr<RPG::LuaScriptComponent> lsc = std::dynamic_pointer_cast<RPG::LuaScriptComponent>(c);
+		lsc->OnTriggerExit();
+	}
 }
 
 std::vector<std::shared_ptr<RPG::Property>> PhysicsComponent::GetProperties() {

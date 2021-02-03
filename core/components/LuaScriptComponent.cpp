@@ -4,10 +4,7 @@
 
 #include "LuaScriptComponent.hpp"
 #include "../LuaWrapper.hpp"
-#include "../Log.hpp"
 #include "../Assets.hpp"
-#include "../Guid.hpp"
-#include "../GameObject.hpp"
 #include "../SceneManager.hpp"
 #include "../input/InputManager.hpp"
 #include "../../application/ApplicationStats.hpp"
@@ -146,7 +143,9 @@ struct LuaScriptComponent::Internal {
 
 			//TODO: Only handles Circle shape for now
 			if (componentName == "PhysicsComponent") {
-				std::shared_ptr<RPG::PhysicsComponent> pc = std::make_shared<RPG::PhysicsComponent>(RPG::PhysicsComponent(gameObject->GetTransform()));
+				std::shared_ptr<RPG::PhysicsComponent> pc = std::make_shared<RPG::PhysicsComponent>(RPG::PhysicsComponent(gameObject->GetTransform(), [gameObject]() -> std::vector<std::shared_ptr<RPG::IComponent>> {
+					return gameObject->GetLuaScripts();
+				}));
 				pc->SetIsStatic(lua_toboolean(L, -stackSize + 2));
 				pc->SetIsTrigger(lua_toboolean(L, -stackSize + 3));
 				pc->SetMass((float)lua_tonumber(L, -stackSize + 4));
@@ -541,6 +540,25 @@ struct LuaScriptComponent::Internal {
 		});
 		lua_setglobal(L, "CreateGameObject");
 	}
+
+	void OnTriggerEnter() {
+		lua_getglobal(L, "Class");
+		lua_getfield(L, -1, "OnTriggerEnter");
+		lua_pcall(L, 0, 0, 0);
+	}
+
+	void OnTriggerStay(float delta) {
+		lua_getglobal(L, "Class");
+		lua_getfield(L, -1, "OnTriggerStay");
+		lua_pushnumber(L, delta);
+		lua_pcall(L, 1, 0, 0);
+	}
+
+	void OnTriggerExit() {
+		lua_getglobal(L, "Class");
+		lua_getfield(L, -1, "OnTriggerExit");
+		lua_pcall(L, 0, 0, 0);
+	}
 };
 
 LuaScriptComponent::LuaScriptComponent(std::string path, std::shared_ptr<RPG::GameObject> gameObject, std::string guid) : internal(MakeInternalPointer<Internal>(path, gameObject, guid)) {}
@@ -559,6 +577,18 @@ void LuaScriptComponent::Update(const float &delta) {
 
 std::string LuaScriptComponent::Guid() {
 	return internal->guid;
+}
+
+void LuaScriptComponent::OnTriggerEnter() {
+	internal->OnTriggerEnter();
+}
+
+void LuaScriptComponent::OnTriggerStay(float delta) {
+	internal->OnTriggerStay(delta);
+}
+
+void LuaScriptComponent::OnTriggerExit() {
+	internal->OnTriggerExit();
 }
 
 std::vector<std::shared_ptr<RPG::Property>> LuaScriptComponent::GetProperties() {
