@@ -202,6 +202,18 @@ struct LuaScriptComponent::Internal {
 		}));
 		lua_setglobal(L, "RemoveComponent");
 
+		lua_pushcfunction(L, ([](lua_State* L) -> int {
+			int stackSize = lua_gettop(L);
+			if (stackSize < 2) return -1;
+			auto gameObject = static_cast<std::shared_ptr<RPG::GameObject>*>(lua_touserdata(L, -stackSize))->get();
+			auto child = static_cast<std::shared_ptr<RPG::GameObject>*>(lua_touserdata(L, -stackSize))->get();
+
+			gameObject->RemoveChild(static_cast<std::shared_ptr<RPG::GameObject>>(child));
+
+			return 0;
+		}));
+		lua_setglobal(L, "RemoveChild");
+
 		//Get Child of a GameObject
 		lua_pushcfunction(L, [](lua_State* L) -> int {
 			int stackSize = lua_gettop(L);
