@@ -107,6 +107,14 @@ struct LuaScriptComponent::Internal {
 				return 1;
 			}
 
+			if (componentName == "MeshComponent") {
+				auto c = gameObject->GetComponent<std::shared_ptr<RPG::MeshComponent>, RPG::MeshComponent>("MeshComponent");
+				if (c == nullptr) return 0;
+				void* memory = lua_newuserdata(L, sizeof(std::shared_ptr<RPG::MeshComponent>));
+				new(memory) std::shared_ptr<RPG::MeshComponent>(c);
+				return 1;
+			}
+
 			return 0;
 		}));
 		lua_setglobal(L, "GetComponent");
@@ -178,6 +186,21 @@ struct LuaScriptComponent::Internal {
 			return 0;
 		}));
 		lua_setglobal(L, "AddComponent");
+
+		//Remove Component - gameobject, string, optional
+		lua_pushcfunction(L, ([](lua_State* L) -> int {
+			int stackSize = lua_gettop(L);
+			if (stackSize < 2) return -1;
+			auto gameObject = static_cast<std::shared_ptr<RPG::GameObject>*>(lua_touserdata(L, -stackSize))->get();
+			std::string componentName = lua_tostring(L, -stackSize + 1);
+
+			auto c = gameObject->GetComponent<std::shared_ptr<RPG::MeshComponent>, RPG::MeshComponent>(componentName);
+
+			gameObject->RemoveComponent(c->Guid());
+
+			return 0;
+		}));
+		lua_setglobal(L, "RemoveComponent");
 
 		//Get Child of a GameObject
 		lua_pushcfunction(L, [](lua_State* L) -> int {
