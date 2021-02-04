@@ -44,14 +44,14 @@ struct OpenGLAssetManager::Internal {
 	Internal() : lines(::CreateSceneGridLines()) {
 		RPG::Content::GetInstance().OnLoadedAsset<RPG::Mesh>([this](std::string path, std::shared_ptr<RPG::Mesh> mesh) {
 			if (meshCache.count(path) == 0) {
-				RPG::Log("AssetManager", "Adding new mesh to cache (" + path + ")");
+				//RPG::Log("AssetManager", "Adding new mesh to cache (" + path + ")");
 				meshCache.insert(std::make_pair(path, RPG::OpenGLMesh(mesh)));
 			}
 		});
 
 		RPG::Content::GetInstance().OnLoadedAsset<RPG::Texture>([this](std::string path, std::shared_ptr<RPG::Texture> bitmap) {
 			if (textureCache.count(path) == 0) {
-				RPG::Log("AssetManager", "Adding new bitmap to cache (" + path + ")");
+				//RPG::Log("AssetManager", "Adding new bitmap to cache (" + path + ")");
 				textureCache.insert(std::make_pair(path, RPG::OpenGLTexture(bitmap)));
 			}
 		});

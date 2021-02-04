@@ -30,7 +30,7 @@ namespace RPG {
 	inline std::shared_ptr<T> ResourceCache<T>::Load(std::string path) {
 		//Determine if this asset is already loaded or not
 		if (cache.count(path) != 0) {
-			RPG::Log("Resource Cache", "Asset (" + path + ") was found in the cache.");
+			//RPG::Log("Resource Cache", "Asset (" + path + ") was found in the cache.");
 			return cache.at(path);
 		}
 
@@ -38,9 +38,9 @@ namespace RPG {
 
 		if (v != nullptr) {
 			cache.insert({path, v});
-			RPG::Log("Resource Cache", "Asset (" + path + ") was loaded into the cache.");
+			//RPG::Log("Resource Cache", "Asset (" + path + ") was loaded into the cache.");
 		} else {
-			RPG::Log("Resource Cache", "Asset (" + path + ") failed to load into the cache");
+			//RPG::Log("Resource Cache", "Asset (" + path + ") failed to load into the cache");
 		}
 
 		return v;

@@ -41,7 +41,7 @@ namespace RPG {
 
 	template<>
 	inline void Content::Load<RPG::Mesh>(std::string path) {
-		RPG::Log("Content", "Loading Mesh Asset " + path);
+		//RPG::Log("Content", "Loading Mesh Asset " + path);
 		auto mesh = meshResourceCache.Load(path);
 		if (meshOnLoadedCallback != nullptr) {
 			meshOnLoadedCallback(path, mesh);
@@ -50,7 +50,7 @@ namespace RPG {
 
 	template<>
 	inline void Content::Load<RPG::Texture>(std::string path) {
-		RPG::Log("Content", "Loading Texture Asset " + path);
+		//RPG::Log("Content", "Loading Texture Asset " + path);
 		auto bitmap = bitmapResourceCache.Load(path);
 		if (bitmapOnLoadedCallback != nullptr) {
 			bitmapOnLoadedCallback(path, bitmap);
