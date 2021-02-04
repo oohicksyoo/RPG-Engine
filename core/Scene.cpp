@@ -80,6 +80,7 @@ struct Scene::Internal {
 	}
 
 	void Update(const float& delta) {
+		RPG::Log("Scene", "Update");
 		ProcessInput(delta);
 
 		for (auto gameObject : hierarchy->GetHierarchy()) {
