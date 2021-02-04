@@ -222,6 +222,7 @@ struct OpenGLApplication::Internal {
 	std::shared_ptr<RPG::IScene> GetScene() {
 		auto scene = RPG::SceneManager::GetInstance().GetCurrentScene();
 		if (!scene->HasLoaded()) {
+			RPG::Log("Application", "Scene hasnt loaded yet");
 			assetManager->LoadAssetManifest(scene->GetAssetManifest());
 			#ifdef RPG_EDITOR
 				hasRanPreviewFrame = false;
