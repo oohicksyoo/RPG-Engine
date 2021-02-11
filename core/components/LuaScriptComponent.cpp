@@ -11,6 +11,8 @@
 #include "../PhysicsSystem.hpp"
 #include "MeshComponent.hpp"
 #include "PhysicsComponent.hpp"
+#include "../SDLWrapper.hpp"
+#include "../Log.hpp"
 
 using RPG::LuaScriptComponent;
 
@@ -35,6 +37,13 @@ struct LuaScriptComponent::Internal {
 		if (luaScript == "") return;
 
 		luaL_openlibs(L);
+
+		//Add Application path to Lua to know where the data is
+		if (SDL_GetBasePath() != NULL) {
+			std::string basePath = SDL_GetBasePath();
+			SetupLuaPath(basePath + "?.lua");
+		}
+
 		CreateBindingFunctions();
 
 		int result = luaL_dostring(L, RPG::Assets::LoadTextFile(luaScript).c_str());
@@ -67,6 +76,18 @@ struct LuaScriptComponent::Internal {
 		lua_getfield(L, -1, "Resume");
 		lua_pushnumber(L, delta);
 		lua_pcall(L, 1, 0, 0);
+	}
+
+	void SetupLuaPath(std::string path) {
+		lua_getglobal(L, "package");
+		lua_getfield(L, -1, "path"); // get field "path" from table at top of stack (-1)
+		std::string cur_path = lua_tostring(L, -1); // grab path string from top of stack
+		cur_path.append(";"); // do your path magic here
+		cur_path.append(path.c_str());
+		lua_pop(L, 1); // get rid of the string on the stack we just pushed on line 5
+		lua_pushstring(L, cur_path.c_str()); // push the new one
+		lua_setfield(L, -2, "path"); // set the field "path" in table at -2 with value at top of stack
+		lua_pop(L, 1); // get rid of package table from top of stack
 	}
 
 	void CreateBindingFunctions() {
