@@ -176,8 +176,8 @@ struct OpenGLApplication::Internal {
 	}
 
 	void Update(const float& delta) {
-		//std::string s = "RPG-Engine | FPS: " + std::to_string(RPG::ApplicationStats::GetInstance().GetFPS());
-		//SDL_SetWindowTitle(window.GetWindow(), s.c_str());
+		std::string s = "RPG-Engine | FPS: " + std::to_string(RPG::ApplicationStats::GetInstance().GetFPS());
+		SDL_SetWindowTitle(window.GetWindow(), s.c_str());
 		#ifdef RPG_EDITOR
 			if (editorManager.IsGameRunning() || !hasRanPreviewFrame) {
 				if (hasRanPreviewFrame && !hasRanFirstFrame) {
