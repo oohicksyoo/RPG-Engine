@@ -13,6 +13,7 @@
 #include "PhysicsComponent.hpp"
 #include "../SDLWrapper.hpp"
 #include "../Log.hpp"
+#include <filesystem>
 
 using RPG::LuaScriptComponent;
 
@@ -22,6 +23,7 @@ struct LuaScriptComponent::Internal {
 	std::shared_ptr<RPG::GameObject> myGameObject;
 	lua_State* L;
 	bool isRunnable = false;
+	std::string luaScriptName;
 
 	Internal(std::string path, std::shared_ptr<RPG::GameObject> gameObject, std::string guid)  : guid(guid),
 								  path(std::make_unique<RPG::Property>(path, "Path", "RPG::Resource::String", true, "Lua")),
@@ -36,12 +38,16 @@ struct LuaScriptComponent::Internal {
 		std::string luaScript = std::any_cast<std::string>(path->GetProperty());
 		if (luaScript == "") return;
 
+		luaScriptName = std::filesystem::path(luaScript).stem().string();
+		RPG::Log("Lua", luaScriptName);
+
 		luaL_openlibs(L);
 
 		//Add Application path to Lua to know where the data is
 		if (SDL_GetBasePath() != NULL) {
 			std::string basePath = SDL_GetBasePath();
 			SetupLuaPath(basePath + "?.lua");
+            SetupLuaPath(basePath + "assets/scripts/?.lua");
 		}
 
 		CreateBindingFunctions();
@@ -51,23 +57,40 @@ struct LuaScriptComponent::Internal {
 			RPG::Log("Lua", lua_tostring(L, -1));
 		}
 
-		isRunnable = true;
+        lua_setglobal(L, "Class");
+		lua_settop(L, 0);
+
+        lua_getglobal(L, "Class");
+        lua_getfield(L, -1, luaScriptName.c_str());
+        lua_getfield(L, -1, "prototype");
+        lua_getfield(L, -1, "____constructor");
+        lua_pushvalue(L, -3);
+        lua_pcall(L, 1, 0, 0);
+
+		isRunnable = true; //TODO: Change back later when typescript working
 	}
 
 	void Start() {
 		if (!isRunnable) return;
 
-		lua_getglobal(L, "Class");
+		/*lua_getglobal(L, "Class");
 		lua_getfield(L, -1, "OnStart");
 		void* memory = lua_newuserdata(L, sizeof(std::shared_ptr<RPG::GameObject>));
 		new(memory) std::shared_ptr<RPG::GameObject>(myGameObject);
-		lua_pcall(L, 1, 0, 0);
+		lua_pcall(L, 1, 0, 0);*/
+
+        lua_getglobal(L, "Class");
+        lua_getfield(L, -1, luaScriptName.c_str());
+        lua_getfield(L, -1, "prototype");
+        lua_getfield(L, -1, "Start");
+        lua_pushvalue(L, -3);
+        lua_pcall(L, 1, 0, 0);
 	}
 
 	void Update(const float &delta) {
 		if (!isRunnable) return;
 
-		lua_getglobal(L, "Class");
+		/*lua_getglobal(L, "Class");
 		lua_getfield(L, -1, "OnUpdate");
 		lua_pushnumber(L, delta);
 		lua_pcall(L, 1, 0, 0);
@@ -75,7 +98,23 @@ struct LuaScriptComponent::Internal {
 		lua_getglobal(L, "Class");
 		lua_getfield(L, -1, "Resume");
 		lua_pushnumber(L, delta);
-		lua_pcall(L, 1, 0, 0);
+		lua_pcall(L, 1, 0, 0);*/
+
+        lua_getglobal(L, "Class");
+        lua_getfield(L, -1, luaScriptName.c_str());
+        lua_getfield(L, -1, "prototype");
+        lua_getfield(L, -1, "Update");
+        lua_pushvalue(L, -3);
+        lua_pushnumber(L, delta);
+        lua_pcall(L, 2, 0, 0);
+
+        lua_getglobal(L, "Class");
+        lua_getfield(L, -1, luaScriptName.c_str());
+        lua_getfield(L, -1, "prototype");
+        lua_getfield(L, -1, "Resume");
+        lua_pushvalue(L, -3);
+        lua_pushnumber(L, delta);
+        lua_pcall(L, 2, 0, 0);
 	}
 
 	void SetupLuaPath(std::string path) {
@@ -92,13 +131,21 @@ struct LuaScriptComponent::Internal {
 
 	void CreateBindingFunctions() {
 
-		lua_pushcfunction(L, [](lua_State* L) -> int {
+	    //First value is nil for whatever fucking reason
+        lua_pushcfunction(L, [](lua_State* L) -> int {
+            if (lua_gettop(L) != 2) return -1;
+            const char* value = lua_tostring(L, -1);
+            RPG::Log("Lua", value);
+            return 0;
+        });
+        lua_setglobal(L, "Log");
+		/*lua_pushcfunction(L, [](lua_State* L) -> int {
 			if (lua_gettop(L) != 1) return -1;
 			const char* value = lua_tostring(L, -1);
 			RPG::Log("Lua", value);
 			return 0;
 		});
-		lua_setglobal(L, "Log");
+		lua_setglobal(L, "Log");*/
 
 		/*//Creates a GameObject for the lua script
 		lua_pushcfunction(L, [](lua_State* L) -> int {
