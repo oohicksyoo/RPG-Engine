@@ -129,16 +129,25 @@ struct LuaScriptComponent::Internal {
 		lua_pop(L, 1); // get rid of package table from top of stack
 	}
 
+	static int Log(lua_State *L) {
+        if (lua_gettop(L) != 2) return -1;
+        const char* value = lua_tostring(L, -1);
+        RPG::Log("Lua", value);
+        return 0;
+	}
+
 	void CreateBindingFunctions() {
+        lua_register(L, "Log", Log);
 
 	    //First value is nil for whatever fucking reason
-        lua_pushcfunction(L, [](lua_State* L) -> int {
+        /*lua_pushcfunction(L, [](lua_State* L) -> int {
             if (lua_gettop(L) != 2) return -1;
             const char* value = lua_tostring(L, -1);
             RPG::Log("Lua", value);
             return 0;
         });
-        lua_setglobal(L, "Log");
+        lua_setglobal(L, "Log");*/
+
 		/*lua_pushcfunction(L, [](lua_State* L) -> int {
 			if (lua_gettop(L) != 1) return -1;
 			const char* value = lua_tostring(L, -1);
