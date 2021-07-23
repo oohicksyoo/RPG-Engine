@@ -11,6 +11,7 @@ namespace RPG {
 	struct FrameBuffer {
 		public:
 			FrameBuffer(uint32_t bufferID, uint32_t renderTextureID, uint32_t depthStencilBufferID);
+            FrameBuffer(uint32_t bufferID, uint32_t renderTextureID);
 			const glm::vec2& GetSize() const;
 			const uint32_t& GetBufferID() const;
 			const uint32_t& GetRenderTextureID() const;

@@ -22,8 +22,9 @@ namespace RPG {
 		virtual void Start() = 0;
 		virtual void Update(const float& delta) = 0;
 		virtual void UpdateEditorScene(const float& delta) = 0;
-		virtual void Render(RPG::IRenderer& renderer) = 0;
-		virtual void RenderToFrameBuffer(RPG::IRenderer& renderer, std::shared_ptr<RPG::FrameBuffer> frameBuffer, glm::vec3 clearColor, bool isGameCamera = true) = 0;
+		virtual void Render(RPG::IRenderer& renderer, uint32_t shadowMap) = 0;
+		virtual void RenderToFrameBuffer(RPG::IRenderer& renderer, std::shared_ptr<RPG::FrameBuffer> frameBuffer, glm::vec3 clearColor, uint32_t shadowMap, bool isGameCamera = true) = 0;
+		virtual void RenderToDepthBuffer(RPG::IRenderer& renderer, std::shared_ptr<RPG::FrameBuffer> frameBuffer) = 0;
 		virtual void RenderLinesToFrameBuffer(RPG::IRenderer& renderer, std::shared_ptr<RPG::FrameBuffer> frameBuffer) = 0;
 		virtual void OnWindowResized(const RPG::WindowSize& size) = 0;
 		virtual std::shared_ptr<RPG::Hierarchy> GetHierarchy() = 0;

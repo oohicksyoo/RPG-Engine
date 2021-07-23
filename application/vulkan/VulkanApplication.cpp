@@ -37,7 +37,7 @@ struct VulkanApplication::Internal {
 
 	void Render() {
 		if (context.RenderBegin()) {
-			GetScene()->Render(context);
+			GetScene()->Render(context, 0); //TODO: Setup Shadow map texture id here
 			context.RenderEnd();
 		}
 	}

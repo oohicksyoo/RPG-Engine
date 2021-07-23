@@ -4,8 +4,10 @@
 
 #include "OpenGLPipeline.hpp"
 #include "OpenGLAssetManager.hpp"
+#include "../../application/ApplicationStats.hpp"
 #include "../../core/Assets.hpp"
 #include "../../core/Log.hpp"
+#include "../../core/Time.hpp"
 #include <stdexcept>
 #include <vector>
 
@@ -50,12 +52,14 @@ namespace {
 		const std::string fragmentShaderCode{RPG::Assets::LoadTextFile("assets/shaders/opengl/" + shaderName + ".frag")};
 
 
+		//TODO: Inject Engine functions for lighting
 		#ifdef USING_GLES
 			std::string vertexShaderSource{"#version 100\n" + vertexShaderCode};
 			std::string fragmentShaderSource{"#version 100\nprecision mediump float;\n" + fragmentShaderCode};
-		#else
-			std::string vertexShaderSource{"#version 120\n" + vertexShaderCode};
-			std::string fragmentShaderSource{"#version 120\n" + fragmentShaderCode};
+        #else
+			//Use to be 120 going to  bump to 420  though
+			std::string vertexShaderSource{"#version 420\n" + vertexShaderCode};
+			std::string fragmentShaderSource{"#version 420\n" + fragmentShaderCode};
 		#endif
 
 		RPG::Log(logTag, "Creating shader for pipeline '" + shaderName + "'");
@@ -91,22 +95,28 @@ namespace {
 struct OpenGLPipeline::Internal {
 	const GLuint shaderProgramId;
 	const GLuint uniformLocationMVP;
+	const GLuint uniformLocationM;
 	const GLuint attributeLocationVertexPosition;
 	const GLuint attributeLocationTexCoord;
+	const GLuint attributeLocationNormal;
 	const GLsizei stride;
 	const GLsizei offsetPosition;
 	const GLsizei offsetTexCoord;
+	const GLsizei offsetNormal;
 
 	Internal(const std::string& shaderName)
 			: shaderProgramId(::CreateShaderProgram(shaderName)),
 			  uniformLocationMVP(glGetUniformLocation(shaderProgramId, "u_mvp")),
+              uniformLocationM(glGetUniformLocation(shaderProgramId, "u_model")),
 			  attributeLocationVertexPosition(glGetAttribLocation(shaderProgramId, "a_vertexPosition")),
 			  attributeLocationTexCoord(glGetAttribLocation(shaderProgramId, "a_texCoord")),
-			  stride(5 * sizeof(float)),
+              attributeLocationNormal(glGetAttribLocation(shaderProgramId, "a_normal")),
+			  stride(8 * sizeof(float)),
 			  offsetPosition(0),
-			  offsetTexCoord(3 * sizeof(float)) {}
+			  offsetTexCoord(3 * sizeof(float)),
+			  offsetNormal(5 * sizeof(float)) {}
 
-	void Render(const RPG::OpenGLAssetManager& assetManager, const std::shared_ptr<RPG::Hierarchy> hierarchy, const glm::mat4 cameraMatrix, const bool isGameCamera) const {
+	void Render(const RPG::OpenGLAssetManager& assetManager, const std::shared_ptr<RPG::Hierarchy> hierarchy, const glm::mat4 cameraMatrix, const uint32_t shadowMap, const bool isGameCamera) const {
 		// Instruct OpenGL to starting using our shader program.
 		glUseProgram(shaderProgramId);
 
@@ -116,29 +126,123 @@ struct OpenGLPipeline::Internal {
 		// Enable the 'a_texCoord' attribute.
 		glEnableVertexAttribArray(attributeLocationTexCoord);
 
+		//Enable the 'a_normal' attribute
+		glEnableVertexAttribArray(attributeLocationNormal);
+
 		//Enable Transparent
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 		for (auto gameObject : hierarchy->GetHierarchy()) {
-			RenderGameObject(assetManager, gameObject, cameraMatrix, isGameCamera);
+			RenderGameObject(assetManager, gameObject, cameraMatrix, shadowMap, isGameCamera);
 		}
 
 		// Tidy up.
 		glDisableVertexAttribArray(attributeLocationVertexPosition);
 		glDisableVertexAttribArray(attributeLocationTexCoord);
+        glDisableVertexAttribArray(attributeLocationNormal);
 	}
 
-	void RenderToFrameBuffer(const RPG::OpenGLAssetManager& assetManager, const std::shared_ptr<RPG::Hierarchy> hierarchy, const std::shared_ptr<RPG::FrameBuffer> frameBuffer, const glm::mat4 cameraMatrix, const glm::vec3 clearColor, const bool isGameCamera) const {
+	void RenderToFrameBuffer(const RPG::OpenGLAssetManager& assetManager, const std::shared_ptr<RPG::Hierarchy> hierarchy, const std::shared_ptr<RPG::FrameBuffer> frameBuffer, const glm::mat4 cameraMatrix, const glm::vec3 clearColor, const uint32_t shadowMap, const bool isGameCamera) const {
 		glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer->GetRenderTextureID());
 		glClearColor(clearColor.x, clearColor.y, clearColor.z, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // we're not using the stencil buffer now
 		glEnable(GL_DEPTH_TEST);
 
-		Render(assetManager, hierarchy, cameraMatrix, isGameCamera);
+		Render(assetManager, hierarchy, cameraMatrix, shadowMap, isGameCamera);
 
 		//Tidy Up
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	}
+
+	void RenderToDepthBuffer(const RPG::OpenGLAssetManager& assetManager, const std::shared_ptr<RPG::Hierarchy> hierarchy, const std::shared_ptr<RPG::FrameBuffer> frameBuffer) const {
+        //TODO: Move location and pre calc once
+        float near_plane = 1.0f, far_plane = 7.5f;
+        glm::vec3 lightPos(-2.0f, 4.0f, -1.0f);
+        glm::mat4 lightProjection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, near_plane, far_plane);
+        glm::mat4 lightView = glm::lookAt(lightPos, glm::vec3( 0.0f), glm::vec3( 0.0f, 1.0f,  0.0f));
+        glm::mat4  lightSpaceMatrix = lightProjection * lightView;
+
+        glViewport(0, 0, 1024, 1024);
+	    glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer->GetRenderTextureID());
+        glClear(GL_DEPTH_BUFFER_BIT);
+
+        glCullFace(GL_FRONT);
+        RenderSceneToDepthBuffer(assetManager, hierarchy, lightSpaceMatrix);
+        glCullFace(GL_BACK);
+
+        //Tidy Up
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+        glm::vec2 size = RPG::ApplicationStats::GetInstance().GetWindowSize();
+        glViewport(0, 0, size.x, size.y);
+	}
+
+	void RenderSceneToDepthBuffer(const RPG::OpenGLAssetManager& assetManager, const std::shared_ptr<RPG::Hierarchy> hierarchy, const glm::mat4 lightMatrix) const {
+        // Instruct OpenGL to starting using our shader program.
+        glUseProgram(shaderProgramId);
+
+        // Enable the 'a_vertexPosition' attribute.
+        glEnableVertexAttribArray(attributeLocationVertexPosition);
+
+        for (auto gameObject : hierarchy->GetHierarchy()) {
+            RenderGameObjectToDepthBuffer(assetManager, gameObject, lightMatrix);
+        }
+
+        // Tidy up.
+        glDisableVertexAttribArray(attributeLocationVertexPosition);
+	}
+
+	void RenderGameObjectToDepthBuffer(const RPG::OpenGLAssetManager& assetManager, std::shared_ptr<RPG::GameObject> gameObject, const glm::mat4 lightMatrix) const {
+        //Render Children First
+        for (auto childGameObject : gameObject->GetChildren()) {
+            RenderGameObjectToDepthBuffer(assetManager, childGameObject, lightMatrix);
+        }
+
+        bool canRenderMesh = true;
+        auto transform = gameObject->GetTransform();
+        auto meshComponent = gameObject->GetComponent<std::shared_ptr<RPG::MeshComponent>, RPG::MeshComponent>(std::make_unique<RPG::MeshComponent>("", ""));
+        std::shared_ptr<RPG::SpriteComponent> spriteComponent;
+        if (meshComponent == nullptr) {
+            spriteComponent = gameObject->GetComponent<std::shared_ptr<RPG::SpriteComponent>, RPG::SpriteComponent>(std::make_unique<RPG::SpriteComponent>(""));
+            if (spriteComponent == nullptr)  {
+                canRenderMesh = false;
+            }
+        }
+
+        if (!canRenderMesh) {
+            return;
+        }
+
+        //Render Mesh
+        std::string meshString = (meshComponent != nullptr) ? meshComponent->GetMesh() : spriteComponent->GetMesh();
+        if (meshString == "") return;
+        const RPG::OpenGLMesh &mesh = assetManager.GetStaticMesh(meshString);
+
+        // Populate the 'u_mvp' uniform in the shader program.
+        glUniformMatrix4fv(uniformLocationMVP, 1, GL_FALSE, &(lightMatrix * transform->GetTransformMatrix())[0][0]);
+
+        // Bind the vertex and index buffers.
+        glBindBuffer(GL_ARRAY_BUFFER, mesh.GetVertexBufferId());
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.GetIndexBufferId());
+
+        // Configure the 'a_vertexPosition' attribute.
+        glVertexAttribPointer(
+                attributeLocationVertexPosition,
+                3,
+                GL_FLOAT,
+                GL_FALSE,
+                stride,
+                reinterpret_cast<const GLvoid *>(offsetPosition)
+        );
+
+        // Execute the draw command - with how many indices to iterate.
+        glDrawElements(
+                GL_TRIANGLES,
+                mesh.GetNumIndices(),
+                GL_UNSIGNED_INT,
+                reinterpret_cast<const GLvoid *>(0)
+        );
 	}
 
 	void RenderLinesToFrameBuffer(const RPG::OpenGLAssetManager &assetManager, const std::shared_ptr<RPG::FrameBuffer> frameBuffer, const glm::mat4 cameraMatrix) const {
@@ -195,10 +299,10 @@ struct OpenGLPipeline::Internal {
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	}
 
-	void RenderGameObject(const RPG::OpenGLAssetManager& assetManager, std::shared_ptr<RPG::GameObject> gameObject, const glm::mat4 cameraMatrix, const bool isGameCamera) const {
+	void RenderGameObject(const RPG::OpenGLAssetManager& assetManager, std::shared_ptr<RPG::GameObject> gameObject, const glm::mat4 cameraMatrix, const uint32_t shadowMap, const bool isGameCamera) const {
 		//Render Children First
 		for (auto childGameObject : gameObject->GetChildren()) {
-			RenderGameObject(assetManager, childGameObject, cameraMatrix, isGameCamera);
+			RenderGameObject(assetManager, childGameObject, cameraMatrix, shadowMap, isGameCamera);
 		}
 
 		bool canRenderMesh = true;
@@ -236,6 +340,7 @@ struct OpenGLPipeline::Internal {
 					modelMatrix = glm::scale(modelMatrix, std::any_cast<glm::vec3>(boxColliderComponent->GetSize()));
 
 					glUniformMatrix4fv(uniformLocationMVP, 1, GL_FALSE, &(cameraMatrix * modelMatrix)[0][0]);
+                    glUniformMatrix4fv(uniformLocationM, 1, GL_FALSE, &(modelMatrix)[0][0]);
 
 					// Apply the texture we want to paint the mesh with.
 					std::string colliderText = (boxColliderComponent->IsTrigger()) ? "assets/textures/trigger.png" : "assets/textures/collider.png";
@@ -263,6 +368,16 @@ struct OpenGLPipeline::Internal {
 										stride,
 										reinterpret_cast<const GLvoid *>(offsetTexCoord)
 					);
+
+                    // Configure the 'a_normal' attribute.
+                    glVertexAttribPointer(
+                            attributeLocationNormal,
+                            3,
+                            GL_FLOAT,
+                            GL_FALSE,
+                            stride,
+                            reinterpret_cast<const GLvoid*>(offsetNormal)
+                    );
 
 					// Execute the draw command - with how many indices to iterate.
 					glDrawElements(
@@ -302,6 +417,7 @@ struct OpenGLPipeline::Internal {
 						modelMatrix = glm::scale(modelMatrix, scale);
 
 						glUniformMatrix4fv(uniformLocationMVP, 1, GL_FALSE, &(cameraMatrix * modelMatrix)[0][0]);
+                        glUniformMatrix4fv(uniformLocationM, 1, GL_FALSE, &(modelMatrix)[0][0]);
 
 						// Apply the texture we want to paint the mesh with.
 						std::string colliderText = (physicsComponent->IsTrigger()) ? "assets/textures/trigger.png"
@@ -331,6 +447,16 @@ struct OpenGLPipeline::Internal {
 											  reinterpret_cast<const GLvoid *>(offsetTexCoord)
 						);
 
+                        // Configure the 'a_normal' attribute.
+                        glVertexAttribPointer(
+                                attributeLocationNormal,
+                                3,
+                                GL_FLOAT,
+                                GL_FALSE,
+                                stride,
+                                reinterpret_cast<const GLvoid*>(offsetNormal)
+                        );
+
 						// Execute the draw command - with how many indices to iterate.
 						glDrawElements(
 								GL_TRIANGLES,
@@ -357,6 +483,7 @@ struct OpenGLPipeline::Internal {
 							modelMatrix = glm::scale(modelMatrix, scale);
 
 							glUniformMatrix4fv(uniformLocationMVP, 1, GL_FALSE, &(cameraMatrix * modelMatrix)[0][0]);
+                            glUniformMatrix4fv(uniformLocationM, 1, GL_FALSE, &(modelMatrix)[0][0]);
 
 							// Apply the texture we want to paint the mesh with.
 							std::string colliderText = (physicsComponent->IsTrigger()) ? "assets/textures/trigger.png"
@@ -385,6 +512,16 @@ struct OpenGLPipeline::Internal {
 												  stride,
 												  reinterpret_cast<const GLvoid *>(offsetTexCoord)
 							);
+
+                            // Configure the 'a_normal' attribute.
+                            glVertexAttribPointer(
+                                    attributeLocationNormal,
+                                    3,
+                                    GL_FLOAT,
+                                    GL_FALSE,
+                                    stride,
+                                    reinterpret_cast<const GLvoid*>(offsetNormal)
+                            );
 
 							// Execute the draw command - with how many indices to iterate.
 							glDrawElements(
@@ -413,6 +550,7 @@ struct OpenGLPipeline::Internal {
 							modelMatrix = glm::scale(modelMatrix, scale);
 
 							glUniformMatrix4fv(uniformLocationMVP, 1, GL_FALSE, &(cameraMatrix * modelMatrix)[0][0]);
+                            glUniformMatrix4fv(uniformLocationM, 1, GL_FALSE, &(modelMatrix)[0][0]);
 
 							// Apply the texture we want to paint the mesh with.
 							std::string colliderText = (physicsComponent->IsTrigger()) ? "assets/textures/trigger.png"
@@ -441,6 +579,16 @@ struct OpenGLPipeline::Internal {
 												  stride,
 												  reinterpret_cast<const GLvoid *>(offsetTexCoord)
 							);
+
+                            // Configure the 'a_normal' attribute.
+                            glVertexAttribPointer(
+                                    attributeLocationNormal,
+                                    3,
+                                    GL_FLOAT,
+                                    GL_FALSE,
+                                    stride,
+                                    reinterpret_cast<const GLvoid*>(offsetNormal)
+                            );
 
 							// Execute the draw command - with how many indices to iterate.
 							glDrawElements(
@@ -503,6 +651,16 @@ struct OpenGLPipeline::Internal {
 												  reinterpret_cast<const GLvoid*>(offsetTexCoord)
 							);
 
+                            // Configure the 'a_normal' attribute.
+                            glVertexAttribPointer(
+                                    attributeLocationNormal,
+                                    3,
+                                    GL_FLOAT,
+                                    GL_FALSE,
+                                    stride,
+                                    reinterpret_cast<const GLvoid*>(offsetNormal)
+                            );
+
 							// Execute the draw command - with how many indices to iterate.
 							glDrawArrays(GL_LINES, 0, 4);
 						}
@@ -522,15 +680,52 @@ struct OpenGLPipeline::Internal {
 		if (meshString == "") return;
 		const RPG::OpenGLMesh &mesh = assetManager.GetStaticMesh(meshString);
 
-		// Populate the 'u_mvp' uniform in the shader program.
+        //Camera Position
+        glm::vec3 cameraPosition = glm::vec3(cameraMatrix[3]);
 
-		glUniformMatrix4fv(uniformLocationMVP, 1, GL_FALSE,
-						   &(cameraMatrix * transform->GetTransformMatrix())[0][0]);
+        //TODO: Move location and pre calc once
+        float near_plane = 1.0f, far_plane = 7.5f;
+        glm::vec3 lightPos(-2.0f, 4.0f, -1.0f);
+        glm::mat4 lightProjection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, near_plane, far_plane);
+        glm::mat4 lightView = glm::lookAt(lightPos, glm::vec3( 0.0f), glm::vec3( 0.0f, 1.0f,  0.0f));
+        glm::mat4  lightSpaceMatrix = lightProjection * lightView;
+        glm::vec3 lightDirection = glm::normalize(-lightPos);
+
+        //Lighting
+        glUniformMatrix4fv(glGetUniformLocation(shaderProgramId, "u_lightSpace"), 1, GL_FALSE, &lightSpaceMatrix[0][0]);
+        //glUniform1i(glGetUniformLocation(shaderProgramId, "shadowMap"), shadowMap);
+        glUniform1f(glGetUniformLocation(shaderProgramId, "material.shininess"), 32.0);
+        glUniform3f(glGetUniformLocation(shaderProgramId, "directionLight.direction"), lightDirection.x, lightDirection.y, lightDirection.z);
+        glUniform3f(glGetUniformLocation(shaderProgramId, "directionLight.ambient"), 0.05, 0.05, 0.05);
+        glUniform3f(glGetUniformLocation(shaderProgramId, "directionLight.diffuse"), 0.4, 0.4, 0.4);
+        glUniform3f(glGetUniformLocation(shaderProgramId, "directionLight.specular"), 0.5, 0.5, 0.5);
+
+        /*for (int i = 0; i < 4; i++) {
+            glUniform3f(glGetUniformLocation(shaderProgramId, ("pointLights[" + std::to_string(i) + "].position").c_str()), 0.0, 10.0, 0.0);
+            glUniform3f(glGetUniformLocation(shaderProgramId, ("pointLights[" + std::to_string(i) + "].ambient").c_str()), 0.05, 0.05, 0.05);
+            glUniform3f(glGetUniformLocation(shaderProgramId, ("pointLights[" + std::to_string(i) + "].diffuse").c_str()), 0.8, 0.8, 0.8);
+            glUniform3f(glGetUniformLocation(shaderProgramId, ("pointLights[" + std::to_string(i) + "].specular").c_str()), 1.0, 1.0, 1.0);
+            glUniform1f(glGetUniformLocation(shaderProgramId, ("pointLights[" + std::to_string(i) + "].constant").c_str()), 1.0);
+            glUniform1f(glGetUniformLocation(shaderProgramId, ("pointLights[" + std::to_string(i) + "].linear").c_str()), 0.09);
+            glUniform1f(glGetUniformLocation(shaderProgramId, ("pointLights[" + std::to_string(i) + "].quadratic").c_str()), 0.032);
+        }*/
+
+        glUniform3f(glGetUniformLocation(shaderProgramId, "viewPosition"), cameraPosition.x, cameraPosition.y, cameraPosition.z);
+
+
+
+		// Populate the 'u_mvp' uniform in the shader program.
+		glUniformMatrix4fv(uniformLocationMVP, 1, GL_FALSE, &(cameraMatrix * transform->GetTransformMatrix())[0][0]);
+        glUniformMatrix4fv(uniformLocationM, 1, GL_FALSE, &(transform->GetTransformMatrix())[0][0]);
 
 		// Apply the texture we want to paint the mesh with.
 		std::string textureString = (meshComponent != nullptr) ? meshComponent->GetTexture() : spriteComponent->GetTexture();
 		if (textureString == "") return;
+		glActiveTexture(GL_TEXTURE0);
 		assetManager.GetTexture(textureString).Bind();
+
+        glActiveTexture(GL_TEXTURE2);
+		glBindTexture(GL_TEXTURE_2D, shadowMap);
 
 		// Bind the vertex and index buffers.
 		glBindBuffer(GL_ARRAY_BUFFER, mesh.GetVertexBufferId());
@@ -555,6 +750,16 @@ struct OpenGLPipeline::Internal {
 							  reinterpret_cast<const GLvoid *>(offsetTexCoord)
 		);
 
+        // Configure the 'a_normal' attribute.
+        glVertexAttribPointer(
+                attributeLocationNormal,
+                3,
+                GL_FLOAT,
+                GL_FALSE,
+                stride,
+                reinterpret_cast<const GLvoid*>(offsetNormal)
+        );
+
 		// Execute the draw command - with how many indices to iterate.
 		glDrawElements(
 				GL_TRIANGLES,
@@ -577,8 +782,8 @@ struct OpenGLPipeline::Internal {
 
 OpenGLPipeline::OpenGLPipeline(const std::string& shaderName) : internal(RPG::MakeInternalPointer<Internal>(shaderName)) {}
 
-void OpenGLPipeline::Render(const RPG::OpenGLAssetManager& assetManager, const std::shared_ptr<RPG::Hierarchy> hierarchy, const glm::mat4 cameraMatrix) const {
-	internal->Render(assetManager, hierarchy, cameraMatrix, true);
+void OpenGLPipeline::Render(const RPG::OpenGLAssetManager& assetManager, const std::shared_ptr<RPG::Hierarchy> hierarchy, const glm::mat4 cameraMatrix, const uint32_t shadowMap) const {
+	internal->Render(assetManager, hierarchy, cameraMatrix, shadowMap, true);
 }
 
 void OpenGLPipeline::RenderToFrameBuffer(const RPG::OpenGLAssetManager &assetManager,
@@ -586,14 +791,19 @@ void OpenGLPipeline::RenderToFrameBuffer(const RPG::OpenGLAssetManager &assetMan
 										 const std::shared_ptr<RPG::FrameBuffer> frameBuffer,
 										 const glm::mat4 cameraMatrix,
 										 const glm::vec3 clearColor,
+                                         const uint32_t shadowMap,
 										 const bool isGameCamera) const {
-	internal->RenderToFrameBuffer(assetManager, hierarchy, frameBuffer, cameraMatrix, clearColor, isGameCamera);
+	internal->RenderToFrameBuffer(assetManager, hierarchy, frameBuffer, cameraMatrix, clearColor, shadowMap, isGameCamera);
 }
 
 void OpenGLPipeline::RenderLinesToFrameBuffer(const RPG::OpenGLAssetManager &assetManager,
 											  const std::shared_ptr<RPG::FrameBuffer> framebuffer,
 											  const glm::mat4 cameraMatrix) const {
 	internal->RenderLinesToFrameBuffer(assetManager, framebuffer, cameraMatrix);
+}
+
+void OpenGLPipeline::RenderToDepthBuffer(const RPG::OpenGLAssetManager &assetManager, const std::shared_ptr<RPG::Hierarchy> hierarchy, const std::shared_ptr<RPG::FrameBuffer> frameBuffer) const {
+    internal->RenderToDepthBuffer(assetManager, hierarchy, frameBuffer);
 }
 
 void OpenGLPipeline::DeleteFrameBuffer(const std::shared_ptr<RPG::FrameBuffer> framebuffer) const {

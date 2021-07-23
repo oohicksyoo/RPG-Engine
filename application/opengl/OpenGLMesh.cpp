@@ -20,6 +20,11 @@ namespace {
 			// Texture coordinate
 			bufferData.push_back(vertex.texCoord.x);
 			bufferData.push_back(vertex.texCoord.y);
+
+			//Normal
+            bufferData.push_back(vertex.normal.x);
+            bufferData.push_back(vertex.normal.y);
+            bufferData.push_back(vertex.normal.z);
 		}
 
 		GLuint bufferId;

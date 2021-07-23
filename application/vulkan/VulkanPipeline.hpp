@@ -27,7 +27,8 @@ namespace RPG {
 						const vk::CommandBuffer& commandBuffer,
 						const RPG::VulkanAssetManager& assetManager,
 						const std::shared_ptr<RPG::Hierarchy> hierarchy,
-						const glm::mat4 cameraMatrix) const;
+						const glm::mat4 cameraMatrix,
+                        const uint32_t shadowMap) const;
 
 		private:
 			struct Internal;

@@ -63,7 +63,7 @@ struct Scene::Internal {
 		hasLoaded = true;
 
 		return RPG::AssetManifest {
-				{{Pipeline::Default, Pipeline::SceneLines}}
+				{{Pipeline::Default, Pipeline::SceneLines, Pipeline::DepthMap}}
 		};
 	}
 
@@ -149,16 +149,20 @@ struct Scene::Internal {
 		#endif
 	}
 
-	void Render(RPG::IRenderer& renderer) {
-		renderer.Render(Pipeline::Default, hierarchy, GetGameCameraMatrix());
+	void Render(RPG::IRenderer& renderer, uint32_t shadowMap) {
+		renderer.Render(Pipeline::Default, hierarchy, GetGameCameraMatrix(), shadowMap);
 	}
 
-	void RenderToFrameBuffer(RPG::IRenderer& renderer, std::shared_ptr<RPG::FrameBuffer>frameBuffer, glm::vec3 clearColor, bool isGameCamera = true) {
-		renderer.RenderToFrameBuffer(Pipeline::Default, hierarchy, frameBuffer, (isGameCamera) ? GetGameCameraMatrix() : GetSceneCameraMatrix(), clearColor, isGameCamera);
+	void RenderToFrameBuffer(RPG::IRenderer& renderer, std::shared_ptr<RPG::FrameBuffer>frameBuffer, glm::vec3 clearColor, uint32_t shadowMap, bool isGameCamera = true) {
+		renderer.RenderToFrameBuffer(Pipeline::Default, hierarchy, frameBuffer, (isGameCamera) ? GetGameCameraMatrix() : GetSceneCameraMatrix(), clearColor, shadowMap, isGameCamera);
 	}
 
 	void RenderLinesToFrameBuffer(RPG::IRenderer& renderer, std::shared_ptr<RPG::FrameBuffer> frameBuffer) {
 		renderer.RenderLinesToFrameBuffer(Pipeline::SceneLines, frameBuffer, GetSceneCameraMatrix());
+	}
+
+	void RenderToDepthBuffer(RPG::IRenderer &renderer, std::shared_ptr<RPG::FrameBuffer> frameBuffer, uint32_t shadowMap) {
+        renderer.RenderToDepthBuffer(Pipeline::DepthMap, hierarchy, frameBuffer);
 	}
 
 	void OnWindowResized(const RPG::WindowSize& size) {
@@ -250,16 +254,20 @@ void Scene::UpdateEditorScene(const float &delta) {
 	internal->UpdateEditorScene(delta);
 }
 
-void Scene::Render(RPG::IRenderer& renderer) {
-	internal->Render(renderer);
+void Scene::Render(RPG::IRenderer& renderer, uint32_t shadowMap) {
+	internal->Render(renderer, shadowMap);
 }
 
-void Scene::RenderToFrameBuffer(RPG::IRenderer &renderer, std::shared_ptr<RPG::FrameBuffer> frameBuffer, glm::vec3 clearColor, bool isGameCamera = true) {
-	internal->RenderToFrameBuffer(renderer, frameBuffer, clearColor, isGameCamera);
+void Scene::RenderToFrameBuffer(RPG::IRenderer &renderer, std::shared_ptr<RPG::FrameBuffer> frameBuffer, glm::vec3 clearColor, uint32_t shadowMap, bool isGameCamera = true) {
+	internal->RenderToFrameBuffer(renderer, frameBuffer, clearColor, shadowMap, isGameCamera);
 }
 
 void Scene::RenderLinesToFrameBuffer(RPG::IRenderer& renderer, std::shared_ptr<RPG::FrameBuffer> frameBuffer) {
 	internal->RenderLinesToFrameBuffer(renderer, frameBuffer);
+}
+
+void Scene::RenderToDepthBuffer(RPG::IRenderer &renderer, std::shared_ptr<RPG::FrameBuffer> frameBuffer) {
+    internal->RenderToDepthBuffer(renderer, frameBuffer, 0);
 }
 
 void Scene::OnWindowResized(const RPG::WindowSize& size) {

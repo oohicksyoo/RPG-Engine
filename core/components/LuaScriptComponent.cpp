@@ -65,19 +65,15 @@ struct LuaScriptComponent::Internal {
         lua_getfield(L, -1, "prototype");
         lua_getfield(L, -1, "____constructor");
         lua_pushvalue(L, -3);
-        lua_pcall(L, 1, 0, 0);
+        void* memory = lua_newuserdata(L, sizeof(std::shared_ptr<RPG::GameObject>));
+        new(memory) std::shared_ptr<RPG::GameObject>(myGameObject);
+        lua_pcall(L, 2, 0, 0);
 
-		isRunnable = true; //TODO: Change back later when typescript working
+		isRunnable = true;
 	}
 
 	void Start() {
 		if (!isRunnable) return;
-
-		/*lua_getglobal(L, "Class");
-		lua_getfield(L, -1, "OnStart");
-		void* memory = lua_newuserdata(L, sizeof(std::shared_ptr<RPG::GameObject>));
-		new(memory) std::shared_ptr<RPG::GameObject>(myGameObject);
-		lua_pcall(L, 1, 0, 0);*/
 
         lua_getglobal(L, "Class");
         lua_getfield(L, -1, luaScriptName.c_str());
@@ -89,16 +85,6 @@ struct LuaScriptComponent::Internal {
 
 	void Update(const float &delta) {
 		if (!isRunnable) return;
-
-		/*lua_getglobal(L, "Class");
-		lua_getfield(L, -1, "OnUpdate");
-		lua_pushnumber(L, delta);
-		lua_pcall(L, 1, 0, 0);
-
-		lua_getglobal(L, "Class");
-		lua_getfield(L, -1, "Resume");
-		lua_pushnumber(L, delta);
-		lua_pcall(L, 1, 0, 0);*/
 
         lua_getglobal(L, "Class");
         lua_getfield(L, -1, luaScriptName.c_str());
@@ -136,8 +122,99 @@ struct LuaScriptComponent::Internal {
         return 0;
 	}
 
+    static int GetPosition(lua_State *L) {
+        if (lua_gettop(L) != 2) return -1;
+        auto gameObject = static_cast<std::shared_ptr<RPG::GameObject>*>(lua_touserdata(L, -1));
+        auto rotation = gameObject->get()->GetTransform()->GetPosition();
+
+        lua_newtable(L);
+        lua_pushstring(L, "x");
+        lua_pushnumber(L, rotation.x);
+        lua_settable(L, -3);
+        lua_pushstring(L, "y");
+        lua_pushnumber(L, rotation.y);
+        lua_settable(L, -3);
+        lua_pushstring(L, "z");
+        lua_pushnumber(L, rotation.z);
+        lua_settable(L, -3);
+
+        return 1;
+    }
+
+    static int SetPosition(lua_State *L) {
+	    RPG::Log("Lua", "SetPosition()");
+        if (lua_gettop(L) != 3) return -1;
+        RPG::Log("Lua", "Enough params");
+        auto gameObject = static_cast<std::shared_ptr<RPG::GameObject>*>(lua_touserdata(L, -2))->get();
+
+        lua_getfield(L, -1, "x");
+        lua_getfield(L, -2, "y");
+        lua_getfield(L, -3, "z");
+
+        float posX = (float)lua_tonumber(L, -3);
+        float posY = (float)lua_tonumber(L, -2);
+        float posZ = (float)lua_tonumber(L, -1);
+        RPG::Log("Lua", "Params: (" + std::to_string(posX) + ", "+ std::to_string(posY) + ", "+ std::to_string(posZ) + ")");
+        gameObject->GetTransform()->SetPosition({posX, posY, posZ});
+        return 0;
+	}
+
+	static int GetRotation(lua_State *L) {
+        if (lua_gettop(L) != 2) return -1;
+        auto gameObject = static_cast<std::shared_ptr<RPG::GameObject>*>(lua_touserdata(L, -1));
+        auto rotation = gameObject->get()->GetTransform()->GetRotation();
+
+        lua_newtable(L);
+        lua_pushstring(L, "x");
+        lua_pushnumber(L, rotation.x);
+        lua_settable(L, -3);
+        lua_pushstring(L, "y");
+        lua_pushnumber(L, rotation.y);
+        lua_settable(L, -3);
+        lua_pushstring(L, "z");
+        lua_pushnumber(L, rotation.z);
+        lua_settable(L, -3);
+
+        return 1;
+	}
+
+    static int GetVector3(lua_State *L) {
+        if (lua_gettop(L) != 1) return -1;
+
+        lua_newtable(L);
+        lua_pushstring(L, "x");
+        lua_pushnumber(L, 5);
+        lua_settable(L, -3);
+        lua_pushstring(L, "y");
+        lua_pushnumber(L, 6);
+        lua_settable(L, -3);
+        lua_pushstring(L, "z");
+        lua_pushnumber(L, 7);
+        lua_settable(L, -3);
+
+        return 1;
+    }
+
 	void CreateBindingFunctions() {
-        lua_register(L, "Log", Log);
+	    static const luaL_Reg functions[] = {{"Log", Log}, {NULL, NULL}};
+        static const luaL_Reg mathFuncs[] = {{"GetVector3", GetVector3}, {NULL, NULL}};
+        static const luaL_Reg gameObjectFuncs[] = {{"GetPosition", GetPosition}, {"SetPosition", SetPosition}, {NULL, NULL}};
+
+        lua_newtable(L);
+        luaL_setfuncs(L, functions, 0);
+        lua_setglobal(L, "RPG");
+
+        lua_newtable(L);
+        luaL_setfuncs(L, mathFuncs, 0);
+        lua_setglobal(L, "RPGMath");
+
+        lua_newtable(L);
+        luaL_setfuncs(L, gameObjectFuncs, 0);
+        lua_setglobal(L, "GameObject");
+
+        /*lua_register(L, "Log", Log);
+        lua_register(L, "GetPosition", GetPosition);
+        //lua_register(L, "GetRotation", GetRotation);*/
 
 	    //First value is nil for whatever fucking reason
         /*lua_pushcfunction(L, [](lua_State* L) -> int {
@@ -171,7 +248,7 @@ struct LuaScriptComponent::Internal {
 		lua_setglobal(L, "CreateGameObject");*/
 
 		//Get Component - std::shared_prt<RPG::IComponent>
-		lua_pushcfunction(L, ([](lua_State* L) -> int {
+		/*lua_pushcfunction(L, ([](lua_State* L) -> int {
 			if (lua_gettop(L) != 2) return -1;
 			auto gameObject = static_cast<std::shared_ptr<RPG::GameObject>*>(lua_touserdata(L, -2))->get();
 			std::string componentName = lua_tostring(L, -1);
@@ -715,7 +792,7 @@ struct LuaScriptComponent::Internal {
 			}
 			return 0;
 		});
-		lua_setglobal(L, "SetParent");
+		lua_setglobal(L, "SetParent");*/
 	}
 
 	void OnTriggerEnter() {

@@ -322,7 +322,8 @@ struct VulkanPipeline::Internal {
 				const vk::CommandBuffer& commandBuffer,
 				const RPG::VulkanAssetManager& assetManager,
 				const std::shared_ptr<RPG::Hierarchy> hierarchy,
-				const glm::mat4 cameraMatrix) {
+				const glm::mat4 cameraMatrix,
+                const uint32_t shadowMap) {
 
 		//TODO: Similar rendering to Opengl but Vulkan
 		for (auto gameObject : hierarchy->GetHierarchy()) {
@@ -440,6 +441,7 @@ void VulkanPipeline::Render(const RPG::VulkanDevice& device,
 							const vk::CommandBuffer& commandBuffer,
 							const RPG::VulkanAssetManager& assetManager,
 							const std::shared_ptr<RPG::Hierarchy> hierarchy,
-							const glm::mat4 cameraMatrix) const {
-	internal->Render(device, commandBuffer, assetManager, hierarchy, cameraMatrix);
+							const glm::mat4 cameraMatrix,
+                            const uint32_t shadowMap) const {
+	internal->Render(device, commandBuffer, assetManager, hierarchy, cameraMatrix, shadowMap);
 }

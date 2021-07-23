@@ -63,7 +63,13 @@ RPG::Mesh RPG::Assets::LoadOBJFile(const std::string& path) {
 					1.0f - attributes.texcoords[2 * index.texcoord_index + 1]
 			};
 
-			RPG::Vertex vertex{position, texCoord};
+            glm::vec3 normal{
+                    attributes.normals[3 * index.normal_index + 0],
+                    attributes.normals[3 * index.normal_index + 1],
+                    attributes.normals[3 * index.normal_index + 2]
+            };
+
+			RPG::Vertex vertex{position, texCoord, normal};
 
 			if (uniqueVertices.count(vertex) == 0) {
 				uniqueVertices[vertex] = static_cast<uint32_t>(vertices.size());

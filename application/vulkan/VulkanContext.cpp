@@ -131,8 +131,8 @@ struct VulkanContext::Internal {
 		return true;
 	}
 
-	void Render(const RPG::Assets::Pipeline& pipeline, const std::shared_ptr<RPG::Hierarchy> hierarchy, const glm::mat4 cameraMatrix) {
-		assetManager.GetPipeline(pipeline).Render(device, renderContext.GetActiveCommandBuffer(), assetManager, hierarchy, cameraMatrix);
+	void Render(const RPG::Assets::Pipeline& pipeline, const std::shared_ptr<RPG::Hierarchy> hierarchy, const glm::mat4 cameraMatrix, const uint32_t shadowMap) {
+		assetManager.GetPipeline(pipeline).Render(device, renderContext.GetActiveCommandBuffer(), assetManager, hierarchy, cameraMatrix, shadowMap);
 	}
 
 	void RenderEnd() {
@@ -158,8 +158,8 @@ bool VulkanContext::RenderBegin() {
 	return internal->RenderBegin();
 }
 
-void VulkanContext::Render(const RPG::Assets::Pipeline& pipeline, const std::shared_ptr<RPG::Hierarchy> hierarchy, const glm::mat4 cameraMatrix) {
-	internal->Render(pipeline, hierarchy, cameraMatrix);
+void VulkanContext::Render(const RPG::Assets::Pipeline& pipeline, const std::shared_ptr<RPG::Hierarchy> hierarchy, const glm::mat4 cameraMatrix, const uint32_t shadowMap) {
+	internal->Render(pipeline, hierarchy, cameraMatrix, shadowMap);
 }
 
 void VulkanContext::RenderToFrameBuffer(const RPG::Assets::Pipeline &pipeline,
@@ -167,6 +167,7 @@ void VulkanContext::RenderToFrameBuffer(const RPG::Assets::Pipeline &pipeline,
 										const std::shared_ptr<RPG::FrameBuffer> framebuffer,
 										const glm::mat4 cameraMatrix,
 										const glm::vec3 clearColor,
+                                        const uint32_t shadowMap,
 										const bool isGameCamera) {
 	//TODO: Vulkan Framebuffer setup
 }
@@ -175,6 +176,12 @@ void VulkanContext::RenderLinesToFrameBuffer(const RPG::Assets::Pipeline &pipeli
 											 const std::shared_ptr<RPG::FrameBuffer> framebuffer,
 											 const glm::mat4 cameraMatrix) {
 	//TODO: Vulkan render lines to framebuffer
+}
+
+void VulkanContext::RenderToDepthBuffer(const RPG::Assets::Pipeline &pipeline,
+                                        const std::shared_ptr<RPG::Hierarchy> hierarchy,
+                                        const std::shared_ptr<RPG::FrameBuffer> framebuffer) {
+    //TODO: Vulkan framebuffer for depth
 }
 
 void VulkanContext::DeleteFrameBuffer(const RPG::Assets::Pipeline &pipeline, const std::shared_ptr<RPG::FrameBuffer> framebuffer) {

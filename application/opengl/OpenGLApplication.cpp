@@ -113,6 +113,66 @@ namespace {
 
 			return framebuffer;
 		}
+
+        std::shared_ptr<RPG::FrameBuffer> CreateDepthBuffer(glm::vec2 size) {
+	        uint32_t depthMapFBO;
+	        glGenFramebuffers(1, &depthMapFBO);
+
+	        uint32_t depthMap;
+            glGenTextures(1, &depthMap);
+            glBindTexture(GL_TEXTURE_2D, depthMap);
+            glTexImage2D(GL_TEXTURE_2D, 0 , GL_DEPTH_COMPONENT, size.x, size.y, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+            float borderColor[] = { 1.0f, 1.0f, 1.0f, 1.0f };
+            glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
+
+            glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
+            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthMap, 0);
+            glDrawBuffer(GL_NONE);
+            glReadBuffer(GL_NONE);
+            glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+            std::shared_ptr<RPG::FrameBuffer> framebuffer = std::make_unique<RPG::FrameBuffer>(RPG::FrameBuffer{depthMapFBO, depthMap});
+            if(glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE) {
+                RPG::Log("Framebuffer", "Framebuffer was created and completed");
+            }
+
+            return framebuffer;
+	    }
+
+        std::shared_ptr<RPG::FrameBuffer> CreateCubemapDepthBuffer(glm::vec2 size) {
+            uint32_t depthMapFBO;
+            glGenFramebuffers(1, &depthMapFBO);
+
+            uint32_t depthCubemap;
+            glGenTextures(1, &depthCubemap);
+            glBindTexture(GL_TEXTURE_CUBE_MAP, depthCubemap);
+            for (unsigned int i = 0; i < 6; i++) {
+                glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0 , GL_DEPTH_COMPONENT, size.x, size.y, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+            }
+            glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+            glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+            glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+            glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+            glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_BORDER);
+
+            //Attach depth texture as FBOs depth buffer
+            glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
+            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthCubemap, 0);
+            glDrawBuffer(GL_NONE);
+            glReadBuffer(GL_NONE);
+            glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+            std::shared_ptr<RPG::FrameBuffer> framebuffer = std::make_unique<RPG::FrameBuffer>(RPG::FrameBuffer{depthMapFBO, depthCubemap});
+            if(glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE) {
+                RPG::Log("Framebuffer", "Framebuffer was created and completed");
+            }
+
+	        return framebuffer;
+        }
 	#endif
 }
 
@@ -128,6 +188,7 @@ struct OpenGLApplication::Internal {
 		RPG::EditorManager editorManager;
 		std::shared_ptr<RPG::FrameBuffer> framebuffer;
 		std::shared_ptr<RPG::FrameBuffer> gameFramebuffer;
+		std::shared_ptr<RPG::FrameBuffer> depthBuffer;
 	#endif
 
 	#ifdef RPG_EDITOR
@@ -137,7 +198,8 @@ struct OpenGLApplication::Internal {
 					 renderer(::CreateRenderer(assetManager)),
 					 editorManager(window, context),
 					 framebuffer(::CreateFrameBuffer(glm::vec2{1280, 720})),
-					 gameFramebuffer(::CreateFrameBuffer(glm::vec2{1280, 720})) {}
+					 gameFramebuffer(::CreateFrameBuffer(glm::vec2{1280, 720})),
+					 depthBuffer(::CreateDepthBuffer(glm::vec2{1024, 1024})){}
 	#else
 		Internal() : window(RPG::SDLWindow(SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI)),
 					 context(::CreateContext(window.GetWindow())),
@@ -149,9 +211,13 @@ struct OpenGLApplication::Internal {
 		SDL_GL_MakeCurrent(window.GetWindow(), context);
 
 		#ifdef RPG_EDITOR
-			GetScene()->RenderToFrameBuffer(renderer, framebuffer, {0.3f, 0.3f, 0.3f}, false);
-			GetScene()->RenderLinesToFrameBuffer(renderer, framebuffer);
-			GetScene()->RenderToFrameBuffer(renderer, gameFramebuffer, {0.0f, 0.0f, 0.0f});
+            //Depth Buffer for Lighting
+            GetScene()->RenderToDepthBuffer(renderer, depthBuffer);
+            //Scene Render
+		    GetScene()->RenderToFrameBuffer(renderer, framebuffer, {0.3f, 0.3f, 0.3f}, depthBuffer->GetRenderTextureID(), false);
+            GetScene()->RenderLinesToFrameBuffer(renderer, framebuffer);
+            //Render Game Scene
+			GetScene()->RenderToFrameBuffer(renderer, gameFramebuffer, {0.0f, 0.0f, 0.0f}, depthBuffer->GetRenderTextureID());
 		#endif
 
 		#ifndef RPG_EDITOR

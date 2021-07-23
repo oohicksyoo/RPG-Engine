@@ -15,12 +15,16 @@ struct FrameBuffer::Internal {
 															renderTextureID(rtID),
 															depthStencilBufferID(dsbID) {}
 
+    Internal(uint32_t bID, uint32_t rtID) : bufferID(bID),
+                                                            renderTextureID(rtID) {}
+
 	~Internal() {
 		//TODO: Need to delete the buffer stuff above but dont know the renderer to delete it
 	}
 };
 
 FrameBuffer::FrameBuffer(uint32_t bufferID, uint32_t renderTextureID, uint32_t depthStencilBufferID) : internal(RPG::MakeInternalPointer<Internal>(bufferID, renderTextureID, depthStencilBufferID)) {}
+FrameBuffer::FrameBuffer(uint32_t bufferID, uint32_t renderTextureID) : internal(RPG::MakeInternalPointer<Internal>(bufferID, renderTextureID)) {}
 
 const glm::vec2& FrameBuffer::GetSize() const{
 	return glm::vec2{0, 0};

@@ -9,7 +9,8 @@
 namespace RPG::Assets {
 	enum class Pipeline {
 		Default,
-		SceneLines
+		SceneLines,
+		DepthMap
 	};
 
 	std::string ResolvePipelinePath(const RPG::Assets::Pipeline& pipeline);
