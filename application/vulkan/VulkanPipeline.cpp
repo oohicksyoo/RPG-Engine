@@ -399,7 +399,8 @@ struct VulkanPipeline::Internal {
 
 		commandBuffer.bindIndexBuffer(mesh.GetIndexBuffer(), 0, vk::IndexType::eUint32);
 
-		const RPG::VulkanTexture& texture{assetManager.GetTexture((meshComponent != nullptr) ? meshComponent->GetTexture() : spriteComponent->GetTexture())};
+		//TODO: Grab material here
+		const RPG::VulkanTexture& texture{assetManager.GetTexture(""/*(meshComponent != nullptr) ? meshComponent->GetTexture() : spriteComponent->GetTexture()*/)};
 
 		const vk::DescriptorSet& textureSamplerDescriptorSet{
 				GetTextureSamplerDescriptorSet(device, texture) };

@@ -719,7 +719,8 @@ struct OpenGLPipeline::Internal {
         glUniformMatrix4fv(uniformLocationM, 1, GL_FALSE, &(transform->GetTransformMatrix())[0][0]);
 
 		// Apply the texture we want to paint the mesh with.
-		std::string textureString = (meshComponent != nullptr) ? meshComponent->GetTexture() : spriteComponent->GetTexture();
+		//TODO: Grab Material Here
+		std::string textureString = "assets/textures/default.png";//(meshComponent != nullptr) ? meshComponent->GetTexture() : spriteComponent->GetTexture();
 		if (textureString == "") return;
 		glActiveTexture(GL_TEXTURE0);
 		assetManager.GetTexture(textureString).Bind();
