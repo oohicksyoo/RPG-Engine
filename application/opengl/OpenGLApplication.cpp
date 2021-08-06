@@ -20,6 +20,8 @@
 #endif
 
 #include "../../core/Serializer.hpp"
+#include "../../core/Scene.hpp"
+#include "../../core/components/MeshComponent.hpp"
 
 using RPG::OpenGLApplication;
 
@@ -173,7 +175,27 @@ namespace {
 
 	        return framebuffer;
         }
-	#endif
+    #endif
+
+    std::shared_ptr<RPG::IScene> CreateTestScene() {
+        glm::vec2 size = RPG::ApplicationStats::GetInstance().GetWindowSize();
+	    auto scene = std::make_unique<RPG::Scene>(RPG::Scene({static_cast<uint32_t>(size.x), static_cast<uint32_t>(size.y)}));
+
+        auto cube = std::make_shared<RPG::GameObject>(RPG::GameObject("Cube"));
+        cube->AddComponent(std::make_shared<RPG::MeshComponent>(RPG::MeshComponent("assets/models/1_Meter_Cube.obj", "assets/materials/default.mat")));
+
+        auto camera = std::make_shared<RPG::GameObject>(RPG::GameObject("Camera"));
+        auto transformComponent = camera->GetTransform();
+        camera->AddComponent(std::make_shared<RPG::CameraComponent>(RPG::CameraComponent(static_cast<uint32_t>(size.x), static_cast<uint32_t>(size.y), transformComponent)));
+
+        auto cameraComponent = camera->GetComponent<std::shared_ptr<RPG::CameraComponent>, RPG::CameraComponent>(std::make_unique<RPG::CameraComponent>(1, 1, transformComponent));
+        cameraComponent->SetDistance(2);
+
+	    scene->GetHierarchy()->Add(cube);
+        scene->GetHierarchy()->Add(camera);
+
+	    return scene;
+	}
 }
 
 struct OpenGLApplication::Internal {
@@ -189,6 +211,8 @@ struct OpenGLApplication::Internal {
 		std::shared_ptr<RPG::FrameBuffer> framebuffer;
 		std::shared_ptr<RPG::FrameBuffer> gameFramebuffer;
 		std::shared_ptr<RPG::FrameBuffer> depthBuffer;
+		std::shared_ptr<RPG::IScene> materialMakerScene;
+		std::shared_ptr<RPG::FrameBuffer> materialMakerBuffer;
 	#endif
 
 	#ifdef RPG_EDITOR
@@ -199,7 +223,9 @@ struct OpenGLApplication::Internal {
 					 editorManager(window, context),
 					 framebuffer(::CreateFrameBuffer(glm::vec2{1280, 720})),
 					 gameFramebuffer(::CreateFrameBuffer(glm::vec2{1280, 720})),
-					 depthBuffer(::CreateDepthBuffer(glm::vec2{1024, 1024})){}
+					 depthBuffer(::CreateDepthBuffer(glm::vec2{1024, 1024})),
+					 materialMakerScene(::CreateTestScene()),
+                     materialMakerBuffer(::CreateFrameBuffer(glm::vec2{1280, 720})) {}
 	#else
 		Internal() : window(RPG::SDLWindow(SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI)),
 					 context(::CreateContext(window.GetWindow())),
@@ -216,6 +242,9 @@ struct OpenGLApplication::Internal {
             //Scene Render
 		    GetScene()->RenderToFrameBuffer(renderer, framebuffer, {0.3f, 0.3f, 0.3f}, depthBuffer->GetRenderTextureID(), false);
             GetScene()->RenderLinesToFrameBuffer(renderer, framebuffer);
+            //Render Material Editor MiniScene
+            //TODO: Need a way to say not game camera but use this static non movable camera thats not the scene camera
+            materialMakerScene->RenderToFrameBuffer(renderer, materialMakerBuffer, {0.3f, 0.3f, 0.3f}, depthBuffer->GetRenderTextureID(), true);
             //Render Game Scene
 			GetScene()->RenderToFrameBuffer(renderer, gameFramebuffer, {0.0f, 0.0f, 0.0f}, depthBuffer->GetRenderTextureID());
 		#endif
@@ -234,6 +263,8 @@ struct OpenGLApplication::Internal {
 		#endif
 
 		#ifdef RPG_EDITOR
+			//TODO: Scene and game framebuffer should follow similar process to the material maker submit
+			editorManager.SubmitMaterialMakerFrameBuffer(materialMakerBuffer);
 			editorManager.BuildGUI(framebuffer, gameFramebuffer, GetScene()->GetHierarchy());
 			editorManager.Render();
 		#endif
@@ -307,6 +338,7 @@ struct OpenGLApplication::Internal {
 		SDL_GL_DeleteContext(context);
 
 		#ifdef RPG_EDITOR
+		    //TODO: Might need to erase the other framebuffers as well here
 			renderer.DeleteFrameBuffer(RPG::Assets::Pipeline::Default, framebuffer);
 		#endif
 	}
