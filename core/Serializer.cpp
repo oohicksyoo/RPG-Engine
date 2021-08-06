@@ -21,6 +21,17 @@ using RPG::Assets::Pipeline;
 using json = nlohmann::json;
 
 //Saving
+//Material
+std::string Serializer::SaveMaterial(std::shared_ptr<RPG::Material> material, const std::string &path) {
+    json j;
+
+    j["Name"] = material->GetName();
+
+    RPG::Assets::SaveTextFile(j.dump(), path);
+    return j.dump();
+}
+
+//Scene
 std::string Serializer::SaveScene(std::shared_ptr<RPG::IScene> scene, const std::string& path) {
 	auto hierarchy = scene->GetHierarchy();
 	json j;
@@ -83,7 +94,7 @@ nlohmann::json Serializer::SaveComponent(std::shared_ptr<RPG::IComponent> compon
 	return obj;
 }
 
-//TODO: Similar to displaying this value in the editor we need a map of <Type, Func<VALUE>>
+//Similar to displaying this value in the editor we need a map of <Type, Func<VALUE>>
 //The map should actually just return the json::object with the one key of Value so the mapping can exist
 nlohmann::json Serializer::SavePropertyValue(std::shared_ptr<RPG::Property> property) {
 	json obj = json::object();

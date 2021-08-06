@@ -9,6 +9,7 @@
 #include "GameObject.hpp"
 #include "IComponent.hpp"
 #include "nlohmann/json.hpp"
+#include "Material.hpp"
 #include <unordered_map>
 #include <string>
 
@@ -20,6 +21,9 @@ namespace RPG {
 			std::string SaveScene(std::shared_ptr<RPG::IScene> scene, const std::string& path);
 			std::unique_ptr<RPG::IScene> LoadScene(const RPG::WindowSize& frameSize, const std::string& path);
 			std::unique_ptr<RPG::IScene> LoadSceneData(const RPG::WindowSize& frameSize, const std::string& sceneData);
+
+			//Material
+			std::string SaveMaterial(std::shared_ptr<RPG::Material> material, const std::string& path);
 
 			//Inspector Properties
 			void AddPropertyLayout(std::pair<std::string, RPG::Action<std::shared_ptr<RPG::Property>>::Callback> pair);

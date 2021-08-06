@@ -12,7 +12,7 @@
 namespace RPG {
 	struct MeshComponent : public IComponent {
 		public:
-			MeshComponent(std::string mesh, std::string texture, std::string guid = RPG::Guid::GenerateGuid());
+			MeshComponent(std::string mesh, std::string material, std::string guid = RPG::Guid::GenerateGuid());
 			void Awake() override;
 			void Start() override;
 			void Update(const float &delta) override;
@@ -21,7 +21,7 @@ namespace RPG {
 			std::string Guid() override;
 			bool AllowMultiple() { return false; };
 			std::string GetMesh();
-			std::string GetTexture();
+			std::string GetMaterial();
 
 		private:
 			struct Internal;
