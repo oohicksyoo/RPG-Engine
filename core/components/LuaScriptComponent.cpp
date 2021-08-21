@@ -115,12 +115,18 @@ struct LuaScriptComponent::Internal {
 		lua_pop(L, 1); // get rid of package table from top of stack
 	}
 
-	static int Log(lua_State *L) {
+    #pragma region RPG
+
+    static int Log(lua_State *L) {
         if (lua_gettop(L) != 2) return -1;
         const char* value = lua_tostring(L, -1);
         RPG::Log("Lua", value);
         return 0;
 	}
+
+    #pragma endregion
+
+    #pragma region GameObject
 
     static int GetPosition(lua_State *L) {
         if (lua_gettop(L) != 2) return -1;
@@ -142,9 +148,9 @@ struct LuaScriptComponent::Internal {
     }
 
     static int SetPosition(lua_State *L) {
-	    RPG::Log("Lua", "SetPosition()");
+	    //RPG::Log("Lua", "SetPosition()");
         if (lua_gettop(L) != 3) return -1;
-        RPG::Log("Lua", "Enough params");
+        //RPG::Log("Lua", "Enough params");
         auto gameObject = static_cast<std::shared_ptr<RPG::GameObject>*>(lua_touserdata(L, -2))->get();
 
         lua_getfield(L, -1, "x");
@@ -154,7 +160,7 @@ struct LuaScriptComponent::Internal {
         float posX = (float)lua_tonumber(L, -3);
         float posY = (float)lua_tonumber(L, -2);
         float posZ = (float)lua_tonumber(L, -1);
-        RPG::Log("Lua", "Params: (" + std::to_string(posX) + ", "+ std::to_string(posY) + ", "+ std::to_string(posZ) + ")");
+        //RPG::Log("Lua", "Params: (" + std::to_string(posX) + ", "+ std::to_string(posY) + ", "+ std::to_string(posZ) + ")");
         gameObject->GetTransform()->SetPosition({posX, posY, posZ});
         return 0;
 	}
@@ -178,6 +184,29 @@ struct LuaScriptComponent::Internal {
         return 1;
 	}
 
+	static int GetForward(lua_State *L) {
+        if (lua_gettop(L) != 2) return -1;
+        auto gameObject = static_cast<std::shared_ptr<RPG::GameObject>*>(lua_touserdata(L, -1));
+        auto value = gameObject->get()->GetTransform()->GetForward();
+
+        lua_newtable(L);
+        lua_pushstring(L, "x");
+        lua_pushnumber(L, value.x);
+        lua_settable(L, -3);
+        lua_pushstring(L, "y");
+        lua_pushnumber(L, value.y);
+        lua_settable(L, -3);
+        lua_pushstring(L, "z");
+        lua_pushnumber(L, value.z);
+        lua_settable(L, -3);
+
+        return 1;
+	}
+
+    #pragma endregion
+
+    #pragma region RPGMath
+
     static int GetVector3(lua_State *L) {
         if (lua_gettop(L) != 1) return -1;
 
@@ -195,10 +224,64 @@ struct LuaScriptComponent::Internal {
         return 1;
     }
 
+    #pragma endregion
+
+    #pragma region Mouse
+
+    static int MouseIsDown(lua_State *L) {
+        if (lua_gettop(L) != 2) return -1;
+        int value = lua_tonumber(L, -1);
+        lua_pushboolean(L, RPG::InputManager::GetInstance().IsMouseButtonDown((RPG::Input::MouseButton)value));
+	    return 1;
+	}
+
+    static int MouseIsPressed(lua_State *L) {
+        if (lua_gettop(L) != 2) return -1;
+        int value = lua_tonumber(L, -1);
+        lua_pushboolean(L, RPG::InputManager::GetInstance().IsMouseButtonPressed((RPG::Input::MouseButton)value));
+        return 1;
+    }
+
+    static int MouseIsReleased(lua_State *L) {
+        if (lua_gettop(L) != 2) return -1;
+        int value = lua_tonumber(L, -1);
+        lua_pushboolean(L, RPG::InputManager::GetInstance().IsMouseButtonReleased((RPG::Input::MouseButton)value));
+        return 1;
+    }
+
+    #pragma endregion
+
+    #pragma region Keyboard
+
+    static int KeyboardIsDown(lua_State *L) {
+        if (lua_gettop(L) != 2) return -1;
+        int value = lua_tonumber(L, -1);
+        lua_pushboolean(L, RPG::InputManager::GetInstance().IsKeyDown((RPG::Input::Key)value));
+        return 1;
+    }
+
+    static int KeyboardIsPressed(lua_State *L) {
+        if (lua_gettop(L) != 2) return -1;
+        int value = lua_tonumber(L, -1);
+        lua_pushboolean(L, RPG::InputManager::GetInstance().IsKeyPressed((RPG::Input::Key)value));
+        return 1;
+    }
+
+    static int KeyboardIsReleased(lua_State *L) {
+        if (lua_gettop(L) != 2) return -1;
+        int value = lua_tonumber(L, -1);
+        lua_pushboolean(L, RPG::InputManager::GetInstance().IsKeyReleased((RPG::Input::Key)value));
+        return 1;
+    }
+
+    #pragma endregion
+
 	void CreateBindingFunctions() {
 	    static const luaL_Reg functions[] = {{"Log", Log}, {NULL, NULL}};
         static const luaL_Reg mathFuncs[] = {{"GetVector3", GetVector3}, {NULL, NULL}};
         static const luaL_Reg gameObjectFuncs[] = {{"GetPosition", GetPosition}, {"SetPosition", SetPosition}, {NULL, NULL}};
+        static const luaL_Reg mouseFuncs[] = {{"IsDown", MouseIsDown}, {"IsPressed", MouseIsPressed}, {"IsReleased", MouseIsReleased}, {NULL, NULL}};
+        static const luaL_Reg keyboardFuncs[] = {{"IsDown", KeyboardIsDown}, {"IsPressed", KeyboardIsPressed}, {"IsReleased", KeyboardIsReleased}, {NULL, NULL}};
 
         lua_newtable(L);
         luaL_setfuncs(L, functions, 0);
@@ -211,6 +294,14 @@ struct LuaScriptComponent::Internal {
         lua_newtable(L);
         luaL_setfuncs(L, gameObjectFuncs, 0);
         lua_setglobal(L, "GameObject");
+
+        lua_newtable(L);
+        luaL_setfuncs(L, mouseFuncs, 0);
+        lua_setglobal(L, "Mouse");
+
+        lua_newtable(L);
+        luaL_setfuncs(L, keyboardFuncs, 0);
+        lua_setglobal(L, "Keyboard");
 
         /*lua_register(L, "Log", Log);
         lua_register(L, "GetPosition", GetPosition);
