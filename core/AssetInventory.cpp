@@ -10,6 +10,8 @@ std::string RPG::Assets::ResolvePipelinePath(const RPG::Assets::Pipeline &pipeli
 			return "lines";
 	    case RPG::Assets::Pipeline::DepthMap:
 	        return "depthMap";
+	    case RPG::Assets::Pipeline::Sprite:
+	        return "sprite";
 		case RPG::Assets::Pipeline::Default:
 		default:
 			return "default";
