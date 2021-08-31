@@ -93,6 +93,7 @@ namespace {
 }
 
 struct OpenGLPipeline::Internal {
+    const std::string shaderName;
 	const GLuint shaderProgramId;
 	const GLuint uniformLocationMVP;
 	const GLuint uniformLocationM;
@@ -105,7 +106,8 @@ struct OpenGLPipeline::Internal {
 	const GLsizei offsetNormal;
 
 	Internal(const std::string& shaderName)
-			: shaderProgramId(::CreateShaderProgram(shaderName)),
+			: shaderName(shaderName),
+              shaderProgramId(::CreateShaderProgram(shaderName)),
 			  uniformLocationMVP(glGetUniformLocation(shaderProgramId, "u_mvp")),
               uniformLocationM(glGetUniformLocation(shaderProgramId, "u_model")),
 			  attributeLocationVertexPosition(glGetAttribLocation(shaderProgramId, "a_vertexPosition")),
@@ -781,6 +783,13 @@ struct OpenGLPipeline::Internal {
 
     void RenderToFrameBuffer(const RPG::OpenGLAssetManager& assetManager, const std::shared_ptr<RPG::FrameBuffer> frameBuffer,
                              const std::vector<RPG::GameObjectMaterialGroup> gameObjects, const glm::mat4 cameraMatrix) const {
+
+	    //Catch to render scene lines
+	    if (shaderName == Assets::ResolvePipelinePath(Assets::Pipeline::SceneLines)) {
+            RenderLinesToFrameBuffer(assetManager, frameBuffer, cameraMatrix);
+	        return;
+	    }
+
         glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer->GetRenderTextureID());
 
         //Rendering all objects using the shader

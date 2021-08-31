@@ -177,6 +177,13 @@ namespace {
 
 	        return framebuffer;
         }
+
+        std::shared_ptr<RPG::GameObject> CreateSceneLinesGameObject() {
+	        std::shared_ptr<RPG::GameObject> go = std::make_unique<RPG::GameObject>("Scene Lines");
+	        go->AddComponent(std::make_unique<RPG::MeshComponent>("assets/models/1_Meter_Cube.obj", "assets/materials/default.mat"));
+
+	        return go;
+	    }
     #endif
 
     std::shared_ptr<RPG::IScene> CreateTestScene() {
@@ -216,6 +223,10 @@ struct OpenGLApplication::Internal {
 		std::shared_ptr<RPG::FrameBuffer> depthBuffer;
 		std::shared_ptr<RPG::IScene> materialMakerScene;
 		std::shared_ptr<RPG::FrameBuffer> materialMakerBuffer;
+
+		//SceneLines
+		std::shared_ptr<GameObject> sceneLinesGameObject;
+		std::shared_ptr<RPG::Material> sceneLinesMaterial;
 	#endif
 
 	#ifdef RPG_EDITOR
@@ -228,7 +239,9 @@ struct OpenGLApplication::Internal {
 					 gameFramebuffer(::CreateFrameBuffer(glm::vec2{1280, 720})),
 					 depthBuffer(::CreateDepthBuffer(glm::vec2{1024, 1024})),
 					 materialMakerScene(::CreateTestScene()),
-                     materialMakerBuffer(::CreateFrameBuffer(glm::vec2{1280, 720})) {}
+                     materialMakerBuffer(::CreateFrameBuffer(glm::vec2{1280, 720})),
+                     sceneLinesGameObject(::CreateSceneLinesGameObject()),
+                     sceneLinesMaterial(std::make_unique<RPG::Material>("Scene Lines", 0, "lines")) {}
 	#else
 		Internal() : window(RPG::SDLWindow(SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI)),
 					 context(::CreateContext(window.GetWindow())),
@@ -243,10 +256,39 @@ struct OpenGLApplication::Internal {
 		    //Organize Scene for Rendering
 		    BuildRenderOrder();
 		    GetScene()->ClearFrameBufferToColor(renderer, framebuffer, {0.3f, 0.3f, 0.3f});
+            GetScene()->ClearFrameBufferToColor(renderer, gameFramebuffer, {0.0f, 0.0f, 0.0f});
 
+            //Render Scene Lines
+            std::vector<RPG::GameObjectMaterialGroup> sceneLines;
+            RPG::GameObjectMaterialGroup sceneLinesGroup;
+            sceneLinesGroup.gameObject = sceneLinesGameObject;
+            sceneLinesGroup.material = sceneLinesMaterial;
+            sceneLines.push_back(sceneLinesGroup);
+            GetScene()->RenderToFrameBuffer(renderer, RPG::Assets::Pipeline::SceneLines, framebuffer, sceneLines, false);
+
+            //Render through scene once for Scene and Once for Game view
 		    for (auto map : mappedRenderPass) {
                 GetScene()->RenderToFrameBuffer(renderer, map.first, framebuffer, map.second, false);
+                GetScene()->RenderToFrameBuffer(renderer, map.first, gameFramebuffer, map.second, true);
 		    }
+
+            //Render Material Editor MiniScene
+            materialMakerScene->ClearFrameBufferToColor(renderer, materialMakerBuffer, {0.3f, 0.3f, 0.3f});
+		    auto material = editorManager.GetCurrentMaterial();
+		    if (material != nullptr) {
+		        std::vector<RPG::GameObjectMaterialGroup> materialGroup;
+		        for (auto go : materialMakerScene->GetHierarchy()->GetHierarchy()) {
+		            if (go->IsRenderable()) {
+		                auto materialPath = go->GetMaterial();
+                        std::shared_ptr<RPG::Material> material = assetManager->GetMaterial(materialPath);
+                        RPG::GameObjectMaterialGroup group;
+                        group.gameObject = go;
+                        group.material = material;
+                        materialGroup.push_back(group);
+		            }
+		        }
+                materialMakerScene->RenderToFrameBuffer(renderer, RPG::Assets::GetPipelineByName(material->GetShader()), materialMakerBuffer, materialGroup, true);
+            }
 
 
 
