@@ -36,6 +36,8 @@ namespace RPG {
 			ResourceCache<RPG::Texture> bitmapResourceCache;
 			std::function<void(std::string path, std::shared_ptr<RPG::Texture>)> bitmapOnLoadedCallback;
 			std::function<int(std::string path)> textureIDFunc;
+            ResourceCache<RPG::Material> materialResourceCache;
+            std::function<void(std::string path, std::shared_ptr<RPG::Material>)> materialOnLoadedCallback;
 
 	};
 
@@ -57,6 +59,15 @@ namespace RPG {
 		}
 	}
 
+    template<>
+    inline void Content::Load<RPG::Material>(std::string path) {
+        //RPG::Log("Content", "Loading Texture Asset " + path);
+        auto material = materialResourceCache.Load(path);
+        if (materialOnLoadedCallback != nullptr) {
+            materialOnLoadedCallback(path, material);
+        }
+    }
+
 	template<>
 	inline void Content::OnLoadedAsset<RPG::Mesh>(std::function<void(std::string path, std::shared_ptr<RPG::Mesh>)> callback) {
 		meshOnLoadedCallback = callback;
@@ -66,6 +77,11 @@ namespace RPG {
 	inline void Content::OnLoadedAsset<RPG::Texture>(std::function<void(std::string path, std::shared_ptr<RPG::Texture>)> callback) {
 		bitmapOnLoadedCallback = callback;
 	}
+
+    template<>
+    inline void Content::OnLoadedAsset<RPG::Material>(std::function<void(std::string path, std::shared_ptr<RPG::Material>)> callback) {
+        materialOnLoadedCallback = callback;
+    }
 }
 
 

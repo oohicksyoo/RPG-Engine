@@ -11,10 +11,12 @@ namespace RPG::Assets {
 		Default,
 		SceneLines,
 		DepthMap,
-		Sprite
+		Sprite,
+		Default2
 	};
 
 	std::string ResolvePipelinePath(const RPG::Assets::Pipeline& pipeline);
+	RPG::Assets::Pipeline GetPipelineByName(std::string name);
 }
 
 

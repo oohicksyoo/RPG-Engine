@@ -26,6 +26,8 @@ std::string Serializer::SaveMaterial(std::shared_ptr<RPG::Material> material, co
     json j;
 
     j["Name"] = material->GetName();
+    j["RenderQueue"] = material->GetRenderQueue();
+    j["Shader"] = material->GetShader();
 
     RPG::Assets::SaveTextFile(j.dump(), path);
     return j.dump();

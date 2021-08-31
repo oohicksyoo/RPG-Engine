@@ -30,6 +30,16 @@ struct OpenGLRenderer::Internal {
 	void DeleteFrameBuffer(const RPG::Assets::Pipeline& pipeline, const std::shared_ptr<RPG::FrameBuffer> framebuffer) {
 		assetManager->GetPipeline(pipeline).DeleteFrameBuffer(framebuffer);
 	}
+
+    void ClearFrameBufferToColor(const RPG::Assets::Pipeline &pipeline,
+                                 const std::shared_ptr<RPG::FrameBuffer> framebuffer, const glm::vec3 clearColor) {
+        assetManager->GetPipeline(pipeline).ClearFrameBufferToColor(framebuffer, clearColor);
+    }
+
+    void RenderToFrameBuffer(const RPG::Assets::Pipeline &pipeline, const std::shared_ptr<RPG::FrameBuffer> framebuffer,
+                             const std::vector<RPG::GameObjectMaterialGroup> gameObjects, const glm::mat4 cameraMatrix) {
+        assetManager->GetPipeline(pipeline).RenderToFrameBuffer(*assetManager, framebuffer, gameObjects, cameraMatrix);
+    }
 };
 
 OpenGLRenderer::OpenGLRenderer(std::shared_ptr<RPG::OpenGLAssetManager> assetManager) : internal(RPG::MakeInternalPointer<Internal>(assetManager)) {}
@@ -58,4 +68,14 @@ void OpenGLRenderer::RenderToDepthBuffer(const RPG::Assets::Pipeline &pipeline, 
 
 void OpenGLRenderer::DeleteFrameBuffer(const RPG::Assets::Pipeline &pipeline, const std::shared_ptr<RPG::FrameBuffer> framebuffer) {
 	internal->DeleteFrameBuffer(pipeline, framebuffer);
+}
+
+void OpenGLRenderer::ClearFrameBufferToColor(const RPG::Assets::Pipeline &pipeline,
+                                             const std::shared_ptr<RPG::FrameBuffer> framebuffer, const glm::vec3 clearColor) {
+    internal->ClearFrameBufferToColor(pipeline, framebuffer, clearColor);
+}
+
+void OpenGLRenderer::RenderToFrameBuffer(const RPG::Assets::Pipeline &pipeline, const std::shared_ptr<RPG::FrameBuffer> frameBuffer,
+                                         const std::vector<RPG::GameObjectMaterialGroup> gameObjects, const glm::mat4 cameraMatrix) {
+    internal->RenderToFrameBuffer(pipeline, frameBuffer, gameObjects, cameraMatrix);
 }

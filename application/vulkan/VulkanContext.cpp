@@ -199,3 +199,15 @@ RPG::WindowSize VulkanContext::GetCurrentWindowSize() const {
 glm::vec2 VulkanContext::GetWindowPosition() {
 	return internal->GetWindowPosition();
 }
+
+void VulkanContext::ClearFrameBufferToColor(const RPG::Assets::Pipeline &pipeline,
+                                            const std::shared_ptr<RPG::FrameBuffer> framebuffer, const glm::vec3 clearColor) {
+    //TODO: Implement for Vulkan
+}
+
+void VulkanContext::RenderToFrameBuffer(const RPG::Assets::Pipeline &pipeline,
+                                        const std::shared_ptr<RPG::FrameBuffer> framebuffer,
+                                        const std::vector<RPG::GameObjectMaterialGroup> gameObjects,
+                                        const glm::mat4 cameraMatrix) {
+    //TODO: Implement for Vulkan
+}

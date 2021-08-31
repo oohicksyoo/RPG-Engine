@@ -7,6 +7,7 @@
 #include "../../core/InternalPointer.hpp"
 #include "../../core/FrameBuffer.hpp"
 #include "../../core/Hierarchy.hpp"
+#include "../../core/GameObjectMaterialGroup.hpp"
 #include <string>
 #include <vector>
 
@@ -21,6 +22,9 @@ namespace RPG {
 			void RenderLinesToFrameBuffer(const RPG::OpenGLAssetManager& assetManager, const std::shared_ptr<RPG::FrameBuffer> framebuffer, const glm::mat4 cameraMatrix) const;
             void RenderToDepthBuffer(const RPG::OpenGLAssetManager& assetManager, const std::shared_ptr<RPG::Hierarchy> hierarchy, const std::shared_ptr<RPG::FrameBuffer> frameBuffer) const;
 			void DeleteFrameBuffer(const std::shared_ptr<RPG::FrameBuffer> framebuffer) const;
+
+			void ClearFrameBufferToColor(const std::shared_ptr<RPG::FrameBuffer> framebuffer, const glm::vec3 clearColor) const;
+			void RenderToFrameBuffer(const RPG::OpenGLAssetManager& assetManager, const std::shared_ptr<RPG::FrameBuffer> framebuffer, const std::vector<RPG::GameObjectMaterialGroup> gameObjects, const glm::mat4 cameraMatrix) const;
 
 		private:
 			struct Internal;

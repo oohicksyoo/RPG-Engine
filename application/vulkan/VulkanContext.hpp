@@ -25,6 +25,9 @@ namespace RPG {
 			RPG::WindowSize GetCurrentWindowSize() const;
 			glm::vec2 GetWindowPosition();
 
+            void ClearFrameBufferToColor(const RPG::Assets::Pipeline &pipeline, const std::shared_ptr<RPG::FrameBuffer> framebuffer, const glm::vec3 clearColor) override;
+            void RenderToFrameBuffer(const RPG::Assets::Pipeline &pipeline, const std::shared_ptr<RPG::FrameBuffer> framebuffer, const std::vector<RPG::GameObjectMaterialGroup> gameObjects, const glm::mat4 cameraMatrix) override;
+
 		private:
 			struct Internal;
 			RPG::InternalPointer<Internal> internal;

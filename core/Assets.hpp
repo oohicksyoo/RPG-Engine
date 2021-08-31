@@ -6,6 +6,7 @@
 
 #include "Mesh.hpp"
 #include "Texture.hpp"
+#include "Material.hpp"
 #include <string>
 #include <vector>
 
@@ -16,6 +17,7 @@ namespace RPG::Assets {
 	RPG::Mesh LoadOBJFile(const std::string& path);
 	RPG::Texture LoadBitmapFile(const std::string& path);
 	std::vector<char> LoadBinaryFile(const std::string& path);
+	RPG::Material LoadMaterial(const std::string& path);
 }
 
 

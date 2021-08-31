@@ -21,6 +21,7 @@ namespace RPG {
 			const RPG::OpenGLMesh& GetStaticMesh(std::string path) const;
 			const RPG::OpenGLTexture& GetTexture(std::string path) const;
 			const RPG::OpenGLMesh& GetSceneLines() const;
+			const std::shared_ptr<RPG::Material> GetMaterial(std::string path) const;
 
 		private:
 			struct Internal;

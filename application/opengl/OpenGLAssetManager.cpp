@@ -38,6 +38,7 @@ struct OpenGLAssetManager::Internal {
 
 	std::unordered_map<std::string, RPG::OpenGLMesh> meshCache;
 	std::unordered_map<std::string, RPG::OpenGLTexture> textureCache;
+	std::unordered_map<std::string, std::shared_ptr<RPG::Material>> materialCache;
 
 	RPG::OpenGLMesh lines;
 
@@ -61,6 +62,13 @@ struct OpenGLAssetManager::Internal {
 				return textureCache.at(path).TextureID();
 			}
 			return -1;
+		});
+
+		RPG::Content::GetInstance().OnLoadedAsset<RPG::Material>([this](std::string path, std::shared_ptr<RPG::Material> material) {
+            RPG::Log("AssetManager", "Adding new material to cache (" + path + ")");
+		   if (materialCache.count(path) == 0) {
+               materialCache.insert(std::make_pair(path, material));
+		   }
 		});
 	}
 
@@ -97,4 +105,8 @@ const RPG::OpenGLTexture& OpenGLAssetManager::GetTexture(std::string path) const
 
 const RPG::OpenGLMesh& OpenGLAssetManager::GetSceneLines() const {
 	return internal->lines;
+}
+
+const std::shared_ptr<RPG::Material> OpenGLAssetManager::GetMaterial(std::string path) const {
+    return internal->materialCache.at(path);
 }

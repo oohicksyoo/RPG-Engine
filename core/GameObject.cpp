@@ -7,6 +7,8 @@
 #include "Guid.hpp"
 #include "components/PhysicsComponent.hpp"
 #include "PhysicsSystem.hpp"
+#include "components/MeshComponent.hpp"
+#include "components/SpriteComponent.hpp"
 #include <vector>
 #include <string>
 #include <memory>
@@ -16,6 +18,7 @@ using RPG::GameObject;
 struct GameObject::Internal {
 	std::string name;
 	std::string guid;
+	bool isRenderable;
 	std::shared_ptr<RPG::TransformComponent> transform;
 	std::vector<std::shared_ptr<RPG::GameObject>> children;
 	std::vector<std::shared_ptr<RPG::IComponent>> components;
@@ -23,7 +26,8 @@ struct GameObject::Internal {
 
 	Internal(std::string gameObjectName, std::string guid) : name(gameObjectName),
 										   guid(guid),
-										   transform(std::make_unique<RPG::TransformComponent>(RPG::TransformComponent())) {
+										   transform(std::make_unique<RPG::TransformComponent>(RPG::TransformComponent())),
+                                           isRenderable(false) {
 		transform->SetGetParent([this]() -> std::shared_ptr<RPG::TransformComponent> {
 			//Do we have parent
 			if (parent != nullptr) {
@@ -48,6 +52,10 @@ struct GameObject::Internal {
 					return false;
 				}
 			}
+		}
+
+		if (name == "MeshComponent" || name == "SpriteComponent") {
+            isRenderable = true;
 		}
 
 		components.push_back(component);
@@ -182,6 +190,24 @@ void GameObject::SetParent(std::shared_ptr<RPG::GameObject> gameObject, std::sha
 
 bool GameObject::HasParent() {
 	return internal->parent != nullptr;
+}
+
+bool GameObject::IsRenderable() {
+    return internal->isRenderable && GetMaterial() != "";
+}
+
+std::string GameObject::GetMaterial() {
+    for (auto c : internal->components) {
+        if (c->Name() == "MeshComponent") {
+            auto mc = GetComponent<std::shared_ptr<RPG::MeshComponent>, RPG::MeshComponent>("MeshComponent");
+            return mc->GetMaterial();
+        } else if ( c->Name() == "SpriteComponent") {
+            auto sc = GetComponent<std::shared_ptr<RPG::SpriteComponent>, RPG::SpriteComponent>("SpriteComponent");
+            //TODO: Add return
+        }
+    }
+
+    return "";
 }
 
 std::shared_ptr<RPG::TransformComponent> GameObject::GetTransform() {

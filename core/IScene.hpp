@@ -10,6 +10,7 @@
 #include "WindowSize.hpp"
 #include "Hierarchy.hpp"
 #include "components/CameraComponent.hpp"
+#include "GameObjectMaterialGroup.hpp"
 #include <vector>
 #include <string>
 
@@ -32,5 +33,9 @@ namespace RPG {
 		virtual bool HasLoaded() = 0;
 		virtual std::shared_ptr<RPG::CameraComponent> GetCamera() = 0;
 		virtual glm::vec3 GetCameraPosition() = 0;
+
+        //New Pipeline of different materials
+        virtual void ClearFrameBufferToColor(RPG::IRenderer& renderer, std::shared_ptr<RPG::FrameBuffer> frameBuffer, glm::vec3 clearColor) = 0;
+        virtual void RenderToFrameBuffer(RPG::IRenderer& renderer, Assets::Pipeline pipeline, std::shared_ptr<RPG::FrameBuffer> frameBuffer, std::vector<RPG::GameObjectMaterialGroup> gameObjects, bool isGameCamera) = 0;
 	};
 }

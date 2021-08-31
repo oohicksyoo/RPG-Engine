@@ -11,6 +11,9 @@
 #include <vector>
 #include <SDL_image.h>
 #include <stdio.h>
+#include "nlohmann/json.hpp"
+
+using json = nlohmann::json;
 
 std::string RPG::Assets::LoadTextFile(const std::string& path) {
 	SDL_RWops* file{SDL_RWFromFile(path.c_str(), "r")};
@@ -120,7 +123,7 @@ RPG::Texture RPG::Assets::LoadBitmapFile(const std::string& path) {
 
 	SDL_FreeSurface(source);
 
-	return RPG::Texture(target);
+	return RPG::Texture(target, path);
 }
 
 std::vector<char> RPG::Assets::LoadBinaryFile(const std::string& path) {
@@ -141,4 +144,16 @@ std::vector<char> RPG::Assets::LoadBinaryFile(const std::string& path) {
 
 	// Hand back the resulting vector which is the content of the file.
 	return result;
+}
+
+RPG::Material RPG::Assets::LoadMaterial(const std::string &path) {
+    auto text = LoadTextFile(path);
+    json j = json::parse(text);
+    auto name = j["Name"].get<std::string>();
+    auto renderQueue = j["RenderQueue"].get<int>();
+    auto shader = j["Shader"].get<std::string>();
+    RPG::Material material = RPG::Material(name, renderQueue, shader);
+
+
+    return material;
 }

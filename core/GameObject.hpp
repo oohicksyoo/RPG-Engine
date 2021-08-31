@@ -9,6 +9,7 @@
 #include "GLMWrapper.hpp"
 #include "components/TransformComponent.hpp"
 #include "Log.hpp"
+#include "Material.hpp"
 #include <string>
 #include <memory>
 #include <vector>
@@ -34,6 +35,8 @@ namespace RPG {
 			bool RemoveChild(std::shared_ptr<RPG::GameObject> gameObject);
 			void SetParent(std::shared_ptr<RPG::GameObject> gameObject, std::shared_ptr<RPG::GameObject> parent);
 			bool HasParent();
+			bool IsRenderable();
+            std::string GetMaterial();
 			std::shared_ptr<RPG::GameObject> GetParent();
 			std::shared_ptr<RPG::TransformComponent> GetTransform();
 			std::vector<std::shared_ptr<RPG::IComponent>> GetLuaScripts();

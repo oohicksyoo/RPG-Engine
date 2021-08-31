@@ -719,7 +719,6 @@ struct OpenGLPipeline::Internal {
         glUniformMatrix4fv(uniformLocationM, 1, GL_FALSE, &(transform->GetTransformMatrix())[0][0]);
 
 		// Apply the texture we want to paint the mesh with.
-		//TODO: Grab Material Here
 		std::string textureString = "assets/textures/default.png";//(meshComponent != nullptr) ? meshComponent->GetTexture() : spriteComponent->GetTexture();
 		if (textureString == "") return;
 		glActiveTexture(GL_TEXTURE0);
@@ -770,6 +769,126 @@ struct OpenGLPipeline::Internal {
 		);
 	}
 
+    void ClearFrameBufferToColor(const std::shared_ptr<RPG::FrameBuffer> framebuffer, const glm::vec3 clearColor) const {
+        glBindFramebuffer(GL_FRAMEBUFFER, framebuffer->GetRenderTextureID());
+        glClearColor(clearColor.x, clearColor.y, clearColor.z, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // we're not using the stencil buffer now
+        glEnable(GL_DEPTH_TEST);
+
+        //Tidy Up
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    }
+
+    void RenderToFrameBuffer(const RPG::OpenGLAssetManager& assetManager, const std::shared_ptr<RPG::FrameBuffer> frameBuffer,
+                             const std::vector<RPG::GameObjectMaterialGroup> gameObjects, const glm::mat4 cameraMatrix) const {
+        glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer->GetRenderTextureID());
+
+        //Rendering all objects using the shader
+        {
+            // Instruct OpenGL to starting using our shader program.
+            glUseProgram(shaderProgramId);
+
+            // Enable the 'a_vertexPosition' attribute.
+            glEnableVertexAttribArray(attributeLocationVertexPosition);
+
+            // Enable the 'a_texCoord' attribute.
+            glEnableVertexAttribArray(attributeLocationTexCoord);
+
+            //Enable the 'a_normal' attribute
+            glEnableVertexAttribArray(attributeLocationNormal);
+
+            //Enable Transparent
+            glEnable(GL_BLEND);
+            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+            //TODO: Grab and Set Material Values
+            for (auto gomg : gameObjects) {
+                auto gameObject = gomg.gameObject;
+                bool canRenderMesh = true;
+
+                auto transform = gameObject->GetTransform();
+                auto meshComponent = gameObject->GetComponent<std::shared_ptr<RPG::MeshComponent>, RPG::MeshComponent>(std::make_unique<RPG::MeshComponent>("", ""));
+                std::shared_ptr<RPG::SpriteComponent> spriteComponent;
+                if (meshComponent == nullptr) {
+                    spriteComponent = gameObject->GetComponent<std::shared_ptr<RPG::SpriteComponent>, RPG::SpriteComponent>(std::make_unique<RPG::SpriteComponent>(""));
+                    if (spriteComponent == nullptr)  {
+                        canRenderMesh = false;
+                    }
+                }
+
+                if (canRenderMesh) {
+                    //Render Mesh
+                    std::string meshString = (meshComponent != nullptr) ? meshComponent->GetMesh()
+                                                                        : spriteComponent->GetMesh();
+
+                    if (meshString == "") return;
+                    const RPG::OpenGLMesh &mesh = assetManager.GetStaticMesh(meshString);
+
+                    //SET PROPERTIES
+
+                    // Populate the 'u_mvp' uniform in the shader program.
+                    glUniformMatrix4fv(uniformLocationMVP, 1, GL_FALSE,
+                                       &(cameraMatrix * transform->GetTransformMatrix())[0][0]);
+                    glUniformMatrix4fv(uniformLocationM, 1, GL_FALSE, &(transform->GetTransformMatrix())[0][0]);
+
+                    //TEXTURES
+
+                    // Bind the vertex and index buffers.
+                    glBindBuffer(GL_ARRAY_BUFFER, mesh.GetVertexBufferId());
+                    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.GetIndexBufferId());
+
+                    // Configure the 'a_vertexPosition' attribute.
+                    glVertexAttribPointer(
+                            attributeLocationVertexPosition,
+                            3,
+                            GL_FLOAT,
+                            GL_FALSE,
+                            stride,
+                            reinterpret_cast<const GLvoid *>(offsetPosition)
+                    );
+
+                    // Configure the 'a_texCoord' attribute.
+                    glVertexAttribPointer(attributeLocationTexCoord,
+                                          2,
+                                          GL_FLOAT,
+                                          GL_FALSE,
+                                          stride,
+                                          reinterpret_cast<const GLvoid *>(offsetTexCoord)
+                    );
+
+                    // Configure the 'a_normal' attribute.
+                    glVertexAttribPointer(
+                            attributeLocationNormal,
+                            3,
+                            GL_FLOAT,
+                            GL_FALSE,
+                            stride,
+                            reinterpret_cast<const GLvoid *>(offsetNormal)
+                    );
+
+                    // Execute the draw command - with how many indices to iterate.
+                    glDrawElements(
+                            GL_TRIANGLES,
+                            mesh.GetNumIndices(),
+                            GL_UNSIGNED_INT,
+                            reinterpret_cast<const GLvoid *>(0)
+                    );
+                } else {
+                    RPG::Log("Render", "Cant render " + gameObject->GetName());
+                };
+            }
+
+            glDisable(GL_BLEND);
+
+            // Tidy up.
+            glDisableVertexAttribArray(attributeLocationVertexPosition);
+            glDisableVertexAttribArray(attributeLocationTexCoord);
+            glDisableVertexAttribArray(attributeLocationNormal);
+        }
+
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    }
+
 	void DeleteFrameBuffer(const std::shared_ptr<RPG::FrameBuffer> framebuffer) const {
 		glDeleteBuffers(1, &framebuffer->GetBufferID());
 		glDeleteTextures(1, &framebuffer->GetRenderTextureID());
@@ -809,4 +928,13 @@ void OpenGLPipeline::RenderToDepthBuffer(const RPG::OpenGLAssetManager &assetMan
 
 void OpenGLPipeline::DeleteFrameBuffer(const std::shared_ptr<RPG::FrameBuffer> framebuffer) const {
 	internal->DeleteFrameBuffer(framebuffer);
+}
+
+void OpenGLPipeline::ClearFrameBufferToColor(const std::shared_ptr<RPG::FrameBuffer> framebuffer, const glm::vec3 clearColor) const {
+    internal->ClearFrameBufferToColor(framebuffer, clearColor);
+}
+
+void OpenGLPipeline::RenderToFrameBuffer(const RPG::OpenGLAssetManager& assetManager, const std::shared_ptr<RPG::FrameBuffer> framebuffer,
+                                         const std::vector<RPG::GameObjectMaterialGroup> gameObjects, const glm::mat4 cameraMatrix) const {
+    internal->RenderToFrameBuffer(assetManager, framebuffer, gameObjects, cameraMatrix);
 }

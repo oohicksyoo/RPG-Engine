@@ -60,10 +60,14 @@ struct Scene::Internal {
 			RPG::Content::GetInstance().Load<RPG::Texture>(value.get<std::string>());
 		}
 
+        for (auto [key, value] : j["Materials"].items()) {
+            RPG::Content::GetInstance().Load<RPG::Material>(value.get<std::string>());
+        }
+
 		hasLoaded = true;
 
 		return RPG::AssetManifest {
-				{{Pipeline::Default, Pipeline::SceneLines, Pipeline::DepthMap}}
+				{{Pipeline::Default, Pipeline::SceneLines, Pipeline::DepthMap, Pipeline::Default2}}
 		};
 	}
 
@@ -227,8 +231,17 @@ struct Scene::Internal {
 	}
 
 	void ProcessInput(const float& delta) {
-
+        //TODO: Why did I set this up?
 	}
+
+    void ClearFrameBufferToColor(RPG::IRenderer &renderer, std::shared_ptr<RPG::FrameBuffer> frameBuffer, glm::vec3 clearColor) {
+        renderer.ClearFrameBufferToColor(Pipeline::Default, frameBuffer, clearColor);
+    }
+
+    void RenderToFrameBuffer(RPG::IRenderer &renderer, Assets::Pipeline pipeline, std::shared_ptr<RPG::FrameBuffer> frameBuffer,
+                                    std::vector<RPG::GameObjectMaterialGroup> gameObjects, bool isGameCamera) {
+        renderer.RenderToFrameBuffer(pipeline, frameBuffer, gameObjects, (isGameCamera) ? GetGameCameraMatrix() : GetSceneCameraMatrix());
+    }
 };
 
 
@@ -292,4 +305,13 @@ std::shared_ptr<RPG::CameraComponent> Scene::GetCamera() {
 
 glm::vec3 Scene::GetCameraPosition() {
 	return internal->sceneCamera->GetTransform()->GetPosition();
+}
+
+void Scene::ClearFrameBufferToColor(RPG::IRenderer &renderer, std::shared_ptr<RPG::FrameBuffer> frameBuffer, glm::vec3 clearColor) {
+    internal->ClearFrameBufferToColor(renderer, frameBuffer, clearColor);
+}
+
+void Scene::RenderToFrameBuffer(RPG::IRenderer &renderer, RPG::Assets::Pipeline pipeline, std::shared_ptr<RPG::FrameBuffer> frameBuffer,
+                                std::vector<RPG::GameObjectMaterialGroup> gameObjects, bool isGameCamera) {
+    internal->RenderToFrameBuffer(renderer, pipeline, frameBuffer, gameObjects, isGameCamera);
 }

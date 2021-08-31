@@ -10,6 +10,7 @@
 #include "OpenGLRenderer.hpp"
 #include "../../core/SceneManager.hpp"
 #include <string>
+#include <map>
 
 #include "../ApplicationStats.hpp"
 
@@ -22,6 +23,7 @@
 #include "../../core/Serializer.hpp"
 #include "../../core/Scene.hpp"
 #include "../../core/components/MeshComponent.hpp"
+#include "../../core/GameObjectMaterialGroup.hpp"
 
 using RPG::OpenGLApplication;
 
@@ -204,6 +206,7 @@ struct OpenGLApplication::Internal {
 	const RPG::SDLWindow window;
 	SDL_GLContext context;
 	const std::shared_ptr<RPG::OpenGLAssetManager> assetManager;
+    std::map<Assets::Pipeline, std::vector<GameObjectMaterialGroup>> mappedRenderPass;
 	RPG::OpenGLRenderer renderer;
 	#ifdef RPG_EDITOR
 		bool hasRanPreviewFrame = false;
@@ -237,8 +240,18 @@ struct OpenGLApplication::Internal {
 		SDL_GL_MakeCurrent(window.GetWindow(), context);
 
 		#ifdef RPG_EDITOR
+		    //Organize Scene for Rendering
+		    BuildRenderOrder();
+		    GetScene()->ClearFrameBufferToColor(renderer, framebuffer, {0.3f, 0.3f, 0.3f});
+
+		    for (auto map : mappedRenderPass) {
+                GetScene()->RenderToFrameBuffer(renderer, map.first, framebuffer, map.second, false);
+		    }
+
+
+
             //Depth Buffer for Lighting
-            GetScene()->RenderToDepthBuffer(renderer, depthBuffer);
+            /*GetScene()->RenderToDepthBuffer(renderer, depthBuffer);
             //Scene Render
 		    GetScene()->RenderToFrameBuffer(renderer, framebuffer, {0.3f, 0.3f, 0.3f}, depthBuffer->GetRenderTextureID(), false);
             GetScene()->RenderLinesToFrameBuffer(renderer, framebuffer);
@@ -246,7 +259,7 @@ struct OpenGLApplication::Internal {
             //TODO: Need a way to say not game camera but use this static non movable camera thats not the scene camera
             materialMakerScene->RenderToFrameBuffer(renderer, materialMakerBuffer, {0.3f, 0.3f, 0.3f}, depthBuffer->GetRenderTextureID(), true);
             //Render Game Scene
-			GetScene()->RenderToFrameBuffer(renderer, gameFramebuffer, {0.0f, 0.0f, 0.0f}, depthBuffer->GetRenderTextureID());
+			GetScene()->RenderToFrameBuffer(renderer, gameFramebuffer, {0.0f, 0.0f, 0.0f}, depthBuffer->GetRenderTextureID());*/
 		#endif
 
 		#ifndef RPG_EDITOR
@@ -259,7 +272,7 @@ struct OpenGLApplication::Internal {
 		#endif
 
 		#ifndef RPG_EDITOR
-			GetScene()->Render(renderer);
+			GetScene()->Render(renderer, 0); //TODO: Create a shadowmap for this to run properly
 		#endif
 
 		#ifdef RPG_EDITOR
@@ -333,6 +346,54 @@ struct OpenGLApplication::Internal {
 		SDL_GetWindowPosition(window.GetWindow(), &windowX, &windowY);
 		return {windowX, windowY};
 	}
+
+	void BuildRenderOrder() {
+        mappedRenderPass.clear();
+
+        for (auto gameObject : GetScene()->GetHierarchy()->GetHierarchy()) {
+            CheckGameObjectForBuildOrder(gameObject);
+        }
+    }
+
+    void CheckGameObjectForBuildOrder(std::shared_ptr<RPG::GameObject> gameObject) {
+        for (auto childGameObject : gameObject->GetChildren()) {
+            CheckGameObjectForBuildOrder(childGameObject);
+        }
+
+        //TODO: Render Order pass should be a vector contains vector of this so we can easily push the vector of objects for that pipeline
+        if (gameObject->IsRenderable()) {
+            std::string materialPath = gameObject->GetMaterial();
+            std::shared_ptr<RPG::Material> material = assetManager->GetMaterial(materialPath);
+            RPG::Assets::Pipeline pipeline = RPG::Assets::GetPipelineByName(material->GetShader());
+            RPG::GameObjectMaterialGroup group;
+            group.gameObject = gameObject;
+            group.material = material;
+            //TODO: Add in a dot product to determine distance cal
+
+
+            int priority = group.material->GetRenderQueue();
+            bool foundLocation = false;
+            if (mappedRenderPass.count(pipeline) != 0) {
+                auto array = mappedRenderPass.at(pipeline);
+                for (int i = 0; i < array.size(); i++) {
+                    auto mat = array[i].material;
+                    //Determine if material falls under which render queue type since sorting is different for opaque and transparent
+                    if (mat->GetRenderQueue() > priority || mat->GetName() == group.material->GetName()) {
+                        array.insert(array.begin() + i, group);
+                        foundLocation = true;
+                        break;
+                    }
+                }
+                mappedRenderPass.at(pipeline) = array;
+            }
+
+            if (!foundLocation) {
+                std::vector<GameObjectMaterialGroup> vec;
+                vec.push_back(group);
+                mappedRenderPass.insert({pipeline, vec});
+            }
+        }
+    }
 
 	~Internal() {
 		SDL_GL_DeleteContext(context);

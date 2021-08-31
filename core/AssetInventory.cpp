@@ -12,8 +12,24 @@ std::string RPG::Assets::ResolvePipelinePath(const RPG::Assets::Pipeline &pipeli
 	        return "depthMap";
 	    case RPG::Assets::Pipeline::Sprite:
 	        return "sprite";
+        case RPG::Assets::Pipeline::Default2:
+            return "default2";
 		case RPG::Assets::Pipeline::Default:
 		default:
 			return "default";
 	}
+}
+
+RPG::Assets::Pipeline RPG::Assets::GetPipelineByName(std::string name) {
+    if (name == "lines") {
+        return RPG::Assets::Pipeline::SceneLines;
+    } else if (name == "depthMap") {
+        return RPG::Assets::Pipeline::DepthMap;
+    } else if (name == "sprite") {
+        return RPG::Assets::Pipeline::Sprite;
+    } else if (name == "default2") {
+        return RPG::Assets::Pipeline::Default2;
+    }
+
+    return RPG::Assets::Pipeline::Default;
 }

@@ -6,6 +6,7 @@
 #include "IResourceLoader.hpp"
 #include "resourceLoader/MeshLoader.hpp"
 #include "resourceLoader/BitmapLoader.hpp"
+#include "resourceLoader/MaterialLoader.hpp"
 #include <memory>
 #include <string>
 #include <vector>

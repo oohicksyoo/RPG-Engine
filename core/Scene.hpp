@@ -29,6 +29,10 @@ namespace RPG {
 			std::shared_ptr<RPG::CameraComponent> GetCamera() override;
 			glm::vec3 GetCameraPosition() override;
 
+			//New Render Pipeline tests
+            void ClearFrameBufferToColor(RPG::IRenderer& renderer, std::shared_ptr<RPG::FrameBuffer> frameBuffer, glm::vec3 clearColor) override;
+            void RenderToFrameBuffer(RPG::IRenderer& renderer, Assets::Pipeline pipeline, std::shared_ptr<RPG::FrameBuffer> frameBuffer, std::vector<RPG::GameObjectMaterialGroup> gameObjects, bool isGameCamera) override;
+
 		private:
 			struct Internal;
 			RPG::InternalPointer<Internal> internal;
