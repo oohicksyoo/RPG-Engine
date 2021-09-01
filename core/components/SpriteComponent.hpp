@@ -7,9 +7,10 @@
 #include "../IComponent.hpp"
 #include "../InternalPointer.hpp"
 #include "../AssetInventory.hpp"
+#include "../IRenderable.hpp"
 
 namespace RPG {
-	struct SpriteComponent : public IComponent {
+	struct SpriteComponent : public IComponent, public IRenderable {
 		public:
 			SpriteComponent(std::string texture, std::string guid = RPG::Guid::GenerateGuid());
 			void Awake() override;
@@ -19,7 +20,7 @@ namespace RPG {
 			std::vector<std::shared_ptr<RPG::Property>> GetProperties() override;
 			std::string Guid() override;
 			bool AllowMultiple() { return false; };
-			std::string GetMesh();
+			std::string GetMesh() override;
 			std::string GetTexture();
 
 		private:
