@@ -781,6 +781,7 @@ struct OpenGLPipeline::Internal {
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
     }
 
+    //Renders a group of GameObjects with this pipeline/shader type
     void RenderToFrameBuffer(const RPG::OpenGLAssetManager& assetManager, const std::shared_ptr<RPG::FrameBuffer> frameBuffer,
                              const std::vector<RPG::GameObjectMaterialGroup> gameObjects, const glm::mat4 cameraMatrix) const {
 

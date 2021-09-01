@@ -177,13 +177,6 @@ namespace {
 
 	        return framebuffer;
         }
-
-        std::shared_ptr<RPG::GameObject> CreateSceneLinesGameObject() {
-	        std::shared_ptr<RPG::GameObject> go = std::make_unique<RPG::GameObject>("Scene Lines");
-	        go->AddComponent(std::make_unique<RPG::MeshComponent>("assets/models/1_Meter_Cube.obj", "assets/materials/default.mat"));
-
-	        return go;
-	    }
     #endif
 
     std::shared_ptr<RPG::IScene> CreateTestScene() {
@@ -204,6 +197,37 @@ namespace {
         scene->GetHierarchy()->Add(camera);
 
 	    return scene;
+	}
+
+    std::shared_ptr<RPG::GameObject> CreateSceneLinesGameObject() {
+        std::shared_ptr<RPG::GameObject> go = std::make_unique<RPG::GameObject>("Scene Lines");
+        go->AddComponent(std::make_unique<RPG::MeshComponent>("assets/models/1_Meter_Cube.obj", "assets/materials/default.mat"));
+
+        return go;
+    }
+
+    void CreateFullscreenQuad(uint32_t &quadVAO, uint32_t &quadVBO) {
+        float quadVertices[] = { // vertex attributes for a quad that fills the entire screen in Normalized Device Coordinates.
+                // positions   // texCoords
+                -1.0f,  1.0f,  0.0f, 1.0f,
+                -1.0f, -1.0f,  0.0f, 0.0f,
+                1.0f, -1.0f,  1.0f, 0.0f,
+
+                -1.0f,  1.0f,  0.0f, 1.0f,
+                1.0f, -1.0f,  1.0f, 0.0f,
+                1.0f,  1.0f,  1.0f, 1.0f
+        };
+
+        //unsigned int quadVAO, quadVBO;
+        glGenVertexArrays(1, &quadVAO);
+        glGenBuffers(1, &quadVBO);
+        glBindVertexArray(quadVAO);
+        glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW);
+        glEnableVertexAttribArray(0);
+        glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
+        glEnableVertexAttribArray(1);
+        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
 	}
 }
 
