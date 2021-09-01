@@ -11,6 +11,6 @@ namespace RPG {
         public:
             IRenderable() {};
             virtual std::string GetMesh() = 0;
-            //virtual std::string GetTexture() = 0;
+            virtual std::string GetMaterial() = 0;
     };
 }

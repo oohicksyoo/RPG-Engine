@@ -21,6 +21,7 @@ namespace RPG {
 			std::string Guid() override;
 			bool AllowMultiple() { return false; };
 			std::string GetMesh() override;
+            std::string GetMaterial() override;
 			std::string GetTexture();
 
 		private:

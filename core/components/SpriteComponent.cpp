@@ -40,6 +40,11 @@ std::string SpriteComponent::GetMesh() {
 	return std::any_cast<std::string>(internal->mesh->GetProperty());
 }
 
+std::string SpriteComponent::GetMaterial() {
+    //TODO: Fill in material for sprite later
+    return "";
+}
+
 std::string SpriteComponent::GetTexture() {
 	return std::any_cast<std::string>(internal->texture->GetProperty());
 }
