@@ -771,6 +771,7 @@ struct OpenGLPipeline::Internal {
 		);
 	}
 
+	//Clears framebuffer to a solid colour
     void ClearFrameBufferToColor(const std::shared_ptr<RPG::FrameBuffer> framebuffer, const glm::vec3 clearColor) const {
         glBindFramebuffer(GL_FRAMEBUFFER, framebuffer->GetRenderTextureID());
         glClearColor(clearColor.x, clearColor.y, clearColor.z, 1.0f);
@@ -812,6 +813,7 @@ struct OpenGLPipeline::Internal {
             glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
             //TODO: Grab and Set Material Values
+            //TODO: Add in a Particles Component so maybe really its an IRenderable
             for (auto gomg : gameObjects) {
                 auto gameObject = gomg.gameObject;
                 bool canRenderMesh = true;
