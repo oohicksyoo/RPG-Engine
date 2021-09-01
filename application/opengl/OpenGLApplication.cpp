@@ -239,6 +239,9 @@ struct OpenGLApplication::Internal {
 	const std::shared_ptr<RPG::OpenGLAssetManager> assetManager;
     std::map<Assets::Pipeline, std::vector<GameObjectMaterialGroup>> mappedRenderPass;
 	RPG::OpenGLRenderer renderer;
+
+	uint32_t quadVAO, quadVBO;
+
 	#ifdef RPG_EDITOR
 		bool hasRanPreviewFrame = false;
 		RPG::EditorManager editorManager;
@@ -251,7 +254,10 @@ struct OpenGLApplication::Internal {
 		//SceneLines
 		std::shared_ptr<GameObject> sceneLinesGameObject;
 		std::shared_ptr<RPG::Material> sceneLinesMaterial;
-	#endif
+    #else
+        std::shared_ptr<RPG::FrameBuffer> framebuffer;
+    #endif
+
 
 	#ifdef RPG_EDITOR
 		Internal() : window(RPG::SDLWindow(SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI)),
@@ -270,7 +276,10 @@ struct OpenGLApplication::Internal {
 		Internal() : window(RPG::SDLWindow(SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI)),
 					 context(::CreateContext(window.GetWindow())),
 					 assetManager(::CreateAssetManager()),
-					 renderer(::CreateRenderer(assetManager)) {}
+					 renderer(::CreateRenderer(assetManager)),
+                     framebuffer(::CreateFrameBuffer(glm::vec2{1280, 720})) {
+            CreateFullscreenQuad(quadVAO, quadVBO);
+		}
 	#endif
 
 	void Render() {
@@ -329,8 +338,8 @@ struct OpenGLApplication::Internal {
 		#endif
 
 		#ifndef RPG_EDITOR
-			glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+			//glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+			//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		#endif
 
 		#ifdef RPG_EDITOR
@@ -338,7 +347,16 @@ struct OpenGLApplication::Internal {
 		#endif
 
 		#ifndef RPG_EDITOR
-			GetScene()->Render(renderer, 0); //TODO: Create a shadowmap for this to run properly
+            //Organize Scene for Rendering
+            BuildRenderOrder();
+            GetScene()->ClearFrameBufferToColor(renderer, framebuffer, {0.0f, 0.0f, 0.0f});
+
+            //Render through scene once for Scene and Once for Game view
+            for (auto map : mappedRenderPass) {
+                GetScene()->RenderToFrameBuffer(renderer, map.first, framebuffer, map.second, false);
+            }
+
+
 		#endif
 
 		#ifdef RPG_EDITOR
@@ -462,12 +480,17 @@ struct OpenGLApplication::Internal {
     }
 
 	~Internal() {
+        glDeleteVertexArrays(1, &quadVAO);
+        glDeleteBuffers(1, &quadVBO);
+
 		SDL_GL_DeleteContext(context);
 
 		#ifdef RPG_EDITOR
 		    //TODO: Might need to erase the other framebuffers as well here
 			renderer.DeleteFrameBuffer(RPG::Assets::Pipeline::Default, framebuffer);
-		#endif
+        #else
+            renderer.DeleteFrameBuffer(RPG::Assets::Pipeline::Default, framebuffer);
+        #endif
 	}
 };
 
