@@ -5,6 +5,7 @@
 #pragma once
 
 #include "InternalPointer.hpp"
+#include "Property.hpp"
 #include <string>
 #include <vector>
 
@@ -17,6 +18,8 @@ namespace RPG {
             void SetRenderQueue(int value);
             std::string GetShader();
             void SetShader(std::string shader);
+            std::vector<std::shared_ptr<RPG::Property>> GetProperties();
+            void SetProperties(std::vector<std::shared_ptr<RPG::Property>> properties);
 
         private:
             struct Internal;

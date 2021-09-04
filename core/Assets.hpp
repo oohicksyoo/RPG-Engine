@@ -9,6 +9,7 @@
 #include "Material.hpp"
 #include <string>
 #include <vector>
+#include "nlohmann/json.hpp"
 
 namespace RPG::Assets {
 	std::string LoadTextFile(const std::string& path);
@@ -18,6 +19,7 @@ namespace RPG::Assets {
 	RPG::Texture LoadBitmapFile(const std::string& path);
 	std::vector<char> LoadBinaryFile(const std::string& path);
 	RPG::Material LoadMaterial(const std::string& path);
+    std::shared_ptr<RPG::Property> LoadProperty(nlohmann::json j);
 }
 
 

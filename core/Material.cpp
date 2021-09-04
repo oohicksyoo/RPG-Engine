@@ -3,7 +3,6 @@
 //
 
 #include "Material.hpp"
-#include "Texture.hpp"
 
 using RPG::Material;
 
@@ -11,8 +10,8 @@ struct Material::Internal {
 
     std::string materialName;
     int renderQueue;
-    std::vector<RPG::Texture> textures;
     std::string shader;
+    std::vector<std::shared_ptr<RPG::Property>> properties;
 
     Internal(std::string materialName, int renderQueue, std::string shader) : materialName(materialName),
                                                           renderQueue(renderQueue),
@@ -41,4 +40,12 @@ std::string Material::GetShader() {
 
 void Material::SetShader(std::string shader) {
     internal->shader = shader;
+}
+
+std::vector<std::shared_ptr<RPG::Property>> Material::GetProperties() {
+    return internal->properties;
+}
+
+void Material::SetProperties(std::vector<std::shared_ptr<RPG::Property>> properties) {
+    internal->properties = properties;
 }

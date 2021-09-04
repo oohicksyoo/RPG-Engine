@@ -11,11 +11,11 @@
 #include <vector>
 #include <SDL_image.h>
 #include <stdio.h>
-#include "nlohmann/json.hpp"
 
 using json = nlohmann::json;
 
 std::string RPG::Assets::LoadTextFile(const std::string& path) {
+    //TODO: Have some sort of error fallback when a file is not found
 	SDL_RWops* file{SDL_RWFromFile(path.c_str(), "r")};
 	size_t fileLength{static_cast<size_t>(SDL_RWsize(file))};
 	void* data{SDL_LoadFile_RW(file, nullptr, 1)};
@@ -152,8 +152,30 @@ RPG::Material RPG::Assets::LoadMaterial(const std::string &path) {
     auto name = j["Name"].get<std::string>();
     auto renderQueue = j["RenderQueue"].get<int>();
     auto shader = j["Shader"].get<std::string>();
+
     RPG::Material material = RPG::Material(name, renderQueue, shader);
 
+    if (j.contains("Properties")) {
+        std::vector<std::shared_ptr<RPG::Property>> properties;
+
+        for (auto [key, value] : j["Properties"].items()) {
+            properties.push_back(RPG::Assets::LoadProperty(value));
+        }
+
+        material.SetProperties(properties);
+    }
 
     return material;
+}
+
+std::shared_ptr<RPG::Property> RPG::Assets::LoadProperty(nlohmann::json j) {
+
+    auto type = j["Type"].get<std::string>();
+    auto v = j["Value"];
+    std::any p;
+    if (type == "glm::vec4") {
+        p = glm::vec4{v["x"].get<float>(),v["y"].get<float>(),v["z"].get<float>(),v["w"].get<float>()};
+    }
+
+    return std::make_unique<RPG::Property>(p, j["Name"].get<std::string>(), type);
 }

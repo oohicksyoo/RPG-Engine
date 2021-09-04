@@ -29,6 +29,17 @@ std::string Serializer::SaveMaterial(std::shared_ptr<RPG::Material> material, co
     j["RenderQueue"] = material->GetRenderQueue();
     j["Shader"] = material->GetShader();
 
+    json obj = json::array();
+    RPG::Log("Serializer", std::to_string(material->GetProperties().size()));
+    for (auto property : material->GetProperties()) {
+        json prop = json::object();
+        prop.push_back({"Name", property->GetName()});
+        prop.push_back({"Type", property->GetType()});
+        prop.merge_patch(SavePropertyValue(property));
+        obj.push_back(prop);
+    }
+    j["Properties"] = obj;
+
     RPG::Assets::SaveTextFile(j.dump(), path);
     return j.dump();
 }
@@ -254,6 +265,22 @@ void Serializer::LoadDefaultSavePropertyTypes() {
 
 		return obj;
 	}});
+
+    AddPropertySave({"glm::vec4", [](std::shared_ptr<RPG::Property> property) -> nlohmann::json {
+        std::any prop = property->GetProperty();
+        glm::vec4 v = std::any_cast<glm::vec4>(prop);
+
+       //RPG::Log("Serializer", std::to_string(v.x) + ", " + std::to_string(v.y) + ", " + std::to_string(v.z) + ", " + std::to_string(v.w));
+
+        json obj = json::object();
+
+        obj["Value"]["x"] = v.x;
+        obj["Value"]["y"] = v.y;
+        obj["Value"]["z"] = v.z;
+        obj["Value"]["w"] = v.w;
+
+        return obj;
+    }});
 
 	AddPropertySave({"RPG::CameraType", [](std::shared_ptr<RPG::Property> property) -> nlohmann::json {
 		std::any prop = property->GetProperty();
