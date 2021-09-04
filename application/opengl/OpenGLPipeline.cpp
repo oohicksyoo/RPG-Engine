@@ -792,6 +792,11 @@ struct OpenGLPipeline::Internal {
 	        return;
 	    }
 
+	    //Empty vector passed in
+	    if (gameObjects.size() == 0) {
+	        return;
+	    }
+
         glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer->GetRenderTextureID());
 
         //Rendering all objects using the shader
@@ -809,8 +814,11 @@ struct OpenGLPipeline::Internal {
             glEnableVertexAttribArray(attributeLocationNormal);
 
             //Enable Transparent
-            glEnable(GL_BLEND);
-            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+            //TODO: 4000 should come from some sort of Enum value for Transparent render queue materials
+            if (gameObjects[0].material->GetRenderQueue() >= 4000) {
+                glEnable(GL_BLEND);
+                glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+            }
 
             //TODO: Grab and Set Material Values
             //TODO: Add in a Particles Component so maybe really its an IRenderable
