@@ -67,7 +67,7 @@ struct Scene::Internal {
 		hasLoaded = true;
 
 		return RPG::AssetManifest {
-				{{Pipeline::Default, Pipeline::SceneLines, Pipeline::DepthMap, Pipeline::Default2}}
+				{{Pipeline::Default, Pipeline::SceneLines, Pipeline::DepthMap, Pipeline::Default2, Pipeline::Unlit, Pipeline::Flipbook}}
 		};
 	}
 

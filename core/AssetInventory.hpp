@@ -12,7 +12,9 @@ namespace RPG::Assets {
 		SceneLines,
 		DepthMap,
 		Sprite,
-		Default2
+		Default2,
+		Unlit,
+		Flipbook
 	};
 
 	std::string ResolvePipelinePath(const RPG::Assets::Pipeline& pipeline);

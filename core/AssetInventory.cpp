@@ -14,6 +14,10 @@ std::string RPG::Assets::ResolvePipelinePath(const RPG::Assets::Pipeline &pipeli
 	        return "sprite";
         case RPG::Assets::Pipeline::Default2:
             return "default2";
+        case RPG::Assets::Pipeline::Unlit:
+            return "unlit";
+        case RPG::Assets::Pipeline::Flipbook:
+            return "flipbook";
 		case RPG::Assets::Pipeline::Default:
 		default:
 			return "default";
@@ -29,6 +33,10 @@ RPG::Assets::Pipeline RPG::Assets::GetPipelineByName(std::string name) {
         return RPG::Assets::Pipeline::Sprite;
     } else if (name == "default2") {
         return RPG::Assets::Pipeline::Default2;
+    } else if (name == "unlit") {
+        return RPG::Assets::Pipeline::Unlit;
+    } else if (name == "flipbook") {
+        return RPG::Assets::Pipeline::Flipbook;
     }
 
     return RPG::Assets::Pipeline::Default;
