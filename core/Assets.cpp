@@ -5,6 +5,7 @@
 #define TINYOBJLOADER_IMPLEMENTATION
 
 #include "Assets.hpp"
+#include "Log.hpp"
 #include <sstream>
 #include <tiny_obj_loader.h>
 #include <unordered_map>
@@ -159,7 +160,10 @@ RPG::Material RPG::Assets::LoadMaterial(const std::string &path) {
         std::vector<std::shared_ptr<RPG::Property>> properties;
 
         for (auto [key, value] : j["Properties"].items()) {
-            properties.push_back(RPG::Assets::LoadProperty(value));
+            auto property = RPG::Assets::LoadProperty(value);
+            if (property != nullptr) {
+                properties.push_back(property);
+            }
         }
 
         material.SetProperties(properties);
@@ -169,13 +173,33 @@ RPG::Material RPG::Assets::LoadMaterial(const std::string &path) {
 }
 
 std::shared_ptr<RPG::Property> RPG::Assets::LoadProperty(nlohmann::json j) {
-
     auto type = j["Type"].get<std::string>();
     auto v = j["Value"];
     std::any p;
-    if (type == "glm::vec4") {
-        p = glm::vec4{v["x"].get<float>(),v["y"].get<float>(),v["z"].get<float>(),v["w"].get<float>()};
+
+    if (type == "float") {
+        float vec = v.get<float>();
+        return std::make_unique<RPG::Property>(vec, j["Name"].get<std::string>(), type);
     }
 
-    return std::make_unique<RPG::Property>(p, j["Name"].get<std::string>(), type);
+    if (type == "glm::vec2") {
+        glm::vec2 vec = glm::vec2{v["x"].get<float>(),v["y"].get<float>()};
+        return std::make_unique<RPG::Property>(vec, j["Name"].get<std::string>(), type);
+    }
+
+    if (type == "glm::vec3") {
+        glm::vec3 vec = glm::vec3{v["x"].get<float>(),v["y"].get<float>(),v["z"].get<float>()};
+        return std::make_unique<RPG::Property>(vec, j["Name"].get<std::string>(), type);
+    }
+
+    if (type == "glm::vec4") {
+        glm::vec4 vec = glm::vec4{v["x"].get<float>(),v["y"].get<float>(),v["z"].get<float>(),v["w"].get<float>()};
+        return std::make_unique<RPG::Property>(vec, j["Name"].get<std::string>(), type);
+    }
+
+    if (type == "RPG::Resource::String") {
+        return std::make_unique<RPG::Property>(v.get<std::string>(), j["Name"].get<std::string>(), "RPG::Resource::String", true, "Texture");
+    }
+
+    return nullptr;
 }

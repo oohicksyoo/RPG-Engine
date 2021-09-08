@@ -824,6 +824,7 @@ struct OpenGLPipeline::Internal {
             //TODO: Add in a Particles Component so maybe really its an IRenderable
             for (auto gomg : gameObjects) {
                 auto gameObject = gomg.gameObject;
+                auto material = gomg.material;
                 bool canRenderMesh = true;
 
                 auto transform = gameObject->GetTransform();
@@ -844,14 +845,52 @@ struct OpenGLPipeline::Internal {
                     if (meshString == "") return;
                     const RPG::OpenGLMesh &mesh = assetManager.GetStaticMesh(meshString);
 
-                    //SET PROPERTIES
-
                     // Populate the 'u_mvp' uniform in the shader program.
-                    glUniformMatrix4fv(uniformLocationMVP, 1, GL_FALSE,
-                                       &(cameraMatrix * transform->GetTransformMatrix())[0][0]);
+                    glUniformMatrix4fv(uniformLocationMVP, 1, GL_FALSE, &(cameraMatrix * transform->GetTransformMatrix())[0][0]);
                     glUniformMatrix4fv(uniformLocationM, 1, GL_FALSE, &(transform->GetTransformMatrix())[0][0]);
 
+                    /*uint32_t rpgTime = glGetUniformLocation(shaderProgramId, "time");
+                    if (rpgTime != GL_INVALID_VALUE) {
+                        glUniform1f(rpgTime, RPG::Time::milliseconds);
+                    }*/
+
+                    glUniform1f(glGetUniformLocation(shaderProgramId, "time"), RPG::Time::Seconds());
+
+                    //SET PROPERTIES
                     //TEXTURES
+                    int textureCount = 0;
+                    for (auto property : material->GetProperties()) {
+                        auto type = property->GetType();
+                        auto name = property->GetName();
+                        auto value = property->GetProperty();
+
+                        if (type == "float") {
+                            auto v = std::any_cast<float>(value);
+                            glUniform1f(glGetUniformLocation(shaderProgramId, name.c_str()), v);
+                        }
+
+                        if (type == "glm::vec2") {
+                            auto v = std::any_cast<glm::vec2>(value);
+                            glUniform2f(glGetUniformLocation(shaderProgramId, name.c_str()), v.x, v.y);
+                        }
+
+                        if (type == "glm::vec3") {
+                            auto v = std::any_cast<glm::vec3>(value);
+                            glUniform3f(glGetUniformLocation(shaderProgramId, name.c_str()), v.x, v.y, v.z);
+                        }
+
+                        if (type == "glm::vec4") {
+                            auto v = std::any_cast<glm::vec4>(value);
+                            glUniform4f(glGetUniformLocation(shaderProgramId, name.c_str()), v.x, v.y, v.z, v.w);
+                        }
+
+                        if (type == "RPG::Resource::String") {
+                            auto v = std::any_cast<std::string>(value);
+                            glActiveTexture(GL_TEXTURE0 + textureCount);
+                            assetManager.GetTexture(v).Bind();
+                            textureCount++;
+                        }
+                    }
 
                     // Bind the vertex and index buffers.
                     glBindBuffer(GL_ARRAY_BUFFER, mesh.GetVertexBufferId());

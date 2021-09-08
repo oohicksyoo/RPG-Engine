@@ -264,7 +264,7 @@ struct OpenGLApplication::Internal {
 					 context(::CreateContext(window.GetWindow())),
 					 assetManager(::CreateAssetManager()),
 					 renderer(::CreateRenderer(assetManager)),
-					 editorManager(window, context),
+					 editorManager(window, context, assetManager),
 					 framebuffer(::CreateFrameBuffer(glm::vec2{1280, 720})),
 					 gameFramebuffer(::CreateFrameBuffer(glm::vec2{1280, 720})),
 					 depthBuffer(::CreateDepthBuffer(glm::vec2{1024, 1024})),
@@ -312,8 +312,6 @@ struct OpenGLApplication::Internal {
 		        std::vector<RPG::GameObjectMaterialGroup> materialGroup;
 		        for (auto go : materialMakerScene->GetHierarchy()->GetHierarchy()) {
 		            if (go->IsRenderable()) {
-		                auto materialPath = go->GetMaterial();
-                        std::shared_ptr<RPG::Material> material = assetManager->GetMaterial(materialPath);
                         RPG::GameObjectMaterialGroup group;
                         group.gameObject = go;
                         group.material = material;
@@ -328,13 +326,7 @@ struct OpenGLApplication::Internal {
             //Depth Buffer for Lighting
             /*GetScene()->RenderToDepthBuffer(renderer, depthBuffer);
             //Scene Render
-		    GetScene()->RenderToFrameBuffer(renderer, framebuffer, {0.3f, 0.3f, 0.3f}, depthBuffer->GetRenderTextureID(), false);
-            GetScene()->RenderLinesToFrameBuffer(renderer, framebuffer);
-            //Render Material Editor MiniScene
-            //TODO: Need a way to say not game camera but use this static non movable camera thats not the scene camera
-            materialMakerScene->RenderToFrameBuffer(renderer, materialMakerBuffer, {0.3f, 0.3f, 0.3f}, depthBuffer->GetRenderTextureID(), true);
-            //Render Game Scene
-			GetScene()->RenderToFrameBuffer(renderer, gameFramebuffer, {0.0f, 0.0f, 0.0f}, depthBuffer->GetRenderTextureID());*/
+		    GetScene()->RenderToFrameBuffer(renderer, framebuffer, {0.3f, 0.3f, 0.3f}, depthBuffer->GetRenderTextureID(), false);*/
 		#endif
 
 		#ifndef RPG_EDITOR
