@@ -248,7 +248,8 @@ struct OpenGLPipeline::Internal {
 	}
 
 	void RenderLinesToFrameBuffer(const RPG::OpenGLAssetManager &assetManager, const std::shared_ptr<RPG::FrameBuffer> frameBuffer, const glm::mat4 cameraMatrix) const {
-		glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer->GetRenderTextureID());
+        #ifdef RPG_EDITOR
+	    glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer->GetRenderTextureID());
 		glEnable(GL_DEPTH_TEST);
 		glLineWidth(3);
 
@@ -299,6 +300,7 @@ struct OpenGLPipeline::Internal {
 
 		//Tidy Up
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        #endif
 	}
 
 	void RenderGameObject(const RPG::OpenGLAssetManager& assetManager, std::shared_ptr<RPG::GameObject> gameObject, const glm::mat4 cameraMatrix, const uint32_t shadowMap, const bool isGameCamera) const {
