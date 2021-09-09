@@ -211,3 +211,8 @@ void VulkanContext::RenderToFrameBuffer(const RPG::Assets::Pipeline &pipeline,
                                         const glm::mat4 cameraMatrix) {
     //TODO: Implement for Vulkan
 }
+
+void VulkanContext::DisplayFrameBuffer(const RPG::Assets::Pipeline &pipeline,
+                                       const std::shared_ptr<RPG::FrameBuffer> frameBuffer, const uint32_t quadVAO) {
+    //TODO: Implement release implementation of displaying the scene to screen
+}

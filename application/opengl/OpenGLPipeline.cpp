@@ -946,6 +946,14 @@ struct OpenGLPipeline::Internal {
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
     }
 
+    void DisplayFrameBuffer(const std::shared_ptr<RPG::FrameBuffer> frameBuffer,
+                       const uint32_t quadVAO) const {
+        glUseProgram(shaderProgramId);
+        glBindVertexArray(quadVAO);
+        glBindTexture(GL_TEXTURE_2D, frameBuffer->GetRenderTextureID());
+        glDrawArrays(GL_TRIANGLES, 0 , 6);
+	}
+
 	void DeleteFrameBuffer(const std::shared_ptr<RPG::FrameBuffer> framebuffer) const {
 		glDeleteBuffers(1, &framebuffer->GetBufferID());
 		glDeleteTextures(1, &framebuffer->GetRenderTextureID());
@@ -994,4 +1002,9 @@ void OpenGLPipeline::ClearFrameBufferToColor(const std::shared_ptr<RPG::FrameBuf
 void OpenGLPipeline::RenderToFrameBuffer(const RPG::OpenGLAssetManager& assetManager, const std::shared_ptr<RPG::FrameBuffer> framebuffer,
                                          const std::vector<RPG::GameObjectMaterialGroup> gameObjects, const glm::mat4 cameraMatrix) const {
     internal->RenderToFrameBuffer(assetManager, framebuffer, gameObjects, cameraMatrix);
+}
+
+void OpenGLPipeline::DisplayFrameBuffer(const std::shared_ptr<RPG::FrameBuffer> frameBuffer,
+                                        const uint32_t quadVAO) const {
+    internal->DisplayFrameBuffer(frameBuffer, quadVAO);
 }
