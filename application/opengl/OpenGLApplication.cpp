@@ -240,8 +240,6 @@ struct OpenGLApplication::Internal {
     std::map<Assets::Pipeline, std::vector<GameObjectMaterialGroup>> mappedRenderPass;
 	RPG::OpenGLRenderer renderer;
 
-	uint32_t quadVAO, quadVBO;
-
 	#ifdef RPG_EDITOR
 		bool hasRanPreviewFrame = false;
 		RPG::EditorManager editorManager;
@@ -255,6 +253,7 @@ struct OpenGLApplication::Internal {
 		std::shared_ptr<GameObject> sceneLinesGameObject;
 		std::shared_ptr<RPG::Material> sceneLinesMaterial;
     #else
+        uint32_t quadVAO, quadVBO;
         std::shared_ptr<RPG::FrameBuffer> framebuffer;
     #endif
 
@@ -279,6 +278,7 @@ struct OpenGLApplication::Internal {
 					 renderer(::CreateRenderer(assetManager)),
                      framebuffer(::CreateFrameBuffer(glm::vec2{1280, 720})) {
             CreateFullscreenQuad(quadVAO, quadVBO);
+            RPG::Log("Quad", std::to_string(quadVAO));
 		}
 	#endif
 
@@ -327,18 +327,18 @@ struct OpenGLApplication::Internal {
             /*GetScene()->RenderToDepthBuffer(renderer, depthBuffer);
             //Scene Render
 		    GetScene()->RenderToFrameBuffer(renderer, framebuffer, {0.3f, 0.3f, 0.3f}, depthBuffer->GetRenderTextureID(), false);*/
-		#endif
 
-		#ifndef RPG_EDITOR
-			//glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-			//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		#endif
+            //Rendering and Sending the Editor
+            editorManager.NewFrame(window);
+			//TODO: Scene and game framebuffer should follow similar process to the material maker submit
+			editorManager.SubmitMaterialMakerFrameBuffer(materialMakerBuffer);
+			editorManager.BuildGUI(framebuffer, gameFramebuffer, GetScene()->GetHierarchy());
+			editorManager.Render();
+        #else
+			//Rendering for Release
+            glClearColor(1.0f, 0.0f, 0.0f, 1.0f);
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		#ifdef RPG_EDITOR
-			editorManager.NewFrame(window);
-		#endif
-
-		#ifndef RPG_EDITOR
             //Organize Scene for Rendering
             BuildRenderOrder();
             GetScene()->ClearFrameBufferToColor(renderer, framebuffer, {0.0f, 0.0f, 0.0f});
@@ -348,14 +348,7 @@ struct OpenGLApplication::Internal {
                 GetScene()->RenderToFrameBuffer(renderer, map.first, framebuffer, map.second, false);
             }
 
-
-		#endif
-
-		#ifdef RPG_EDITOR
-			//TODO: Scene and game framebuffer should follow similar process to the material maker submit
-			editorManager.SubmitMaterialMakerFrameBuffer(materialMakerBuffer);
-			editorManager.BuildGUI(framebuffer, gameFramebuffer, GetScene()->GetHierarchy());
-			editorManager.Render();
+           renderer.DisplayFrameBuffer(RPG::Assets::Pipeline::DefaultReleaseFrameBuffer, framebuffer, quadVAO);
 		#endif
 
 		SDL_GL_SwapWindow(window.GetWindow());
@@ -412,7 +405,9 @@ struct OpenGLApplication::Internal {
 			assetManager->LoadAssetManifest(scene->GetAssetManifest());
 			#ifdef RPG_EDITOR
 				hasRanPreviewFrame = false;
-			#endif
+            #else
+				hasRanFirstFrame = false;
+            #endif
 		}
 		return scene;
 	}
@@ -472,17 +467,20 @@ struct OpenGLApplication::Internal {
     }
 
 	~Internal() {
-        glDeleteVertexArrays(1, &quadVAO);
-        glDeleteBuffers(1, &quadVBO);
-
-		SDL_GL_DeleteContext(context);
 
 		#ifdef RPG_EDITOR
-		    //TODO: Might need to erase the other framebuffers as well here
+		    //TODO: Convert this to use ::DeleteFrameBuffer(frameBuffer) instead of feeding it through a pipeline for no reason
 			renderer.DeleteFrameBuffer(RPG::Assets::Pipeline::Default, framebuffer);
+            renderer.DeleteFrameBuffer(RPG::Assets::Pipeline::Default, gameFramebuffer);
+            renderer.DeleteFrameBuffer(RPG::Assets::Pipeline::Default, depthBuffer);
+            renderer.DeleteFrameBuffer(RPG::Assets::Pipeline::Default, materialMakerBuffer);
         #else
+            glDeleteVertexArrays(1, &quadVAO);
+            glDeleteBuffers(1, &quadVBO);
             renderer.DeleteFrameBuffer(RPG::Assets::Pipeline::Default, framebuffer);
         #endif
+
+        SDL_GL_DeleteContext(context);
 	}
 };
 
