@@ -8,6 +8,7 @@
 
 namespace RPG::Assets {
 	enum class Pipeline {
+	    DefaultReleaseFrameBuffer,
 		Default,
 		SceneLines,
 		DepthMap,
