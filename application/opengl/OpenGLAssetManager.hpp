@@ -20,7 +20,9 @@ namespace RPG {
 			const RPG::OpenGLPipeline& GetPipeline(const RPG::Assets::Pipeline& pipeline) const;
 			const RPG::OpenGLMesh& GetStaticMesh(std::string path) const;
 			const RPG::OpenGLTexture& GetTexture(std::string path) const;
-			const RPG::OpenGLMesh& GetSceneLines() const;
+            #ifdef RPG_EDITOR
+			    const RPG::OpenGLMesh& GetSceneLines() const;
+            #endif
 			const std::shared_ptr<RPG::Material> GetMaterial(std::string path) const;
 
 		private:
