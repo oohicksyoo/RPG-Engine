@@ -114,17 +114,17 @@ bool Application::RunMainLoop() {
 					InputManager::GetInstance().OnKeyUp((RPG::Input::Key)event.key.keysym.scancode);
 				}
 				break;
-			case SDL_JOYDEVICEADDED:
-				 index = event.jdevice.which;
-				 if (SDL_IsGameController(index) == SDL_FALSE) {
-				 	RPG::Log("Input", "Joystick Connection event");
-				 	SDL_Joystick* ptr = internal->joysticks[index] = SDL_JoystickOpen(index);
-				 	std::string name = SDL_JoystickName(ptr);
-				 	int buttonCount = SDL_JoystickNumButtons(ptr);
-				 	int axisCount = SDL_JoystickNumAxes(ptr);
-				 	uint16_t vendor = SDL_JoystickGetVendor(ptr);
-				 	uint16_t product = SDL_JoystickGetProduct(ptr);
-				 	uint16_t version = SDL_JoystickGetProductVersion(ptr);
+                /*case SDL_JOYDEVICEADDED:
+                     index = event.jdevice.which;
+                     if (SDL_IsGameController(index) == SDL_FALSE) {
+                         RPG::Log("Input", "Joystick Connection event");
+                         SDL_Joystick* ptr = internal->joysticks[index] = SDL_JoystickOpen(index);
+                         std::string name = SDL_JoystickName(ptr);
+                         int buttonCount = SDL_JoystickNumButtons(ptr);
+                         int axisCount = SDL_JoystickNumAxes(ptr);
+                         uint16_t vendor = SDL_JoystickGetVendor(ptr);
+                         uint16_t product = SDL_JoystickGetProduct(ptr);
+                         uint16_t version = SDL_JoystickGetProductVersion(ptr);
 
 				 	InputManager::GetInstance().OnControllerConnect(index, name, false, buttonCount, axisCount, vendor, product, version);
 				 }
