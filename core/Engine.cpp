@@ -23,7 +23,11 @@ struct Engine::Internal {
 
 	void Run() {
 		RPG::Log(logTag, "Starting engine up");
-		SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS | SDL_INIT_JOYSTICK | SDL_INIT_GAMECONTROLLER);
+        //TODO: Causes mass slow start up on release builds due to joystick probing
+        //https://twitter.com/NoelFB/status/1256794955227361280
+		SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS);
+        SDL_InitSubSystem(SDL_INIT_JOYSTICK);
+        SDL_InitSubSystem(SDL_INIT_GAMECONTROLLER);
 		RPG::Log(logTag, "SDL2 initialized successfully");
 
 		if (IMG_Init(IMG_INIT_PNG) != IMG_INIT_PNG) {
