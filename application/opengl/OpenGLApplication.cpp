@@ -431,7 +431,6 @@ struct OpenGLApplication::Internal {
             CheckGameObjectForBuildOrder(childGameObject);
         }
 
-        //TODO: Render Order pass should be a vector contains vector of this so we can easily push the vector of objects for that pipeline
         if (gameObject->IsRenderable()) {
             std::string materialPath = gameObject->GetMaterial();
             std::shared_ptr<RPG::Material> material = assetManager->GetMaterial(materialPath);
