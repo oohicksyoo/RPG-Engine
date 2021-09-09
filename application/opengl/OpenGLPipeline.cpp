@@ -851,11 +851,7 @@ struct OpenGLPipeline::Internal {
                     glUniformMatrix4fv(uniformLocationMVP, 1, GL_FALSE, &(cameraMatrix * transform->GetTransformMatrix())[0][0]);
                     glUniformMatrix4fv(uniformLocationM, 1, GL_FALSE, &(transform->GetTransformMatrix())[0][0]);
 
-                    /*uint32_t rpgTime = glGetUniformLocation(shaderProgramId, "time");
-                    if (rpgTime != GL_INVALID_VALUE) {
-                        glUniform1f(rpgTime, RPG::Time::milliseconds);
-                    }*/
-
+                    //Default ones shaders can use in general
                     glUniform1f(glGetUniformLocation(shaderProgramId, "time"), RPG::Time::Seconds());
 
                     //SET PROPERTIES
