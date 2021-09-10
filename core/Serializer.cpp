@@ -151,7 +151,7 @@ std::shared_ptr<RPG::GameObject> Serializer::LoadGameObject(nlohmann::json j, bo
 
 
 	for (auto [key, gameObject] : j["Components"].items()) {
-		go->AddComponent(LoadComponent(gameObject, go));
+		go->AddComponent(LoadComponent(gameObject, go, randomGuid));
 	}
 
 	for (auto [key, gameObject] : j["Children"].items()) {
