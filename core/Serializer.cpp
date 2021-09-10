@@ -40,7 +40,7 @@ std::string Serializer::SaveMaterial(std::shared_ptr<RPG::Material> material, co
     }
     j["Properties"] = obj;
 
-    RPG::Assets::SaveTextFile(j.dump(), path);
+    RPG::Assets::SaveTextFile(j.dump(jsonSpacing), path);
     return j.dump();
 }
 
@@ -66,7 +66,7 @@ std::string Serializer::SaveScene(std::shared_ptr<RPG::IScene> scene, const std:
 	//RPG::Log("Serializer - Save", j.dump());
 
 
-	RPG::Assets::SaveTextFile(j.dump(), path);
+	RPG::Assets::SaveTextFile(j.dump(jsonSpacing), path);
 	return j.dump();
 }
 

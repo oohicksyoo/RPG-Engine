@@ -41,6 +41,8 @@ namespace RPG {
 			nlohmann::json SaveGameObject(std::shared_ptr<RPG::GameObject> gameObject);
 			std::shared_ptr<RPG::GameObject> LoadGameObject(nlohmann::json j, bool randomGuid = false);
 
+			const static int jsonSpacing = 4;
+
 		private:
 			nlohmann::json SaveComponent(std::shared_ptr<RPG::IComponent> component);
 			nlohmann::json SavePropertyValue(std::shared_ptr<RPG::Property> property);
