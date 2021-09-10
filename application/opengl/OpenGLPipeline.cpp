@@ -947,7 +947,8 @@ struct OpenGLPipeline::Internal {
     }
 
     void DisplayFrameBuffer(const RPG::OpenGLAssetManager& assetManager, const std::shared_ptr<RPG::FrameBuffer> frameBuffer) const {
-        glClearColor(0.0f, 1.0f, 0.0f, 1.0f);
+        #ifndef RPG_EDITOR
+	    glClearColor(0.0f, 1.0f, 0.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
         glUseProgram(shaderProgramId);
 
@@ -957,6 +958,7 @@ struct OpenGLPipeline::Internal {
 
         glBindVertexArray(mesh.GetVertexBufferId());
         glDrawElements(GL_TRIANGLES, mesh.GetNumIndices(), GL_UNSIGNED_INT, 0);
+        #endif
 	}
 
 	void DeleteFrameBuffer(const std::shared_ptr<RPG::FrameBuffer> framebuffer) const {
