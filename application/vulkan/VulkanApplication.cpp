@@ -37,7 +37,8 @@ struct VulkanApplication::Internal {
 
 	void Render() {
 		if (context.RenderBegin()) {
-			GetScene()->Render(context, 0); //TODO: Setup Shadow map texture id here
+		    //TODO: Remove in favour of a framebuffer type system like in OpenGL
+			//GetScene()->Render(context, 0); //TODO: Setup Shadow map texture id here
 			context.RenderEnd();
 		}
 	}

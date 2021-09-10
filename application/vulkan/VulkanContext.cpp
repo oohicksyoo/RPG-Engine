@@ -131,9 +131,10 @@ struct VulkanContext::Internal {
 		return true;
 	}
 
-	void Render(const RPG::Assets::Pipeline& pipeline, const std::shared_ptr<RPG::Hierarchy> hierarchy, const glm::mat4 cameraMatrix, const uint32_t shadowMap) {
+	//Removed in favour of switching to Framebuffers
+	/*void Render(const RPG::Assets::Pipeline& pipeline, const std::shared_ptr<RPG::Hierarchy> hierarchy, const glm::mat4 cameraMatrix, const uint32_t shadowMap) {
 		assetManager.GetPipeline(pipeline).Render(device, renderContext.GetActiveCommandBuffer(), assetManager, hierarchy, cameraMatrix, shadowMap);
-	}
+	}*/
 
 	void RenderEnd() {
 		if (!renderContext.RenderEnd(device)) {
@@ -156,10 +157,6 @@ void VulkanContext::LoadAssetManifest(const RPG::AssetManifest& assetManifest) {
 
 bool VulkanContext::RenderBegin() {
 	return internal->RenderBegin();
-}
-
-void VulkanContext::Render(const RPG::Assets::Pipeline& pipeline, const std::shared_ptr<RPG::Hierarchy> hierarchy, const glm::mat4 cameraMatrix, const uint32_t shadowMap) {
-	internal->Render(pipeline, hierarchy, cameraMatrix, shadowMap);
 }
 
 void VulkanContext::RenderToFrameBuffer(const RPG::Assets::Pipeline &pipeline,

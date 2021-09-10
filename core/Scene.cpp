@@ -153,10 +153,6 @@ struct Scene::Internal {
 		#endif
 	}
 
-	void Render(RPG::IRenderer& renderer, uint32_t shadowMap) {
-		renderer.Render(Pipeline::Default, hierarchy, GetGameCameraMatrix(), shadowMap);
-	}
-
 	void RenderToFrameBuffer(RPG::IRenderer& renderer, std::shared_ptr<RPG::FrameBuffer>frameBuffer, glm::vec3 clearColor, uint32_t shadowMap, bool isGameCamera = true) {
 		renderer.RenderToFrameBuffer(Pipeline::Default, hierarchy, frameBuffer, (isGameCamera) ? GetGameCameraMatrix() : GetSceneCameraMatrix(), clearColor, shadowMap, isGameCamera);
 	}
@@ -265,10 +261,6 @@ void Scene::Update(const float& delta) {
 
 void Scene::UpdateEditorScene(const float &delta) {
 	internal->UpdateEditorScene(delta);
-}
-
-void Scene::Render(RPG::IRenderer& renderer, uint32_t shadowMap) {
-	internal->Render(renderer, shadowMap);
 }
 
 void Scene::RenderToFrameBuffer(RPG::IRenderer &renderer, std::shared_ptr<RPG::FrameBuffer> frameBuffer, glm::vec3 clearColor, uint32_t shadowMap, bool isGameCamera = true) {

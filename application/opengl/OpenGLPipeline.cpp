@@ -118,33 +118,6 @@ struct OpenGLPipeline::Internal {
 			  offsetTexCoord(3 * sizeof(float)),
 			  offsetNormal(5 * sizeof(float)) {}
 
-	void Render(const RPG::OpenGLAssetManager& assetManager, const std::shared_ptr<RPG::Hierarchy> hierarchy, const glm::mat4 cameraMatrix, const uint32_t shadowMap, const bool isGameCamera) const {
-		/*// Instruct OpenGL to starting using our shader program.
-		glUseProgram(shaderProgramId);
-
-		// Enable the 'a_vertexPosition' attribute.
-		glEnableVertexAttribArray(attributeLocationVertexPosition);
-
-		// Enable the 'a_texCoord' attribute.
-		glEnableVertexAttribArray(attributeLocationTexCoord);
-
-		//Enable the 'a_normal' attribute
-		glEnableVertexAttribArray(attributeLocationNormal);
-
-		//Enable Transparent
-		glEnable(GL_BLEND);
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-		for (auto gameObject : hierarchy->GetHierarchy()) {
-			RenderGameObject(assetManager, gameObject, cameraMatrix, shadowMap, isGameCamera);
-		}
-
-		// Tidy up.
-		glDisableVertexAttribArray(attributeLocationVertexPosition);
-		glDisableVertexAttribArray(attributeLocationTexCoord);
-        glDisableVertexAttribArray(attributeLocationNormal);*/
-	}
-
 	void RenderToFrameBuffer(const RPG::OpenGLAssetManager& assetManager, const std::shared_ptr<RPG::Hierarchy> hierarchy, const std::shared_ptr<RPG::FrameBuffer> frameBuffer, const glm::mat4 cameraMatrix, const glm::vec3 clearColor, const uint32_t shadowMap, const bool isGameCamera) const {
 		/*glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer->GetRenderTextureID());
 		glClearColor(clearColor.x, clearColor.y, clearColor.z, 1.0f);
@@ -914,10 +887,6 @@ struct OpenGLPipeline::Internal {
 };
 
 OpenGLPipeline::OpenGLPipeline(const std::string& shaderName) : internal(RPG::MakeInternalPointer<Internal>(shaderName)) {}
-
-void OpenGLPipeline::Render(const RPG::OpenGLAssetManager& assetManager, const std::shared_ptr<RPG::Hierarchy> hierarchy, const glm::mat4 cameraMatrix, const uint32_t shadowMap) const {
-	internal->Render(assetManager, hierarchy, cameraMatrix, shadowMap, true);
-}
 
 void OpenGLPipeline::RenderToFrameBuffer(const RPG::OpenGLAssetManager &assetManager,
 										 const std::shared_ptr<RPG::Hierarchy> hierarchy,

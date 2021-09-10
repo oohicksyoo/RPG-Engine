@@ -11,10 +11,6 @@ struct OpenGLRenderer::Internal {
 
 	Internal(std::shared_ptr<RPG::OpenGLAssetManager> assetManager) : assetManager(assetManager) {}
 
-	void Render(const RPG::Assets::Pipeline& pipeline, const std::shared_ptr<RPG::Hierarchy> hierarchy, const glm::mat4 cameraMatrix, const uint32_t shadowMap) {
-		assetManager->GetPipeline(pipeline).Render(*assetManager, hierarchy, cameraMatrix, shadowMap);
-	}
-
 	void RenderToFrameBuffer(const RPG::Assets::Pipeline& pipeline, const std::shared_ptr<RPG::Hierarchy> hierarchy, const std::shared_ptr<RPG::FrameBuffer> framebuffer, const glm::mat4 cameraMatrix, const glm::vec3 clearColor, const uint32_t shadowMap, const bool isGameCamera) {
 		assetManager->GetPipeline(pipeline).RenderToFrameBuffer(*assetManager, hierarchy, framebuffer, cameraMatrix, clearColor, shadowMap, isGameCamera);
 	}
@@ -43,10 +39,6 @@ struct OpenGLRenderer::Internal {
 };
 
 OpenGLRenderer::OpenGLRenderer(std::shared_ptr<RPG::OpenGLAssetManager> assetManager) : internal(RPG::MakeInternalPointer<Internal>(assetManager)) {}
-
-void OpenGLRenderer::Render(const RPG::Assets::Pipeline& pipeline, const std::shared_ptr<RPG::Hierarchy> hierarchy, const glm::mat4 cameraMatrix, const uint32_t shadowMap) {
-	internal->Render(pipeline, hierarchy, cameraMatrix, shadowMap);
-}
 
 void OpenGLRenderer::RenderToFrameBuffer(const RPG::Assets::Pipeline &pipeline,
 										 const std::shared_ptr<RPG::Hierarchy> hierarchy,
