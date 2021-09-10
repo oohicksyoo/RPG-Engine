@@ -35,12 +35,15 @@ namespace {
 	RPG::OpenGLMesh CreateFullScreenQuad() {
         std::vector<RPG::Vertex> vertex;
 
-        vertex.push_back(RPG::Vertex{{1.0, 1.0, 0.0}, {0.0, 1.0}, {0.0, 0.0, 0.0}});
-        vertex.push_back(RPG::Vertex{{1.0, -1.0, 0.0}, {0.0, 0.0}, {0.0, 0.0, 0.0}});
-        vertex.push_back(RPG::Vertex{{-1.0, -1.0, 0.0}, {1.0, 0.0}, {0.0, 0.0, 0.0}});
-        vertex.push_back(RPG::Vertex{{-1.0, 1.0, 0.0}, {0.0, 1.0}, {0.0, 0.0, 0.0}});
+        vertex.push_back(RPG::Vertex{{-1.0, 1.0, 0.0}, {0.0, 1.0}});
+        vertex.push_back(RPG::Vertex{{-1.0, -1.0, 0.0}, {0.0, 0.0}});
+        vertex.push_back(RPG::Vertex{{1.0, -1.0, 0.0}, {1.0, 0.0}});
 
-        return RPG::OpenGLMesh(std::make_unique<RPG::Mesh>(RPG::Mesh(vertex, {0, 1, 3, 1, 2, 3})));
+        vertex.push_back(RPG::Vertex{{-1.0, 1.0, 0.0}, {0.0, 1.0}});
+        vertex.push_back(RPG::Vertex{{1.0, -1.0, 0.0}, {1.0, 0.0}});
+        vertex.push_back(RPG::Vertex{{1.0, 1.0, 0.0}, {1.0, 1.0}});
+
+        return RPG::OpenGLMesh(std::make_unique<RPG::Mesh>(RPG::Mesh(vertex, {0, 1, 2, 3, 4, 5})));
 	}
 }
 
