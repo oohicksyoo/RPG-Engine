@@ -31,6 +31,17 @@ namespace {
 
 		return RPG::OpenGLMesh(std::make_unique<RPG::Mesh>(RPG::Mesh(lines, {})));
 	}
+
+	RPG::OpenGLMesh CreateFullScreenQuad() {
+        std::vector<RPG::Vertex> vertex;
+
+        vertex.push_back(RPG::Vertex{{1.0, 1.0, 0.0}, {0.0, 1.0}, {0.0, 0.0, 0.0}});
+        vertex.push_back(RPG::Vertex{{1.0, -1.0, 0.0}, {0.0, 0.0}, {0.0, 0.0, 0.0}});
+        vertex.push_back(RPG::Vertex{{-1.0, -1.0, 0.0}, {1.0, 0.0}, {0.0, 0.0, 0.0}});
+        vertex.push_back(RPG::Vertex{{-1.0, 1.0, 0.0}, {0.0, 1.0}, {0.0, 0.0, 0.0}});
+
+        return RPG::OpenGLMesh(std::make_unique<RPG::Mesh>(RPG::Mesh(vertex, {0, 1, 3, 1, 2, 3})));
+	}
 }
 
 struct OpenGLAssetManager::Internal {
@@ -42,14 +53,13 @@ struct OpenGLAssetManager::Internal {
 
     #ifdef RPG_EDITOR
         RPG::OpenGLMesh lines;
+
+        Internal() : lines(::CreateSceneGridLines())
+    #else
+        RPG::OpenGLMesh fullscreenQuad;
+
+        Internal() : fullscreenQuad(::CreateFullScreenQuad())
     #endif
-
-	Internal()
-
-    #ifdef RPG_EDITOR
-	    : lines(::CreateSceneGridLines())
-    #endif
-
 	{
 		RPG::Content::GetInstance().OnLoadedAsset<RPG::Mesh>([this](std::string path, std::shared_ptr<RPG::Mesh> mesh) {
 			if (meshCache.count(path) == 0) {
@@ -114,6 +124,10 @@ const RPG::OpenGLTexture& OpenGLAssetManager::GetTexture(std::string path) const
 #ifdef RPG_EDITOR
 const RPG::OpenGLMesh& OpenGLAssetManager::GetSceneLines() const {
 	return internal->lines;
+}
+#else
+const RPG::OpenGLMesh& OpenGLAssetManager::GetFullscreenQuad() const {
+    return internal->fullscreenQuad;
 }
 #endif
 

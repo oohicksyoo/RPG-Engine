@@ -22,6 +22,8 @@ namespace RPG {
 			const RPG::OpenGLTexture& GetTexture(std::string path) const;
             #ifdef RPG_EDITOR
 			    const RPG::OpenGLMesh& GetSceneLines() const;
+            #else
+                const RPG::OpenGLMesh& GetFullscreenQuad() const;
             #endif
 			const std::shared_ptr<RPG::Material> GetMaterial(std::string path) const;
 

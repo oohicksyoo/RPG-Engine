@@ -946,12 +946,17 @@ struct OpenGLPipeline::Internal {
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
     }
 
-    void DisplayFrameBuffer(const std::shared_ptr<RPG::FrameBuffer> frameBuffer,
-                       const uint32_t quadVAO) const {
+    void DisplayFrameBuffer(const RPG::OpenGLAssetManager& assetManager, const std::shared_ptr<RPG::FrameBuffer> frameBuffer) const {
+        glClearColor(0.0f, 1.0f, 0.0f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT);
         glUseProgram(shaderProgramId);
-        glBindVertexArray(quadVAO);
-        glBindTexture(GL_TEXTURE_2D, frameBuffer->GetRenderTextureID());
-        glDrawArrays(GL_TRIANGLES, 0 , 6);
+
+        const RPG::OpenGLMesh &mesh = assetManager.GetFullscreenQuad();
+        //glActiveTexture(GL_TEXTURE0);
+        //glBindTexture(GL_TEXTURE_2D, frameBuffer->GetRenderTextureID());
+
+        glBindVertexArray(mesh.GetVertexBufferId());
+        glDrawElements(GL_TRIANGLES, mesh.GetNumIndices(), GL_UNSIGNED_INT, 0);
 	}
 
 	void DeleteFrameBuffer(const std::shared_ptr<RPG::FrameBuffer> framebuffer) const {
@@ -1004,7 +1009,6 @@ void OpenGLPipeline::RenderToFrameBuffer(const RPG::OpenGLAssetManager& assetMan
     internal->RenderToFrameBuffer(assetManager, framebuffer, gameObjects, cameraMatrix);
 }
 
-void OpenGLPipeline::DisplayFrameBuffer(const std::shared_ptr<RPG::FrameBuffer> frameBuffer,
-                                        const uint32_t quadVAO) const {
-    internal->DisplayFrameBuffer(frameBuffer, quadVAO);
+void OpenGLPipeline::DisplayFrameBuffer(const RPG::OpenGLAssetManager& assetManager, const std::shared_ptr<RPG::FrameBuffer> frameBuffer) const {
+    internal->DisplayFrameBuffer(assetManager, frameBuffer);
 }

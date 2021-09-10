@@ -183,6 +183,7 @@ namespace {
         glm::vec2 size = RPG::ApplicationStats::GetInstance().GetWindowSize();
 	    auto scene = std::make_unique<RPG::Scene>(RPG::Scene({static_cast<uint32_t>(size.x), static_cast<uint32_t>(size.y)}));
 
+	    //TODO: Set mesh to be a quad instead
         auto cube = std::make_shared<RPG::GameObject>(RPG::GameObject("Cube"));
         cube->AddComponent(std::make_shared<RPG::MeshComponent>(RPG::MeshComponent("assets/models/1_Meter_Cube.obj", "assets/materials/default.mat")));
 
@@ -205,30 +206,6 @@ namespace {
 
         return go;
     }
-
-    void CreateFullscreenQuad(uint32_t &quadVAO, uint32_t &quadVBO) {
-        float quadVertices[] = { // vertex attributes for a quad that fills the entire screen in Normalized Device Coordinates.
-                // positions   // texCoords
-                -1.0f,  1.0f,  0.0f, 1.0f,
-                -1.0f, -1.0f,  0.0f, 0.0f,
-                1.0f, -1.0f,  1.0f, 0.0f,
-
-                -1.0f,  1.0f,  0.0f, 1.0f,
-                1.0f, -1.0f,  1.0f, 0.0f,
-                1.0f,  1.0f,  1.0f, 1.0f
-        };
-
-        //unsigned int quadVAO, quadVBO;
-        glGenVertexArrays(1, &quadVAO);
-        glGenBuffers(1, &quadVBO);
-        glBindVertexArray(quadVAO);
-        glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
-        glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW);
-        glEnableVertexAttribArray(0);
-        glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
-        glEnableVertexAttribArray(1);
-        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
-	}
 }
 
 struct OpenGLApplication::Internal {
@@ -253,7 +230,6 @@ struct OpenGLApplication::Internal {
 		std::shared_ptr<GameObject> sceneLinesGameObject;
 		std::shared_ptr<RPG::Material> sceneLinesMaterial;
     #else
-        uint32_t quadVAO, quadVBO;
         std::shared_ptr<RPG::FrameBuffer> framebuffer;
     #endif
 
@@ -276,10 +252,7 @@ struct OpenGLApplication::Internal {
 					 context(::CreateContext(window.GetWindow())),
 					 assetManager(::CreateAssetManager()),
 					 renderer(::CreateRenderer(assetManager)),
-                     framebuffer(::CreateFrameBuffer(glm::vec2{1280, 720})) {
-            CreateFullscreenQuad(quadVAO, quadVBO);
-            RPG::Log("Quad", std::to_string(quadVAO));
-		}
+                     framebuffer(::CreateFrameBuffer(glm::vec2{1280, 720})) {}
 	#endif
 
 	void Render() {
@@ -335,20 +308,17 @@ struct OpenGLApplication::Internal {
 			editorManager.BuildGUI(framebuffer, gameFramebuffer, GetScene()->GetHierarchy());
 			editorManager.Render();
         #else
-			//Rendering for Release
-            glClearColor(1.0f, 0.0f, 0.0f, 1.0f);
-            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
             //Organize Scene for Rendering
             BuildRenderOrder();
             GetScene()->ClearFrameBufferToColor(renderer, framebuffer, {0.0f, 0.0f, 0.0f});
 
             //Render through scene once for Scene and Once for Game view
             for (auto map : mappedRenderPass) {
-                GetScene()->RenderToFrameBuffer(renderer, map.first, framebuffer, map.second, false);
+                //RPG::Log("Rendering: " + RPG::Assets::ResolvePipelinePath(map.first), std::to_string(map.second.size()));
+                GetScene()->RenderToFrameBuffer(renderer, map.first, framebuffer, map.second, true);
             }
 
-           renderer.DisplayFrameBuffer(RPG::Assets::Pipeline::DefaultReleaseFrameBuffer, framebuffer, quadVAO);
+            renderer.DisplayFrameBuffer(RPG::Assets::Pipeline::DefaultReleaseFrameBuffer, framebuffer);
 		#endif
 
 		SDL_GL_SwapWindow(window.GetWindow());
@@ -389,6 +359,8 @@ struct OpenGLApplication::Internal {
 			::ResizeFrameBuffer(framebuffer, RPG::ApplicationStats::GetInstance().GetWindowSize());
 			::ResizeFrameBuffer(gameFramebuffer, RPG::ApplicationStats::GetInstance().GetWindowSize());
 			hasRanPreviewFrame = false;
+        #else
+			::ResizeFrameBuffer(framebuffer, RPG::ApplicationStats::GetInstance().GetWindowSize());
 		#endif
 	}
 
@@ -474,8 +446,6 @@ struct OpenGLApplication::Internal {
             renderer.DeleteFrameBuffer(RPG::Assets::Pipeline::Default, depthBuffer);
             renderer.DeleteFrameBuffer(RPG::Assets::Pipeline::Default, materialMakerBuffer);
         #else
-            glDeleteVertexArrays(1, &quadVAO);
-            glDeleteBuffers(1, &quadVBO);
             renderer.DeleteFrameBuffer(RPG::Assets::Pipeline::Default, framebuffer);
         #endif
 

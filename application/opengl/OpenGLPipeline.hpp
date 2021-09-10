@@ -25,7 +25,7 @@ namespace RPG {
 
 			void ClearFrameBufferToColor(const std::shared_ptr<RPG::FrameBuffer> framebuffer, const glm::vec3 clearColor) const;
 			void RenderToFrameBuffer(const RPG::OpenGLAssetManager& assetManager, const std::shared_ptr<RPG::FrameBuffer> framebuffer, const std::vector<RPG::GameObjectMaterialGroup> gameObjects, const glm::mat4 cameraMatrix) const;
-            void DisplayFrameBuffer(const std::shared_ptr<RPG::FrameBuffer> frameBuffer, const uint32_t quadVAO) const;
+            void DisplayFrameBuffer(const RPG::OpenGLAssetManager& assetManager, const std::shared_ptr<RPG::FrameBuffer> frameBuffer) const;
 
 		private:
 			struct Internal;

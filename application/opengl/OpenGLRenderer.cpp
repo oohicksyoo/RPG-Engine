@@ -41,9 +41,8 @@ struct OpenGLRenderer::Internal {
         assetManager->GetPipeline(pipeline).RenderToFrameBuffer(*assetManager, framebuffer, gameObjects, cameraMatrix);
     }
 
-    void DisplayFrameBuffer(const RPG::Assets::Pipeline &pipeline,
-                            const std::shared_ptr<RPG::FrameBuffer> frameBuffer, const uint32_t quadVAO) {
-	    assetManager->GetPipeline(pipeline).DisplayFrameBuffer(frameBuffer, quadVAO);
+    void DisplayFrameBuffer(const RPG::Assets::Pipeline &pipeline, const std::shared_ptr<RPG::FrameBuffer> frameBuffer) {
+	    assetManager->GetPipeline(pipeline).DisplayFrameBuffer(*assetManager, frameBuffer);
 	}
 };
 
@@ -85,7 +84,6 @@ void OpenGLRenderer::RenderToFrameBuffer(const RPG::Assets::Pipeline &pipeline, 
     internal->RenderToFrameBuffer(pipeline, frameBuffer, gameObjects, cameraMatrix);
 }
 
-void OpenGLRenderer::DisplayFrameBuffer(const RPG::Assets::Pipeline &pipeline,
-                                        const std::shared_ptr<RPG::FrameBuffer> frameBuffer, const uint32_t quadVAO) {
-    internal->DisplayFrameBuffer(pipeline, frameBuffer, quadVAO);
+void OpenGLRenderer::DisplayFrameBuffer(const RPG::Assets::Pipeline &pipeline, const std::shared_ptr<RPG::FrameBuffer> frameBuffer) {
+    internal->DisplayFrameBuffer(pipeline, frameBuffer);
 }
