@@ -778,7 +778,6 @@ struct OpenGLPipeline::Internal {
         glBindFramebuffer(GL_FRAMEBUFFER, framebuffer->GetRenderTextureID());
         glClearColor(clearColor.x, clearColor.y, clearColor.z, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // we're not using the stencil buffer now
-        glEnable(GL_DEPTH_TEST);
 
         //Tidy Up
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -798,6 +797,7 @@ struct OpenGLPipeline::Internal {
 	        return;
 	    }
 
+        glEnable(GL_DEPTH_TEST);
         glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer->GetRenderTextureID());
 
         //Rendering all objects using the shader
@@ -890,17 +890,19 @@ struct OpenGLPipeline::Internal {
         }
 
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        glDisable(GL_DEPTH_TEST);
     }
 
     void DisplayFrameBuffer(const RPG::OpenGLAssetManager& assetManager, const std::shared_ptr<RPG::FrameBuffer> frameBuffer) const {
         #ifndef RPG_EDITOR
+	    RPG::Log("Rendering " + shaderName, "Display framebuffer to user");
 	    glClearColor(0.0f, 1.0f, 0.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
         glUseProgram(shaderProgramId);
 
         const RPG::OpenGLMesh &mesh = assetManager.GetFullscreenQuad();
-        //glActiveTexture(GL_TEXTURE0);
-        //glBindTexture(GL_TEXTURE_2D, frameBuffer->GetRenderTextureID());
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, frameBuffer->GetRenderTextureID());
 
         glBindVertexArray(mesh.GetVertexArrayObject());
         glDrawElements(GL_TRIANGLES, mesh.GetNumIndices(), GL_UNSIGNED_INT, reinterpret_cast<const GLvoid *>(0));
