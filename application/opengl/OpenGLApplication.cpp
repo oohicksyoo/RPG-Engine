@@ -118,6 +118,12 @@ namespace {
 			return framebuffer;
 		}
 
+		void DeleteFrameBuffer(std::shared_ptr<RPG::FrameBuffer> &framebuffer) {
+            glDeleteBuffers(1, &framebuffer->GetBufferID());
+            glDeleteTextures(1, &framebuffer->GetRenderTextureID());
+            glDeleteRenderbuffers(1, &framebuffer->GetDepthStencilBufferID());
+	    }
+
         std::shared_ptr<RPG::FrameBuffer> CreateDepthBuffer(glm::vec2 size) {
 	        uint32_t depthMapFBO;
 	        glGenFramebuffers(1, &depthMapFBO);
@@ -441,12 +447,12 @@ struct OpenGLApplication::Internal {
 
 		#ifdef RPG_EDITOR
 		    //TODO: Convert this to use ::DeleteFrameBuffer(frameBuffer) instead of feeding it through a pipeline for no reason
-			renderer.DeleteFrameBuffer(RPG::Assets::Pipeline::Default, framebuffer);
-            renderer.DeleteFrameBuffer(RPG::Assets::Pipeline::Default, gameFramebuffer);
-            renderer.DeleteFrameBuffer(RPG::Assets::Pipeline::Default, depthBuffer);
-            renderer.DeleteFrameBuffer(RPG::Assets::Pipeline::Default, materialMakerBuffer);
+		    ::DeleteFrameBuffer(framebuffer);
+            ::DeleteFrameBuffer(gameFramebuffer);
+            ::DeleteFrameBuffer(depthBuffer);
+            ::DeleteFrameBuffer(materialMakerBuffer);
         #else
-            renderer.DeleteFrameBuffer(RPG::Assets::Pipeline::Default, framebuffer);
+            ::DeleteFrameBuffer(framebuffer);
         #endif
 
         SDL_GL_DeleteContext(context);

@@ -27,10 +27,6 @@ struct OpenGLRenderer::Internal {
         assetManager->GetPipeline(pipeline).RenderToDepthBuffer(*assetManager, hierarchy, framebuffer);
 	}
 
-	void DeleteFrameBuffer(const RPG::Assets::Pipeline& pipeline, const std::shared_ptr<RPG::FrameBuffer> framebuffer) {
-		assetManager->GetPipeline(pipeline).DeleteFrameBuffer(framebuffer);
-	}
-
     void ClearFrameBufferToColor(const RPG::Assets::Pipeline &pipeline,
                                  const std::shared_ptr<RPG::FrameBuffer> framebuffer, const glm::vec3 clearColor) {
         assetManager->GetPipeline(pipeline).ClearFrameBufferToColor(framebuffer, clearColor);
@@ -68,10 +64,6 @@ void OpenGLRenderer::RenderLinesToFrameBuffer(const RPG::Assets::Pipeline& pipel
 
 void OpenGLRenderer::RenderToDepthBuffer(const RPG::Assets::Pipeline &pipeline, const std::shared_ptr<RPG::Hierarchy> hierarchy, const std::shared_ptr<RPG::FrameBuffer> framebuffer) {
     internal->RenderToDepthBuffer(pipeline, hierarchy, framebuffer);
-}
-
-void OpenGLRenderer::DeleteFrameBuffer(const RPG::Assets::Pipeline &pipeline, const std::shared_ptr<RPG::FrameBuffer> framebuffer) {
-	internal->DeleteFrameBuffer(pipeline, framebuffer);
 }
 
 void OpenGLRenderer::ClearFrameBufferToColor(const RPG::Assets::Pipeline &pipeline,

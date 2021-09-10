@@ -184,10 +184,6 @@ void VulkanContext::RenderToDepthBuffer(const RPG::Assets::Pipeline &pipeline,
     //TODO: Vulkan framebuffer for depth
 }
 
-void VulkanContext::DeleteFrameBuffer(const RPG::Assets::Pipeline &pipeline, const std::shared_ptr<RPG::FrameBuffer> framebuffer) {
-	//TODO: Clean up framebuffer
-}
-
 void VulkanContext::RenderEnd() {
 	internal->RenderEnd();
 }

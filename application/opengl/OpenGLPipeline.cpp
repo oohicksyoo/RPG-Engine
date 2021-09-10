@@ -961,12 +961,6 @@ struct OpenGLPipeline::Internal {
         #endif
 	}
 
-	void DeleteFrameBuffer(const std::shared_ptr<RPG::FrameBuffer> framebuffer) const {
-		glDeleteBuffers(1, &framebuffer->GetBufferID());
-		glDeleteTextures(1, &framebuffer->GetRenderTextureID());
-		glDeleteRenderbuffers(1, &framebuffer->GetDepthStencilBufferID());
-	}
-
 	~Internal() {
 		glDeleteProgram(shaderProgramId);
 	}
@@ -996,10 +990,6 @@ void OpenGLPipeline::RenderLinesToFrameBuffer(const RPG::OpenGLAssetManager &ass
 
 void OpenGLPipeline::RenderToDepthBuffer(const RPG::OpenGLAssetManager &assetManager, const std::shared_ptr<RPG::Hierarchy> hierarchy, const std::shared_ptr<RPG::FrameBuffer> frameBuffer) const {
     internal->RenderToDepthBuffer(assetManager, hierarchy, frameBuffer);
-}
-
-void OpenGLPipeline::DeleteFrameBuffer(const std::shared_ptr<RPG::FrameBuffer> framebuffer) const {
-	internal->DeleteFrameBuffer(framebuffer);
 }
 
 void OpenGLPipeline::ClearFrameBufferToColor(const std::shared_ptr<RPG::FrameBuffer> framebuffer, const glm::vec3 clearColor) const {
