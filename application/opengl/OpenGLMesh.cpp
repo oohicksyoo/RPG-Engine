@@ -8,68 +8,69 @@
 using RPG::OpenGLMesh;
 
 namespace {
-	GLuint CreateVertexBuffer(std::shared_ptr<RPG::Mesh> mesh) {
-		std::vector<float> bufferData;
+    std::vector<float> CreateBufferData(std::shared_ptr<RPG::Mesh> mesh) {
+        std::vector<float> bufferData;
 
-		for (const auto& vertex : mesh->GetVertices()) {
-			// Position
-			bufferData.push_back(vertex.position.x);
-			bufferData.push_back(vertex.position.y);
-			bufferData.push_back(vertex.position.z);
+        for (const auto& vertex : mesh->GetVertices()) {
+            // Position
+            bufferData.push_back(vertex.position.x);
+            bufferData.push_back(vertex.position.y);
+            bufferData.push_back(vertex.position.z);
 
-			// Texture coordinate
-			bufferData.push_back(vertex.texCoord.x);
-			bufferData.push_back(vertex.texCoord.y);
+            // Texture coordinate
+            bufferData.push_back(vertex.texCoord.x);
+            bufferData.push_back(vertex.texCoord.y);
 
-			//Normal
+            //Normal
             bufferData.push_back(vertex.normal.x);
             bufferData.push_back(vertex.normal.y);
             bufferData.push_back(vertex.normal.z);
-		}
+        }
 
-		GLuint bufferId;
-		glGenBuffers(1, &bufferId);
-		glBindBuffer(GL_ARRAY_BUFFER, bufferId);
-		glBufferData(GL_ARRAY_BUFFER, bufferData.size() * sizeof(float), bufferData.data(), GL_STATIC_DRAW);
-
-		return bufferId;
-	}
-
-	GLuint CreateIndexBuffer(std::shared_ptr<RPG::Mesh> mesh) {
-		GLuint bufferId;
-		glGenBuffers(1, &bufferId);
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferId);
-		glBufferData(GL_ELEMENT_ARRAY_BUFFER, mesh->GetIndices().size() * sizeof(uint32_t), mesh->GetIndices().data(), GL_STATIC_DRAW);
-
-		return bufferId;
+        return bufferData;
 	}
 }
 
 struct OpenGLMesh::Internal {
-	const GLuint bufferIdVertices;
-	const GLuint bufferIdIndices;
-	const uint32_t numIndices;
+    GLuint vao, vbo, ebo;
+    //TODO: In future make dynamic stride based on provide data to the RPG::Mesh
+    GLsizei stride = 8 * sizeof(float);
+    GLuint indiceSize;
 
-	Internal(std::shared_ptr<RPG::Mesh> mesh) : bufferIdVertices(::CreateVertexBuffer(mesh)),
-									  bufferIdIndices(::CreateIndexBuffer(mesh)),
-									  numIndices(static_cast<uint32_t>(mesh->GetIndices().size())) {}
+	Internal(std::shared_ptr<RPG::Mesh> mesh) {
+        std::vector<float> bufferData = ::CreateBufferData(mesh);
+        indiceSize = mesh->GetIndices().size();
+	    glGenVertexArrays(1, &vao);
+	    glGenBuffers(1, &vbo);
+        glGenBuffers(1, &ebo);
+        glBindVertexArray(vao);
+        glBindBuffer(GL_ARRAY_BUFFER, vbo);
+        glBufferData(GL_ARRAY_BUFFER, bufferData.size() * sizeof(float), bufferData.data(), GL_STATIC_DRAW);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, indiceSize * sizeof(uint32_t), mesh->GetIndices().data(), GL_STATIC_DRAW);
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, stride, (void*)0);
+        glEnableVertexAttribArray(0);
+        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, stride, reinterpret_cast<const GLvoid*>(3 * sizeof(float)));
+        glEnableVertexAttribArray(1);
+        glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, stride, reinterpret_cast<const GLvoid*>(5 * sizeof(float)));
+        glEnableVertexAttribArray(2);
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
+        glBindVertexArray(0);
+	}
 
 	~Internal() {
-		glDeleteBuffers(1, &bufferIdVertices);
-		glDeleteBuffers(1, &bufferIdIndices);
+	    glDeleteVertexArrays(1, &vao);
+		glDeleteBuffers(1, &vbo);
+		glDeleteBuffers(1, &ebo);
 	}
 };
 
 OpenGLMesh::OpenGLMesh(std::shared_ptr<RPG::Mesh> mesh) : internal(RPG::MakeInternalPointer<Internal>(mesh)) {}
 
-const GLuint& OpenGLMesh::GetVertexBufferId() const {
-	return internal->bufferIdVertices;
-}
-
-const GLuint& OpenGLMesh::GetIndexBufferId() const {
-	return internal->bufferIdIndices;
+const GLuint& OpenGLMesh::GetVertexArrayObject() const {
+	return internal->vao;
 }
 
 const uint32_t& OpenGLMesh::GetNumIndices() const {
-	return internal->numIndices;
+	return internal->indiceSize;
 }

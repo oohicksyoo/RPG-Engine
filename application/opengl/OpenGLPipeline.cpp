@@ -119,7 +119,7 @@ struct OpenGLPipeline::Internal {
 			  offsetNormal(5 * sizeof(float)) {}
 
 	void Render(const RPG::OpenGLAssetManager& assetManager, const std::shared_ptr<RPG::Hierarchy> hierarchy, const glm::mat4 cameraMatrix, const uint32_t shadowMap, const bool isGameCamera) const {
-		// Instruct OpenGL to starting using our shader program.
+		/*// Instruct OpenGL to starting using our shader program.
 		glUseProgram(shaderProgramId);
 
 		// Enable the 'a_vertexPosition' attribute.
@@ -142,11 +142,11 @@ struct OpenGLPipeline::Internal {
 		// Tidy up.
 		glDisableVertexAttribArray(attributeLocationVertexPosition);
 		glDisableVertexAttribArray(attributeLocationTexCoord);
-        glDisableVertexAttribArray(attributeLocationNormal);
+        glDisableVertexAttribArray(attributeLocationNormal);*/
 	}
 
 	void RenderToFrameBuffer(const RPG::OpenGLAssetManager& assetManager, const std::shared_ptr<RPG::Hierarchy> hierarchy, const std::shared_ptr<RPG::FrameBuffer> frameBuffer, const glm::mat4 cameraMatrix, const glm::vec3 clearColor, const uint32_t shadowMap, const bool isGameCamera) const {
-		glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer->GetRenderTextureID());
+		/*glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer->GetRenderTextureID());
 		glClearColor(clearColor.x, clearColor.y, clearColor.z, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // we're not using the stencil buffer now
 		glEnable(GL_DEPTH_TEST);
@@ -154,11 +154,11 @@ struct OpenGLPipeline::Internal {
 		Render(assetManager, hierarchy, cameraMatrix, shadowMap, isGameCamera);
 
 		//Tidy Up
-		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);*/
 	}
 
 	void RenderToDepthBuffer(const RPG::OpenGLAssetManager& assetManager, const std::shared_ptr<RPG::Hierarchy> hierarchy, const std::shared_ptr<RPG::FrameBuffer> frameBuffer) const {
-        //TODO: Move location and pre calc once
+        /*//TODO: Move location and pre calc once
         float near_plane = 1.0f, far_plane = 7.5f;
         glm::vec3 lightPos(-2.0f, 4.0f, -1.0f);
         glm::mat4 lightProjection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, near_plane, far_plane);
@@ -177,11 +177,11 @@ struct OpenGLPipeline::Internal {
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
         glm::vec2 size = RPG::ApplicationStats::GetInstance().GetWindowSize();
-        glViewport(0, 0, size.x, size.y);
+        glViewport(0, 0, size.x, size.y);*/
 	}
 
 	void RenderSceneToDepthBuffer(const RPG::OpenGLAssetManager& assetManager, const std::shared_ptr<RPG::Hierarchy> hierarchy, const glm::mat4 lightMatrix) const {
-        // Instruct OpenGL to starting using our shader program.
+        /*// Instruct OpenGL to starting using our shader program.
         glUseProgram(shaderProgramId);
 
         // Enable the 'a_vertexPosition' attribute.
@@ -192,11 +192,11 @@ struct OpenGLPipeline::Internal {
         }
 
         // Tidy up.
-        glDisableVertexAttribArray(attributeLocationVertexPosition);
+        glDisableVertexAttribArray(attributeLocationVertexPosition);*/
 	}
 
 	void RenderGameObjectToDepthBuffer(const RPG::OpenGLAssetManager& assetManager, std::shared_ptr<RPG::GameObject> gameObject, const glm::mat4 lightMatrix) const {
-        //Render Children First
+        /*//Render Children First
         for (auto childGameObject : gameObject->GetChildren()) {
             RenderGameObjectToDepthBuffer(assetManager, childGameObject, lightMatrix);
         }
@@ -244,11 +244,11 @@ struct OpenGLPipeline::Internal {
                 mesh.GetNumIndices(),
                 GL_UNSIGNED_INT,
                 reinterpret_cast<const GLvoid *>(0)
-        );
+        );*/
 	}
 
 	void RenderLinesToFrameBuffer(const RPG::OpenGLAssetManager &assetManager, const std::shared_ptr<RPG::FrameBuffer> frameBuffer, const glm::mat4 cameraMatrix) const {
-        #ifdef RPG_EDITOR
+        /*#ifdef RPG_EDITOR
 	    glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer->GetRenderTextureID());
 		glEnable(GL_DEPTH_TEST);
 		glLineWidth(3);
@@ -300,11 +300,11 @@ struct OpenGLPipeline::Internal {
 
 		//Tidy Up
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-        #endif
+        #endif*/
 	}
 
 	void RenderGameObject(const RPG::OpenGLAssetManager& assetManager, std::shared_ptr<RPG::GameObject> gameObject, const glm::mat4 cameraMatrix, const uint32_t shadowMap, const bool isGameCamera) const {
-		//Render Children First
+		/*//Render Children First
 		for (auto childGameObject : gameObject->GetChildren()) {
 			RenderGameObject(assetManager, childGameObject, cameraMatrix, shadowMap, isGameCamera);
 		}
@@ -712,7 +712,7 @@ struct OpenGLPipeline::Internal {
             glUniform1f(glGetUniformLocation(shaderProgramId, ("pointLights[" + std::to_string(i) + "].constant").c_str()), 1.0);
             glUniform1f(glGetUniformLocation(shaderProgramId, ("pointLights[" + std::to_string(i) + "].linear").c_str()), 0.09);
             glUniform1f(glGetUniformLocation(shaderProgramId, ("pointLights[" + std::to_string(i) + "].quadratic").c_str()), 0.032);
-        }*/
+        }*\/
 
         glUniform3f(glGetUniformLocation(shaderProgramId, "viewPosition"), cameraPosition.x, cameraPosition.y, cameraPosition.z);
 
@@ -770,7 +770,7 @@ struct OpenGLPipeline::Internal {
 				mesh.GetNumIndices(),
 				GL_UNSIGNED_INT,
 				reinterpret_cast<const GLvoid *>(0)
-		);
+		);*/
 	}
 
 	//Clears framebuffer to a solid colour
@@ -802,17 +802,7 @@ struct OpenGLPipeline::Internal {
 
         //Rendering all objects using the shader
         {
-            // Instruct OpenGL to starting using our shader program.
             glUseProgram(shaderProgramId);
-
-            // Enable the 'a_vertexPosition' attribute.
-            glEnableVertexAttribArray(attributeLocationVertexPosition);
-
-            // Enable the 'a_texCoord' attribute.
-            glEnableVertexAttribArray(attributeLocationTexCoord);
-
-            //Enable the 'a_normal' attribute
-            glEnableVertexAttribArray(attributeLocationNormal);
 
             //Enable Transparent
             //TODO: 4000 should come from some sort of Enum value for Transparent render queue materials
@@ -889,20 +879,7 @@ struct OpenGLPipeline::Internal {
                         }
                     }
 
-                    // Bind the vertex and index buffers.
-                    glBindBuffer(GL_ARRAY_BUFFER, mesh.GetVertexBufferId());
-                    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.GetIndexBufferId());
-
-                    // Configure the 'a_vertexPosition' attribute.
-                    glVertexAttribPointer( attributeLocationVertexPosition, 3, GL_FLOAT, GL_FALSE, stride, reinterpret_cast<const GLvoid *>(offsetPosition));
-
-                    // Configure the 'a_texCoord' attribute.
-                    glVertexAttribPointer(attributeLocationTexCoord, 2, GL_FLOAT, GL_FALSE, stride, reinterpret_cast<const GLvoid *>(offsetTexCoord));
-
-                    // Configure the 'a_normal' attribute.
-                    glVertexAttribPointer( attributeLocationNormal, 3, GL_FLOAT, GL_FALSE, stride, reinterpret_cast<const GLvoid *>(offsetNormal));
-
-                    // Execute the draw command - with how many indices to iterate.
+                    glBindVertexArray(mesh.GetVertexArrayObject());
                     glDrawElements( GL_TRIANGLES, mesh.GetNumIndices(), GL_UNSIGNED_INT, reinterpret_cast<const GLvoid *>(0));
                 } else {
                     RPG::Log("Render", "Cant render " + gameObject->GetName());
@@ -910,11 +887,6 @@ struct OpenGLPipeline::Internal {
             }
 
             glDisable(GL_BLEND);
-
-            // Tidy up.
-            glDisableVertexAttribArray(attributeLocationVertexPosition);
-            glDisableVertexAttribArray(attributeLocationTexCoord);
-            glDisableVertexAttribArray(attributeLocationNormal);
         }
 
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -930,8 +902,8 @@ struct OpenGLPipeline::Internal {
         //glActiveTexture(GL_TEXTURE0);
         //glBindTexture(GL_TEXTURE_2D, frameBuffer->GetRenderTextureID());
 
-        glBindVertexArray(mesh.GetVertexBufferId());
-        glDrawElements(GL_TRIANGLES, mesh.GetNumIndices(), GL_UNSIGNED_INT, 0);
+        glBindVertexArray(mesh.GetVertexArrayObject());
+        glDrawElements(GL_TRIANGLES, mesh.GetNumIndices(), GL_UNSIGNED_INT, reinterpret_cast<const GLvoid *>(0));
         #endif
 	}
 

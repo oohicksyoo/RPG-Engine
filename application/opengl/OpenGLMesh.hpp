@@ -13,8 +13,7 @@ namespace RPG {
 	struct OpenGLMesh {
 		public:
 			OpenGLMesh(std::shared_ptr<RPG::Mesh> mesh);
-			const GLuint& GetVertexBufferId() const;
-			const GLuint& GetIndexBufferId() const;
+			const GLuint& GetVertexArrayObject() const;
 			const uint32_t& GetNumIndices() const;
 
 		private:
