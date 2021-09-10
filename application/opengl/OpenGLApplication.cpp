@@ -106,7 +106,6 @@ namespace {
 			//Setup Framebuffer
 			glBindFramebuffer(GL_FRAMEBUFFER, bufferID);
 			glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, renderTextureID, 0);
-			glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 			std::shared_ptr<RPG::FrameBuffer> framebuffer = std::make_unique<RPG::FrameBuffer>(RPG::FrameBuffer{bufferID, renderTextureID, depthStencilBufferID});
 			ResizeFrameBuffer(framebuffer, size);
@@ -114,6 +113,7 @@ namespace {
 			if(glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE) {
 				RPG::Log("Framebuffer", "Framebuffer was created and completed");
 			}
+            glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 			return framebuffer;
 		}
