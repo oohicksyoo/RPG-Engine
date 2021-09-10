@@ -785,8 +785,7 @@ struct OpenGLPipeline::Internal {
     }
 
     //Renders a group of GameObjects with this pipeline/shader type
-    void RenderToFrameBuffer(const RPG::OpenGLAssetManager& assetManager, const std::shared_ptr<RPG::FrameBuffer> frameBuffer,
-                             const std::vector<RPG::GameObjectMaterialGroup> gameObjects, const glm::mat4 cameraMatrix) const {
+    void RenderToFrameBuffer(const RPG::OpenGLAssetManager& assetManager, const std::shared_ptr<RPG::FrameBuffer> frameBuffer, const std::vector<RPG::GameObjectMaterialGroup> gameObjects, const glm::mat4 cameraMatrix) const {
 
 	    //Catch to render scene lines
 	    if (shaderName == Assets::ResolvePipelinePath(Assets::Pipeline::SceneLines)) {
@@ -895,41 +894,16 @@ struct OpenGLPipeline::Internal {
                     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.GetIndexBufferId());
 
                     // Configure the 'a_vertexPosition' attribute.
-                    glVertexAttribPointer(
-                            attributeLocationVertexPosition,
-                            3,
-                            GL_FLOAT,
-                            GL_FALSE,
-                            stride,
-                            reinterpret_cast<const GLvoid *>(offsetPosition)
-                    );
+                    glVertexAttribPointer( attributeLocationVertexPosition, 3, GL_FLOAT, GL_FALSE, stride, reinterpret_cast<const GLvoid *>(offsetPosition));
 
                     // Configure the 'a_texCoord' attribute.
-                    glVertexAttribPointer(attributeLocationTexCoord,
-                                          2,
-                                          GL_FLOAT,
-                                          GL_FALSE,
-                                          stride,
-                                          reinterpret_cast<const GLvoid *>(offsetTexCoord)
-                    );
+                    glVertexAttribPointer(attributeLocationTexCoord, 2, GL_FLOAT, GL_FALSE, stride, reinterpret_cast<const GLvoid *>(offsetTexCoord));
 
                     // Configure the 'a_normal' attribute.
-                    glVertexAttribPointer(
-                            attributeLocationNormal,
-                            3,
-                            GL_FLOAT,
-                            GL_FALSE,
-                            stride,
-                            reinterpret_cast<const GLvoid *>(offsetNormal)
-                    );
+                    glVertexAttribPointer( attributeLocationNormal, 3, GL_FLOAT, GL_FALSE, stride, reinterpret_cast<const GLvoid *>(offsetNormal));
 
                     // Execute the draw command - with how many indices to iterate.
-                    glDrawElements(
-                            GL_TRIANGLES,
-                            mesh.GetNumIndices(),
-                            GL_UNSIGNED_INT,
-                            reinterpret_cast<const GLvoid *>(0)
-                    );
+                    glDrawElements( GL_TRIANGLES, mesh.GetNumIndices(), GL_UNSIGNED_INT, reinterpret_cast<const GLvoid *>(0));
                 } else {
                     RPG::Log("Render", "Cant render " + gameObject->GetName());
                 };
