@@ -895,17 +895,16 @@ struct OpenGLPipeline::Internal {
 
     void DisplayFrameBuffer(const RPG::OpenGLAssetManager& assetManager, const std::shared_ptr<RPG::FrameBuffer> frameBuffer) const {
         #ifndef RPG_EDITOR
-	    RPG::Log("Rendering " + shaderName, "Display framebuffer to user");
-	    glClearColor(0.0f, 1.0f, 0.0f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT);
-        glUseProgram(shaderProgramId);
+            glClearColor(0.0f, 1.0f, 0.0f, 1.0f);
+            glClear(GL_COLOR_BUFFER_BIT);
+            glUseProgram(shaderProgramId);
 
-        const RPG::OpenGLMesh &mesh = assetManager.GetFullscreenQuad();
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, frameBuffer->GetRenderTextureID());
+            const RPG::OpenGLMesh &mesh = assetManager.GetFullscreenQuad();
+            glActiveTexture(GL_TEXTURE0);
+            glBindTexture(GL_TEXTURE_2D, frameBuffer->GetRenderTextureID());
 
-        glBindVertexArray(mesh.GetVertexArrayObject());
-        glDrawElements(GL_TRIANGLES, mesh.GetNumIndices(), GL_UNSIGNED_INT, reinterpret_cast<const GLvoid *>(0));
+            glBindVertexArray(mesh.GetVertexArrayObject());
+            glDrawElements(GL_TRIANGLES, mesh.GetNumIndices(), GL_UNSIGNED_INT, reinterpret_cast<const GLvoid *>(0));
         #endif
 	}
 
