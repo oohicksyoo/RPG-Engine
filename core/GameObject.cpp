@@ -229,3 +229,12 @@ std::vector<std::shared_ptr<RPG::IComponent>> GameObject::GetLuaScripts() {
 
 	return list;
 }
+
+std::shared_ptr<RPG::IComponent> GameObject::GetComponentByGuid(std::string guid) {
+	for (auto c : internal->components) {
+		if (c->Guid() == guid) {
+			return c;
+		}
+	}
+	return nullptr;
+}

@@ -40,6 +40,7 @@ namespace RPG {
 			std::shared_ptr<RPG::GameObject> GetParent();
 			std::shared_ptr<RPG::TransformComponent> GetTransform();
 			std::vector<std::shared_ptr<RPG::IComponent>> GetLuaScripts();
+			std::shared_ptr<RPG::IComponent> GetComponentByGuid(std::string guid);
 
 			template<typename T, typename U>
 			T GetComponent(std::string name);
