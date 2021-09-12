@@ -7,6 +7,8 @@
 #include "../IComponent.hpp"
 #include "../InternalPointer.hpp"
 #include "../GameObject.hpp"
+#include "../LuaWrapper.hpp"
+#include "map"
 
 namespace RPG {
 	struct LuaScriptComponent : public IComponent {
@@ -23,9 +25,15 @@ namespace RPG {
 			void OnTriggerStay(float delta);
 			void OnTriggerExit();
 
+
+
 		private:
 			struct Internal;
 			RPG::InternalPointer<Internal> internal;
+
+	    public:
+            static inline std::string currentMappingGuid = "";
+            static inline std::map<std::string, std::vector<std::string>> mappedComponents = {};
 	};
 }
 

@@ -3,7 +3,6 @@
 //
 
 #include "LuaScriptComponent.hpp"
-#include "../LuaWrapper.hpp"
 #include "../Assets.hpp"
 #include "../SceneManager.hpp"
 #include "../input/InputManager.hpp"
@@ -28,7 +27,9 @@ struct LuaScriptComponent::Internal {
 	Internal(std::string path, std::shared_ptr<RPG::GameObject> gameObject, std::string guid)  : guid(guid),
 								  path(std::make_unique<RPG::Property>(path, "Path", "RPG::Resource::String", true, "Lua")),
 								  myGameObject(gameObject),
-								  L(luaL_newstate()) {}
+								  L(luaL_newstate()) {
+	    RPG::LuaScriptComponent::mappedComponents.insert(std::make_pair(guid,std::vector<std::string>()));
+	}
 
 	~Internal() {
 		lua_close(L);
@@ -52,10 +53,17 @@ struct LuaScriptComponent::Internal {
 
 		CreateBindingFunctions();
 
+		//TODO: Statically mark we are the current executer by using our GUID
+		RPG::LuaScriptComponent::mappedComponents[guid].clear();
+		RPG::LuaScriptComponent::currentMappingGuid = guid;
+
 		int result = luaL_dostring(L, RPG::Assets::LoadTextFile(luaScript).c_str());
 		if (result != LUA_OK) {
 			RPG::Log("Lua", lua_tostring(L, -1));
 		}
+
+		RPG::Log("Lua", "Resetting currentMappingGuid");
+        RPG::LuaScriptComponent::currentMappingGuid = "";
 
         lua_setglobal(L, "Class");
 		lua_settop(L, 0);
@@ -68,6 +76,18 @@ struct LuaScriptComponent::Internal {
         void* memory = lua_newuserdata(L, sizeof(std::shared_ptr<RPG::GameObject>));
         new(memory) std::shared_ptr<RPG::GameObject>(myGameObject);
         lua_pcall(L, 2, 0, 0);
+        ClearStack();
+
+        //Loop through list of serializables and set their values
+        auto list = RPG::LuaScriptComponent::mappedComponents[guid];
+        RPG::Log("Lua", std::to_string(list.size()));
+        lua_getglobal(L, "Class");
+        lua_getfield(L, -1, luaScriptName.c_str());
+        for (auto str : list) {
+            lua_getfield(L, -1, str.c_str());
+        }
+        LogStack(L);
+        ClearStack();
 
 		isRunnable = true;
 	}
@@ -114,6 +134,43 @@ struct LuaScriptComponent::Internal {
 		lua_setfield(L, -2, "path"); // set the field "path" in table at -2 with value at top of stack
 		lua_pop(L, 1); // get rid of package table from top of stack
 	}
+
+    #pragma region Helpers
+
+    static int LogStack(lua_State *L) {
+        int topIndex = lua_gettop(L);
+        RPG::Log("Lua", "-------Stack Start-------");
+        RPG::Log("Lua", "Stack Size: " + std::to_string(topIndex));
+        std::string v = "";
+        for (int i = 1; i <= topIndex; i++) {
+            std::string index = std::to_string(i);
+            std::string rIndex = std::to_string(-topIndex + i - 1);
+            std::string prefix = index + "(" + rIndex + "):";
+            switch (lua_type(L, i)) {
+                case LUA_TNUMBER:
+                    RPG::Log("Lua", prefix + std::to_string(lua_tonumber(L, i)));
+                    break;
+                case LUA_TSTRING:
+                    v = lua_tostring(L, i);
+                    RPG::Log("Lua", prefix + v);
+                    break;
+                case LUA_TBOOLEAN:
+                    v = lua_toboolean(L, i) ? "true" : "false";
+                    RPG::Log("Lua", prefix + v);
+                    break;
+                case LUA_TNIL:
+                    RPG::Log("Lua", prefix + "nil");
+                    break;
+                default:
+                    RPG::Log("Lua", prefix + "Pointer");
+                    break;
+            }
+        }
+        RPG::Log("Lua", "-------Stack Done-------");
+        return 0;
+	}
+
+    #pragma endregion
 
     #pragma region RPG
 
@@ -226,6 +283,27 @@ struct LuaScriptComponent::Internal {
 
     #pragma endregion
 
+    #pragma region Meta
+
+    static int SetMeta(lua_State *L) {
+        if (lua_gettop(L) != 4) return -1;
+        std::string luaScript = lua_tostring(L, -3);
+        std::string property = lua_tostring(L, -2);
+        std::string typing = lua_tostring(L, -1);
+        RPG::Log("Lua", "Setting Serialize Field: " + luaScript + " | " + property + " | " + typing);
+
+        //TODO: Grab static marker and using that guid to map this field
+        //TODO: Manually Call constructor
+        //TODO: Set our value from the inspector?
+        auto list = RPG::LuaScriptComponent::mappedComponents[RPG::LuaScriptComponent::currentMappingGuid];
+        list.push_back(property);
+        RPG::LuaScriptComponent::mappedComponents[RPG::LuaScriptComponent::currentMappingGuid] = list;
+
+	    return 0;
+	}
+
+    #pragma endregion
+
     #pragma region Mouse
 
     static int MouseIsDown(lua_State *L) {
@@ -277,9 +355,10 @@ struct LuaScriptComponent::Internal {
     #pragma endregion
 
 	void CreateBindingFunctions() {
-	    static const luaL_Reg functions[] = {{"Log", Log}, {NULL, NULL}};
+	    static const luaL_Reg functions[] = {{"Log", Log}, {"LogStack", LogStack}, {NULL, NULL}};
         static const luaL_Reg mathFuncs[] = {{"GetVector3", GetVector3}, {NULL, NULL}};
         static const luaL_Reg gameObjectFuncs[] = {{"GetPosition", GetPosition}, {"SetPosition", SetPosition}, {NULL, NULL}};
+        static const luaL_Reg metaFuncs[] = {{"SetMeta", SetMeta}, {NULL, NULL}};
         static const luaL_Reg mouseFuncs[] = {{"IsDown", MouseIsDown}, {"IsPressed", MouseIsPressed}, {"IsReleased", MouseIsReleased}, {NULL, NULL}};
         static const luaL_Reg keyboardFuncs[] = {{"IsDown", KeyboardIsDown}, {"IsPressed", KeyboardIsPressed}, {"IsReleased", KeyboardIsReleased}, {NULL, NULL}};
 
@@ -296,6 +375,10 @@ struct LuaScriptComponent::Internal {
         lua_setglobal(L, "GameObject");
 
         lua_newtable(L);
+        luaL_setfuncs(L, metaFuncs, 0);
+        lua_setglobal(L, "Meta");
+
+        lua_newtable(L);
         luaL_setfuncs(L, mouseFuncs, 0);
         lua_setglobal(L, "Mouse");
 
@@ -303,6 +386,7 @@ struct LuaScriptComponent::Internal {
         luaL_setfuncs(L, keyboardFuncs, 0);
         lua_setglobal(L, "Keyboard");
 
+        #pragma region Old Bindings
         /*lua_register(L, "Log", Log);
         lua_register(L, "GetPosition", GetPosition);
         //lua_register(L, "GetRotation", GetRotation);*/
@@ -884,6 +968,7 @@ struct LuaScriptComponent::Internal {
 			return 0;
 		});
 		lua_setglobal(L, "SetParent");*/
+        #pragma endregion
 	}
 
 	void OnTriggerEnter() {
@@ -903,6 +988,10 @@ struct LuaScriptComponent::Internal {
 		lua_getglobal(L, "Class");
 		lua_getfield(L, -1, "OnTriggerExit");
 		lua_pcall(L, 0, 0, 0);
+	}
+
+	void ClearStack() {
+        lua_pop(L, -1);
 	}
 };
 
