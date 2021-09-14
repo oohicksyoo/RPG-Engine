@@ -24,6 +24,7 @@ namespace RPG {
 			void OnTriggerEnter();
 			void OnTriggerStay(float delta);
 			void OnTriggerExit();
+			void SyncProperties();
 
 
 

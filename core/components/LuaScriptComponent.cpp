@@ -35,35 +35,47 @@ struct LuaScriptComponent::Internal {
 		lua_close(L);
 	}
 
-	void Awake() {
-		std::string luaScript = std::any_cast<std::string>(path->GetProperty());
-		if (luaScript == "") return;
+	bool LoadAndRun() {
+        std::string luaScript = std::any_cast<std::string>(path->GetProperty());
+        if (luaScript == "") return false;
 
-		luaScriptName = std::filesystem::path(luaScript).stem().string();
-		RPG::Log("Lua", luaScriptName);
+        luaScriptName = std::filesystem::path(luaScript).stem().string();
+        RPG::Log("Lua", luaScriptName);
 
-		luaL_openlibs(L);
+        luaL_openlibs(L);
 
-		//Add Application path to Lua to know where the data is
-		if (SDL_GetBasePath() != NULL) {
-			std::string basePath = SDL_GetBasePath();
-			SetupLuaPath(basePath + "?.lua");
+        //Add Application path to Lua to know where the data is
+        if (SDL_GetBasePath() != NULL) {
+            std::string basePath = SDL_GetBasePath();
+            SetupLuaPath(basePath + "?.lua");
             SetupLuaPath(basePath + "assets/scripts/?.lua");
-		}
+        }
 
-		CreateBindingFunctions();
+        CreateBindingFunctions();
 
-		//TODO: Statically mark we are the current executer by using our GUID
-		RPG::LuaScriptComponent::mappedComponents[guid].clear();
-		RPG::LuaScriptComponent::currentMappingGuid = guid;
+        //TODO: Statically mark we are the current executer by using our GUID
+        RPG::LuaScriptComponent::mappedComponents[guid].clear();
+        RPG::LuaScriptComponent::currentMappingGuid = guid;
 
-		int result = luaL_dostring(L, RPG::Assets::LoadTextFile(luaScript).c_str());
-		if (result != LUA_OK) {
-			RPG::Log("Lua", lua_tostring(L, -1));
-		}
+        int result = luaL_dostring(L, RPG::Assets::LoadTextFile(luaScript).c_str());
+        if (result != LUA_OK) {
+            RPG::Log("Lua", lua_tostring(L, -1));
+            return false;
+        }
 
-		RPG::Log("Lua", "Resetting currentMappingGuid");
+        RPG::Log("Lua", "Resetting currentMappingGuid");
         RPG::LuaScriptComponent::currentMappingGuid = "";
+        return true;
+	}
+
+
+	//Loads the lua file grabbing its properties for use in the inspector
+	void SyncProperties() {
+        if (!LoadAndRun()) return;
+	}
+
+	void Awake() {
+        if (!LoadAndRun()) return;
 
         lua_setglobal(L, "Class");
 		lua_settop(L, 0);
@@ -1023,6 +1035,10 @@ void LuaScriptComponent::OnTriggerStay(float delta) {
 
 void LuaScriptComponent::OnTriggerExit() {
 	internal->OnTriggerExit();
+}
+
+void LuaScriptComponent::SyncProperties() {
+    internal->SyncProperties();
 }
 
 std::vector<std::shared_ptr<RPG::Property>> LuaScriptComponent::GetProperties() {

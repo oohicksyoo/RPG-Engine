@@ -24,6 +24,7 @@
 #include "../../core/Scene.hpp"
 #include "../../core/components/MeshComponent.hpp"
 #include "../../core/GameObjectMaterialGroup.hpp"
+#include "../../core/components/LuaScriptComponent.hpp"
 
 using RPG::OpenGLApplication;
 
@@ -216,6 +217,7 @@ namespace {
 
 struct OpenGLApplication::Internal {
 	bool hasRanFirstFrame = false;
+	bool hasExitedPlay = false;
 
 	const RPG::SDLWindow window;
 	SDL_GLContext context;
@@ -341,8 +343,17 @@ struct OpenGLApplication::Internal {
 					GetScene()->Start();
 				}
 				hasRanPreviewFrame = true;
+                hasExitedPlay = false;
 				GetScene()->Update(delta);
 			} else {
+                if (!hasExitedPlay) {
+                    hasExitedPlay = true;
+                    //TODO: Sync Properties here by temp loading the script
+                    /*for (auto gameObject : GetScene()->GetHierarchy()->GetHierarchy()) {
+                        GrabPropertiesForLuaScripts(gameObject);
+                    }*/
+                }
+
 				hasRanFirstFrame = false;
 				GetScene()->UpdateEditorScene(delta);
 			}
@@ -356,6 +367,17 @@ struct OpenGLApplication::Internal {
 		#endif
 
 	}
+
+	void GrabPropertiesForLuaScripts(std::shared_ptr<RPG::GameObject> gameObject) {
+        for (auto luaScript : gameObject->GetLuaScripts()) {
+            auto script = std::dynamic_pointer_cast<std::shared_ptr<RPG::LuaScriptComponent>>(luaScript)->get();
+            script->SyncProperties();
+        }
+
+        for (auto child : gameObject->GetChildren()) {
+            GrabPropertiesForLuaScripts(child);
+        }
+    }
 
 	void OnWindowResized() {
 		GetScene()->OnWindowResized(RPG::SDL::GetWindowSize(window.GetWindow()));
